@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Radar 2026 | A Direita faz Direito</title>
+  <meta name="description" content="Rascunho de painel público para acompanhar temas, cobertura, palavras-chave, fontes e tendências relacionadas ao cenário eleitoral de 2026.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0b2341">
+  <link rel="stylesheet" href="/css/tailwind-home.css">
+  <link rel="stylesheet" href="/css/radar.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<svg aria-hidden="true" class="svg-sprite">
+  <symbol id="i-access" viewBox="0 0 512 512"><path d="M256 112a56 56 0 1 0 0-112 56 56 0 0 0 0 112zM118 136a24 24 0 0 0-12 46l82 21v75l-53 153a24 24 0 1 0 45 16l48-139h56l48 139a24 24 0 1 0 45-16l-53-153v-75l82-21a24 24 0 0 0-12-46l-106 27h-64z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 384 512"><path d="M223.5 32C100 32 0 132.3 0 256s100 224 223.5 224c63.6 0 121-26.5 161.5-69-7.5 1-15.2 1.5-23 1.5-105.9 0-191.8-86-191.8-192 0-80.7 49.8-149.7 120.3-178.1A224 224 0 0 0 223.5 32z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 448 512"><path d="M32 0C14.3 0 0 14.3 0 32v448c0 17.7 14.3 32 32 32s32-14.3 32-32V352h64l32-64 32 64h160c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H192l-32 64-32-64H64V32C64 14.3 49.7 0 32 0z"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 448 512"><path d="M0 96c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32A32 32 0 0 1 0 96zm0 160c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32a32 32 0 0 1-32-32zm448 160a32 32 0 0 1-32 32H32a32 32 0 1 1 0-64h384c17.7 0 32 14.3 32 32z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 384 512"><path d="M342.6 150.6a32 32 0 0 0-45.3-45.3L192 210.7 86.6 105.4a32 32 0 0 0-45.3 45.3L146.7 256 41.4 361.4a32 32 0 0 0 45.3 45.3L192 301.3l105.4 105.3a32 32 0 0 0 45.3-45.3L237.3 256z"/></symbol>
+  <symbol id="i-external" viewBox="0 0 512 512"><path d="M320 0a32 32 0 1 0 0 64h82.7L201.4 265.4a32 32 0 0 0 45.3 45.3L448 109.3V192a32 32 0 1 0 64 0V32a32 32 0 0 0-32-32zM80 32C35.8 32 0 67.8 0 112v320c0 44.2 35.8 80 80 80h320c44.2 0 80-35.8 80-80V320a32 32 0 1 0-64 0v112c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16h112a32 32 0 1 0 0-64z"/></symbol>
+</svg>
+
+<aside aria-label="Controles de Acessibilidade" class="bg-slate-800 text-white text-xs py-1.5 px-4 border-b border-slate-700">
+  <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2"><svg class="ui-icon text-yellow-400"><use href="#i-access"></use></svg><span class="font-medium" data-i18n="accessibility">Acessibilidade:</span></div>
+      <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-700" role="group" aria-label="Seleção de idioma">
+        <button onclick="setLanguage('pt')" id="lang-pt" class="lang-btn active" title="Português" aria-label="Português"><span aria-hidden="true">🇧🇷</span></button>
+        <button onclick="setLanguage('en')" id="lang-en" class="lang-btn" title="English" aria-label="English"><span aria-hidden="true">🇺🇸</span></button>
+        <button onclick="setLanguage('es')" id="lang-es" class="lang-btn" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-1" role="group" aria-label="Controle de tamanho de fonte">
+        <button onclick="changeFontSize(-1)" class="access-btn">A-</button><button onclick="resetFontSize()" class="access-btn">A</button><button onclick="changeFontSize(1)" class="access-btn">A+</button>
+      </div>
+      <button id="themeToggle" type="button" onclick="toggleTheme()" class="access-btn flex items-center gap-1.5"><svg id="themeIcon" class="ui-icon text-yellow-400"><use href="#i-moon"></use></svg><span id="themeText" data-i18n="high_contrast">Alto Contraste</span></button>
+    </div>
+  </div>
+</aside>
+
+<header class="bg-brand-navy text-white sticky top-0 z-50 shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex items-center space-x-3 group">
+      <div class="w-10 h-10 rounded-full bg-brand-yellow flex items-center justify-center text-brand-navy shadow-inner"><svg class="ui-icon text-xl text-brand-blue"><use href="#i-flag"></use></svg></div>
+      <div><h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">A Direita faz Direito | O Brasil Vai Vencer</h1><p class="text-xs text-yellow-400 font-medium hidden sm:block" data-i18n="header_subtitle">Radar Eleitoral 2026</p></div>
+    </a>
+    <nav class="hidden md:flex items-center space-x-5 text-sm font-medium">
+      <a href="index.html" class="nav-link" data-i18n="nav_map">Mapa de Votos</a>
+      <a href="assuntos.html" class="nav-link" data-i18n="nav_axes">Eixos Temáticos</a>
+      <a href="materiais.html" class="nav-link" data-i18n="nav_kit">Kit Mídia & Rede</a>
+      <a href="guia.html" class="nav-link" data-i18n="nav_guide">Guia de Diálogo</a>
+      <a href="radar.html" aria-current="page" class="nav-link active" data-i18n="nav_radar">Radar 2026</a>
+    </nav>
+    <div class="flex items-center space-x-3">
+      <span class="bg-brand-yellow text-brand-navy font-bold px-3 py-1.5 rounded-lg text-xs shadow" data-i18n="campaign_2026">Campanha 2026</span>
+      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileMenu" class="md:hidden p-2 rounded-md hover:bg-slate-800"><svg class="ui-icon text-xl"><use id="mobileMenuIcon" href="#i-bars"></use></svg></button>
+    </div>
+  </div>
+  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="md:hidden border-t border-slate-700">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-medium">
+      <a href="index.html" class="mobile-link" data-i18n="nav_map">Mapa de Votos</a><a href="assuntos.html" class="mobile-link" data-i18n="nav_axes">Eixos Temáticos</a><a href="materiais.html" class="mobile-link" data-i18n="nav_kit">Kit Mídia & Rede</a><a href="guia.html" class="mobile-link" data-i18n="nav_guide">Guia de Diálogo</a><a href="radar.html" class="mobile-link active" data-i18n="nav_radar">Radar 2026</a>
+    </div>
+  </nav>
+</header>
+
+<main id="conteudo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <section class="radar-hero">
+    <div>
+      <span class="hero-badge"><span class="live-dot"></span><span data-i18n="prototype">PROTÓTIPO • DADOS DEMONSTRATIVOS</span></span>
+      <h2 data-i18n="hero_title">Radar Eleitoral 2026</h2>
+      <p data-i18n="hero_desc">Uma central para acompanhar cobertura pública, temas, palavras-chave, fontes e sinais de atenção. Nesta versão, os números são simulados para validar a experiência antes das integrações.</p>
+    </div>
+    <div class="hero-status"><span data-i18n="last_update">Última atualização</span><strong id="lastUpdate">—</strong><small data-i18n="mock_notice">Modo demonstração</small></div>
+  </section>
+
+  <section class="filter-panel" aria-labelledby="filterTitle">
+    <div class="filter-heading"><div><span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span><h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3></div><button id="resetFilters" class="btn-secondary" data-i18n="reset">Limpar filtros</button></div>
+    <div class="filter-grid">
+      <label><span data-i18n="period">Período</span><select id="period"><option value="24h">Últimas 24 horas</option><option value="7d" selected>Últimos 7 dias</option><option value="30d">Últimos 30 dias</option></select></label>
+      <label><span data-i18n="scope">Escopo</span><select id="scope"><option value="all">Todos os temas</option><option value="candidate">Candidato</option><option value="economy">Economia</option><option value="security">Segurança</option><option value="institutions">Instituições</option></select></label>
+      <label><span data-i18n="source">Fonte</span><select id="source"><option value="all">Todas</option><option value="news">Notícias</option><option value="search">Busca</option><option value="video">Vídeo</option><option value="social">Social</option></select></label>
+      <label><span data-i18n="region">Região</span><select id="region"><option value="BR">Brasil</option><option value="SE">Sudeste</option><option value="S">Sul</option><option value="NE">Nordeste</option><option value="CO">Centro-Oeste</option><option value="N">Norte</option></select></label>
+      <label class="search-field"><span data-i18n="search">Buscar termo</span><input id="searchTerm" type="search" placeholder="Ex.: economia, segurança..."></label>
+      <button id="applyFilters" class="btn-primary" data-i18n="apply">Aplicar filtros</button>
+    </div>
+  </section>
+
+  <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
+    <button role="tab" aria-selected="true" class="tab active" data-tab="overview" data-i18n="tab_overview">Visão geral</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="themes" data-i18n="tab_themes">Temas</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="trends" data-i18n="tab_trends">Tendências</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
+  </div>
+
+  <section id="panel-overview" class="tab-panel active">
+    <div class="metrics-grid">
+      <article class="metric-card"><span data-i18n="metric_mentions">Menções monitoradas</span><strong id="metricMentions">12.842</strong><small class="up">▲ 18,4% <span data-i18n="vs_period">vs. período anterior</span></small></article>
+      <article class="metric-card"><span data-i18n="metric_topics">Temas ativos</span><strong>18</strong><small>8 <span data-i18n="high_attention">em alta atenção</span></small></article>
+      <article class="metric-card"><span data-i18n="metric_sources">Fontes acompanhadas</span><strong>146</strong><small>4 <span data-i18n="source_types">tipos de fonte</span></small></article>
+      <article class="metric-card"><span data-i18n="metric_peak">Maior pico</span><strong>+42%</strong><small data-i18n="peak_desc">Economia • últimas 6h</small></article>
+    </div>
+    <div class="dashboard-grid">
+      <article class="panel span-8"><div class="panel-head"><div><span class="eyebrow">VOLUME</span><h3 data-i18n="volume_title">Evolução das menções</h3></div><div class="legend"><span><i class="legend-main"></i>Flávio Bolsonaro</span><span><i class="legend-all"></i>Temas relacionados</span></div></div><div class="canvas-wrap"><canvas id="volumeChart" aria-label="Gráfico demonstrativo de evolução das menções"></canvas></div><p class="chart-caption" data-i18n="demo_chart">Dados ilustrativos para validar o layout. Serão substituídos por dados das APIs.</p></article>
+      <article class="panel span-4"><div class="panel-head"><div><span class="eyebrow">AGORA</span><h3 data-i18n="hot_title">Assuntos em destaque</h3></div></div><div id="hotTopics" class="ranking"></div></article>
+      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">RADAR</span><h3 data-i18n="radar_title">Relevância por tema</h3></div></div><div class="radar-visual" id="radarVisual"></div></article>
+      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">COBERTURA</span><h3 data-i18n="news_title">Últimas menções encontradas</h3></div><button class="text-btn" data-open-tab="mentions" data-i18n="view_all">Ver todas</button></div><div id="newsFeed" class="news-feed"></div></article>
+    </div>
+  </section>
+
+  <section id="panel-themes" class="tab-panel">
+    <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Cards demonstrativos com volume, variação e nível de atenção. Clique para filtrar o restante do painel.</p></div><button id="addTheme" class="btn-primary">+ <span data-i18n="add_theme">Adicionar tema</span></button></div>
+    <div id="themeCards" class="theme-grid"></div>
+  </section>
+
+  <section id="panel-mentions" class="tab-panel">
+    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte"><select id="mentionSort"><option value="recent">Mais recentes</option><option value="impact">Maior relevância</option><option value="source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
+  </section>
+
+  <section id="panel-trends" class="tab-panel">
+    <div class="dashboard-grid">
+      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">PALAVRAS-CHAVE</span><h3 data-i18n="keywords_title">Termos com maior presença</h3></div></div><div id="keywordBars" class="keyword-bars"></div></article>
+      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">NUVEM</span><h3 data-i18n="cloud_title">Nuvem de termos</h3></div></div><div id="wordCloud" class="word-cloud"></div><div class="callout" data-i18n="cloud_note">O tamanho representa apenas o peso demonstrativo neste protótipo.</div></article>
+      <article class="panel span-12"><div class="panel-head"><div><span class="eyebrow">PICOS</span><h3 data-i18n="spikes_title">Detecção de picos</h3></div></div><div id="spikeTimeline" class="spike-grid"></div></article>
+    </div>
+  </section>
+
+  <section id="panel-videos" class="tab-panel">
+    <div class="section-intro"><div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Slots preparados para YouTube Data API e outras fontes permitidas.</p></div></div><div id="videoGrid" class="video-grid"></div>
+  </section>
+
+  <section id="panel-sources" class="tab-panel">
+    <div class="dashboard-grid">
+      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">INTEGRAÇÕES</span><h3 data-i18n="apis_title">Fontes e serviços planejados</h3></div></div><div id="apiList" class="api-list"></div></article>
+      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">CONFIGURAÇÃO</span><h3 data-i18n="config_title">Parâmetros do radar</h3></div></div><div class="config-list"><label><span>Atualização automática</span><select disabled><option>15 minutos</option></select></label><label><span>Limite por consulta</span><input value="100 registros" disabled></label><label><span>Idioma da coleta</span><input value="Português (BR)" disabled></label></div><div class="callout"><strong>Rascunho:</strong> estes controles serão habilitados quando o backend estiver conectado.</div></article>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-brand-navy text-slate-400 py-8 mt-8 text-xs">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div><strong class="text-white text-sm">A Direita faz Direito | O Brasil Vai Vencer</strong><p class="mt-1" data-i18n="footer_desc">Protótipo do Radar Eleitoral 2026. Dados demonstrativos nesta versão.</p></div>
+    <div class="flex flex-wrap gap-6 text-slate-300 font-medium"><a href="index.html" class="hover:text-yellow-400">Mapa de Votos</a><a href="assuntos.html" class="hover:text-yellow-400">Eixos Temáticos</a><a href="materiais.html" class="hover:text-yellow-400">Kit Mídia</a><a href="guia.html" class="hover:text-yellow-400">Guia de Diálogo</a></div>
+    <div class="text-[11px] text-right">Campanha 2026 • Rascunho funcional</div>
+  </div>
+</footer>
+<script src="/js/radar.js" defer></script>
+</body></html>
