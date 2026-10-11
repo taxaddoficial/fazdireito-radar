@@ -220,8 +220,70 @@
     aria-label="Panorama dos dados coletados pelo Radar 2026"
   ></div>
 </article>
-      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">COBERTURA</span><h3 data-i18n="news_title">Últimas menções encontradas</h3></div><button class="text-btn" data-open-tab="mentions" data-i18n="view_all">Ver todas</button></div><div id="newsFeed" class="news-feed"></div></article>
+<article class="panel span-7">
+
+  <div class="panel-head">
+
+    <div>
+      <span class="eyebrow">
+        COBERTURA
+      </span>
+
+      <h3 data-i18n="news_title">
+        Últimas menções encontradas
+      </h3>
     </div>
+
+    <div class="coverage-actions">
+
+      <label
+        class="coverage-filter"
+        for="coverageFilter"
+      >
+        <span class="sr-only">
+          Filtrar cobertura por candidato
+        </span>
+
+        <select
+          id="coverageFilter"
+          aria-label="Filtrar cobertura por candidato"
+        >
+          <option
+            value="flavio"
+            selected
+          >
+            Flávio
+          </option>
+
+          <option value="lula">
+            Lula
+          </option>
+
+          <option value="both">
+            Ambos
+          </option>
+        </select>
+      </label>
+
+      <button
+        class="text-btn"
+        data-open-tab="mentions"
+        data-i18n="view_all"
+        type="button"
+      >
+        Ver todas
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    id="newsFeed"
+    class="news-feed"
+  ></div>
+
+</article>    </div>
   </section>
 
   <section id="panel-themes" class="tab-panel">
