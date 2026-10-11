@@ -1631,9 +1631,58 @@ function renderNewsFeed() {
       : liveNews;
 
 
+  const coverageFilter =
+    getEl("coverageFilter")
+      ?.value ||
+    "flavio";
+
+
+  const coverageItems =
+    items.filter(
+      article => {
+
+        if (
+          coverageFilter ===
+          "lula"
+        ) {
+
+          return Boolean(
+            article.mentions
+              ?.lula
+          );
+
+        }
+
+
+        if (
+          coverageFilter ===
+          "both"
+        ) {
+
+          return Boolean(
+            article.mentions
+              ?.flavio ||
+            article.mentions
+              ?.lula
+          );
+
+        }
+
+
+        return Boolean(
+          article.mentions
+            ?.flavio
+        );
+
+      }
+    );
+
+
   if (newsFeed) {
 
-    if (!items.length) {
+    if (
+      !coverageItems.length
+    ) {
 
       newsFeed.innerHTML = `
         <article class="news-item">
@@ -1649,7 +1698,7 @@ function renderNewsFeed() {
     } else {
 
       newsFeed.innerHTML =
-        items
+        coverageItems
           .slice(0, 6)
           .map(newsHTML)
           .join("");
@@ -1686,8 +1735,6 @@ function renderNewsFeed() {
   }
 
 }
-
-
 // ============================================================
 // RANKING DESCRITIVO DE VEÍCULOS
 // ============================================================
@@ -1957,6 +2004,22 @@ function renderCoverageCards() {
     );
 
 
+  const selectedPeriod =
+    getEl("period")
+      ?.value ||
+    "48h";
+
+
+  const periodHours =
+    selectedPeriod === "24h"
+      ? 24
+      : 48;
+
+
+  const periodLabel =
+    `${periodHours} horas`;
+
+
   const cards = [
 
     {
@@ -1970,7 +2033,7 @@ function renderCoverageCards() {
         metrics.flavioShare,
 
       description:
-        "Artigos do corpus em que o monitor identificou referência a Flávio Bolsonaro."
+        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Flávio Bolsonaro.`
     },
 
     {
@@ -1984,7 +2047,7 @@ function renderCoverageCards() {
         metrics.lulaShare,
 
       description:
-        "Artigos do corpus em que o monitor identificou referência a Lula."
+        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Lula.`
     },
 
     {
@@ -1998,12 +2061,12 @@ function renderCoverageCards() {
         metrics.bothShare,
 
       description:
-        "Artigos do corpus em que os dois nomes foram identificados."
+        `Artigos das últimas ${periodHours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.`
     },
 
     {
       name:
-        "Corpus total",
+        "Total monitorado",
 
       count:
         metrics.total,
@@ -2014,7 +2077,7 @@ function renderCoverageCards() {
           : 0,
 
       description:
-        "Total de artigos retornados pelas fontes monitoradas na janela selecionada."
+        `Total de artigos retornados pelas fontes monitoradas nas últimas ${periodHours}h.`
     }
 
   ];
@@ -2045,7 +2108,7 @@ function renderCoverageCards() {
               </div>
 
               <span class="attention stable">
-                Corpus
+                ${escapeHTML(periodLabel)}
               </span>
 
             </div>
@@ -2089,7 +2152,6 @@ function renderCoverageCards() {
       .join("");
 
 }
-
 
 // ============================================================
 // PICO DE PUBLICAÇÕES
@@ -2758,10 +2820,17 @@ function hasActiveFilters() {
     "all";
 
 
+  const period =
+    getEl("period")
+      ?.value ||
+    "48h";
+
+
   return (
     Boolean(search) ||
     source !== "all" ||
-    scope !== "all"
+    scope !== "all" ||
+    period !== "48h"
   );
 
 }
@@ -2784,9 +2853,11 @@ function applyRadarFilters() {
 
 
   const source =
-    getEl("source")
-      ?.value ||
-    "all";
+    normalizeText(
+      getEl("source")
+        ?.value ||
+      "all"
+    );
 
 
   const scope =
@@ -2795,6 +2866,26 @@ function applyRadarFilters() {
         ?.value ||
       "all"
     );
+
+
+  const period =
+    getEl("period")
+      ?.value ||
+    "48h";
+
+
+  const periodHours =
+    period === "24h"
+      ? 24
+      : 48;
+
+
+  const periodStart =
+    Date.now() -
+    periodHours *
+    60 *
+    60 *
+    1000;
 
 
   filteredNews =
@@ -2816,7 +2907,9 @@ function applyRadarFilters() {
 
         const queryMatch =
           !query ||
-          searchable.includes(query);
+          searchable.includes(
+            query
+          );
 
 
         const sourceMatch =
@@ -2831,35 +2924,59 @@ function applyRadarFilters() {
 
 
         if (
-          scope.includes("flavio")
+          scope === "flavio"
         ) {
 
           scopeMatch =
-            article.mentions.flavio;
+            Boolean(
+              article.mentions
+                ?.flavio
+            );
 
         } else if (
-          scope.includes("lula")
+          scope === "lula"
         ) {
 
           scopeMatch =
-            article.mentions.lula;
+            Boolean(
+              article.mentions
+                ?.lula
+            );
 
         } else if (
-          scope.includes("both") ||
-          scope.includes("ambos")
+          scope === "both"
         ) {
 
           scopeMatch =
-            article.mentions.flavio &&
-            article.mentions.lula;
+            Boolean(
+              article.mentions
+                ?.flavio &&
+              article.mentions
+                ?.lula
+            );
 
         }
+
+
+        const publishedDate =
+          validDate(
+            article.publishedAt
+          );
+
+
+        const periodMatch =
+          publishedDate
+            ? publishedDate
+                .getTime() >=
+              periodStart
+            : false;
 
 
         return (
           queryMatch &&
           sourceMatch &&
-          scopeMatch
+          scopeMatch &&
+          periodMatch
         );
 
       }
@@ -2874,16 +2991,22 @@ function applyRadarFilters() {
 function renderFilteredData() {
 
   renderMetrics();
+
   renderNewsFeed();
+
   renderPublisherRanking();
+
   renderCoverageCards();
+
   renderKeywords();
+
   renderSpikes();
+
   renderRadar();
+
   drawChart();
 
 }
-
 
 // ============================================================
 // RESET DOS FILTROS
@@ -4552,6 +4675,22 @@ function bindEvents() {
   }
 
 
+  const coverageFilter =
+    getEl("coverageFilter");
+
+
+  if (coverageFilter) {
+
+    coverageFilter.onchange =
+      () => {
+
+        renderNewsFeed();
+
+      };
+
+  }
+
+
   const mentionFilter =
     getEl("mentionFilter");
 
@@ -4689,8 +4828,6 @@ function bindEvents() {
   );
 
 }
-
-
 // ============================================================
 // INICIALIZAÇÃO
 // ============================================================
