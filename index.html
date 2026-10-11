@@ -9,6 +9,10 @@
   <meta name="theme-color" content="#0b2341">
   <link rel="stylesheet" href="/css/tailwind-home.css">
   <link rel="stylesheet" href="/css/radar.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional"></noscript>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
 <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
@@ -25,49 +29,70 @@
 <aside aria-label="Controles de Acessibilidade" class="bg-slate-800 text-white text-xs py-1.5 px-4 border-b border-slate-700">
   <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
     <div class="flex items-center space-x-3">
-      <div class="flex items-center space-x-2"><svg class="ui-icon text-yellow-400"><use href="#i-access"></use></svg><span class="font-medium" data-i18n="accessibility">Acessibilidade:</span></div>
+      <div class="flex items-center space-x-2">
+        <svg class="ui-icon font-bold text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-access"></use></svg>
+        <span class="font-medium" data-i18n="accessibility">Acessibilidade:</span>
+      </div>
       <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-700" role="group" aria-label="Seleção de idioma">
-        <button onclick="setLanguage('pt')" id="lang-pt" class="lang-btn active" title="Português" aria-label="Português"><span aria-hidden="true">🇧🇷</span></button>
-        <button onclick="setLanguage('en')" id="lang-en" class="lang-btn" title="English" aria-label="English"><span aria-hidden="true">🇺🇸</span></button>
-        <button onclick="setLanguage('es')" id="lang-es" class="lang-btn" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button>
+        <button onclick="setLanguage('pt')" id="lang-pt" class="opacity-100 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Português" aria-label="Português">
+          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 720 504"><rect width="720" height="504" fill="#009b3a"/><polygon points="360,36 684,252 360,468 36,252" fill="#fedf00"/><circle cx="360" cy="252" r="126" fill="#002776"/><path d="M 235,260 A 130,130 0 0,0 485,240" fill="none" stroke="#ffffff" stroke-width="14"/></svg>
+        </button>
+        <button onclick="setLanguage('en')" id="lang-en" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="English" aria-label="English">
+          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 508 268"><rect width="508" height="268" fill="#bf0a30"/><g fill="#fff"><rect width="508" height="20.6"/><rect y="41.2" width="508" height="20.6"/><rect y="82.4" width="508" height="20.6"/><rect y="123.6" width="508" height="20.6"/><rect y="164.8" width="508" height="20.6"/><rect y="206" width="508" height="20.6"/><rect y="247.2" width="508" height="20.8"/></g><rect width="203.2" height="144.2" fill="#002868"/></svg>
+        </button>
+        <button onclick="setLanguage('es')" id="lang-es" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Español" aria-label="Español">
+          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 750 500"><rect width="750" height="500" fill="#aa151b"/><rect width="750" height="250" y="125" fill="#f1bf00"/></svg>
+        </button>
       </div>
     </div>
     <div class="flex items-center space-x-4">
       <div class="flex items-center space-x-1" role="group" aria-label="Controle de tamanho de fonte">
-        <button onclick="changeFontSize(-1)" class="access-btn">A-</button><button onclick="resetFontSize()" class="access-btn">A</button><button onclick="changeFontSize(1)" class="access-btn">A+</button>
+        <button onclick="changeFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
+        <button onclick="resetFontSize()" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 text-xs" title="Redefinir fonte" aria-label="Redefinir fonte">A</button>
+        <button onclick="changeFontSize(1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
       </div>
-      <button id="themeToggle" type="button" onclick="toggleTheme()" class="access-btn flex items-center gap-1.5"><svg id="themeIcon" class="ui-icon text-yellow-400"><use href="#i-moon"></use></svg><span id="themeText" data-i18n="high_contrast">Alto Contraste</span></button>
+      <button id="themeToggle" type="button" onclick="toggleTheme()" class="flex items-center space-x-1 px-2.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400">
+        <svg id="themeIcon" class="ui-icon text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-moon"></use></svg>
+        <span id="themeText" data-i18n="high_contrast">Alto Contraste</span>
+      </button>
     </div>
   </div>
 </aside>
 
-<header class="radar-site-header bg-brand-navy text-white sticky top-0 z-50 shadow-md">
-  <div class="radar-header-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-    <a href="https://fazdireito.neocities.org/" class="radar-brand group" aria-label="A Direita faz Direito — voltar ao portal">
-      <span class="radar-brand-mark bg-brand-yellow text-brand-navy" aria-hidden="true"><svg class="ui-icon"><use href="#i-flag"></use></svg></span>
-      <span class="radar-brand-copy"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span>Rumo à Vitória no 2º Turno • Portal de Mobilização</span></span>
+<header class="bg-brand-navy text-white sticky top-0 z-50 shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+    <a href="https://fazdireito.neocities.org/" class="flex items-center space-x-3 group focus:outline-none" aria-label="A Direita faz Direito — voltar ao portal">
+      <div class="w-10 h-10 rounded-full bg-brand-yellow flex items-center justify-center text-brand-navy shadow-inner group-hover:scale-105 transition-transform">
+        <svg class="ui-icon text-xl text-brand-blue" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">A Direita faz Direito | O Brasil Vai Vencer</h1>
+        <p class="text-xs text-yellow-400 font-medium hidden sm:block">Rumo à Vitória no 2º Turno • Portal de Mobilização</p>
+      </div>
     </a>
-    <nav class="radar-desktop-nav" aria-label="Navegação principal">
-      <a href="https://fazdireito.neocities.org/" class="nav-link" data-i18n="nav_map">Mapa de Votos</a>
-      <a href="https://fazdireito.neocities.org/" class="nav-link" target="_blank" rel="noopener noreferrer" aria-label="Plano de Governo (abre o portal em nova aba)">Plano de Governo <svg class="ui-icon radar-external-icon" aria-hidden="true"><use href="#i-external"></use></svg></a>
-      <a href="https://fazdireito.neocities.org/assuntos.html" class="nav-link" data-i18n="nav_axes">Eixos Temáticos</a>
-      <a href="https://fazdireito.neocities.org/materiais.html" class="nav-link" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
-      <a href="https://fazdireito.neocities.org/guia.html" class="nav-link" data-i18n="nav_guide">Guia de Diálogo</a>
-      <a href="/" aria-current="page" class="nav-link active" data-i18n="nav_radar">Radar 2026</a>
+
+    <nav class="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Navegação principal">
+      <a href="https://fazdireito.neocities.org/" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_map">Mapa de Votos</a>
+      <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow flex items-center gap-1"><span>Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
+      <a href="https://fazdireito.neocities.org/assuntos.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_axes">Eixos Temáticos</a>
+      <a href="https://fazdireito.neocities.org/materiais.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+      <a href="https://fazdireito.neocities.org/guia.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_guide">Guia de Diálogo</a>
     </nav>
-    <div class="radar-header-actions">
-      <span class="radar-campaign-badge bg-brand-yellow text-brand-navy" data-i18n="campaign_2026">Campanha 2026</span>
-      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileMenu" class="radar-mobile-trigger"><svg class="ui-icon"><use id="mobileMenuIcon" href="#i-bars"></use></svg></button>
+
+    <div class="flex items-center space-x-3">
+      <span class="bg-brand-yellow text-brand-navy font-bold px-3 py-1.5 rounded-lg text-xs shadow" data-i18n="campaign_2026">Campanha 2026</span>
+      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mobileMenu" title="Abrir menu de navegação" class="md:hidden p-2 rounded-md hover:bg-slate-800">
+        <svg class="ui-icon text-xl" aria-hidden="true" focusable="false"><use id="mobileMenuIcon" href="#i-bars"></use></svg>
+      </button>
     </div>
   </div>
-  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="radar-mobile-nav">
+  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="md:hidden border-t border-slate-700">
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-medium">
-      <a href="https://fazdireito.neocities.org/" class="mobile-link" data-i18n="nav_map">Mapa de Votos</a>
-      <a href="https://fazdireito.neocities.org/" class="mobile-link" target="_blank" rel="noopener noreferrer">Plano de Governo ↗</a>
-      <a href="https://fazdireito.neocities.org/assuntos.html" class="mobile-link" data-i18n="nav_axes">Eixos Temáticos</a>
-      <a href="https://fazdireito.neocities.org/materiais.html" class="mobile-link" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
-      <a href="https://fazdireito.neocities.org/guia.html" class="mobile-link" data-i18n="nav_guide">Guia de Diálogo</a>
-      <a href="/" class="mobile-link active" aria-current="page" data-i18n="nav_radar">Radar 2026</a>
+      <a href="https://fazdireito.neocities.org/" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_map">Mapa de Votos</a>
+      <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors flex items-center gap-2"><span>Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
+      <a href="https://fazdireito.neocities.org/assuntos.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_axes">Eixos Temáticos</a>
+      <a href="https://fazdireito.neocities.org/materiais.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+      <a href="https://fazdireito.neocities.org/guia.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_guide">Guia de Diálogo</a>
     </div>
   </nav>
 </header>
