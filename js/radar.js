@@ -1710,7 +1710,11 @@ function renderNewsFeed() {
 
   if (mentionsList) {
 
-    if (!items.length) {
+    const mentionItems =
+      getMentionItems(items);
+
+
+    if (!mentionItems.length) {
 
       mentionsList.innerHTML = `
         <article class="news-item">
@@ -1726,7 +1730,7 @@ function renderNewsFeed() {
     } else {
 
       mentionsList.innerHTML =
-        items
+        mentionItems
           .map(newsHTML)
           .join("");
 
@@ -3152,30 +3156,122 @@ function resetRadarFilters() {
 // FILTRO INTERNO DA ABA MENÇÕES
 // ============================================================
 
-function filterMentionsList(value) {
+function getMentionItems(items) {
 
   const query =
     normalizeText(
-      value
+      getEl("mentionFilter")?.value ||
+      ""
     );
 
 
-  document
-    .querySelectorAll(
-      "#mentionsList .news-item"
-    )
-    .forEach(
-      item => {
+  const sort =
+    getEl("mentionSort")?.value ||
+    "recent";
 
-        item.hidden =
-          Boolean(query) &&
-          !normalizeText(
-            item.dataset.title ||
-            ""
-          ).includes(query);
+
+  const result =
+    [...items]
+      .filter(
+        article => {
+
+          if (!query) {
+            return true;
+          }
+
+
+          const searchable =
+            normalizeText(
+              [
+                article.title,
+                article.subtitle,
+                article.publisher,
+                article.domain,
+                article.category,
+                candidateLabel(article)
+              ].join(" ")
+            );
+
+
+          return searchable.includes(query);
+
+        }
+      );
+
+
+  const timeValue =
+    article =>
+      validDate(article.publishedAt)
+        ?.getTime() || 0;
+
+
+  if (sort === "source") {
+
+    result.sort(
+      (a, b) => {
+
+        const bySource =
+          String(a.publisher || "")
+            .localeCompare(
+              String(b.publisher || ""),
+              "pt-BR",
+              { sensitivity: "base" }
+            );
+
+
+        return bySource ||
+          timeValue(b) -
+          timeValue(a);
 
       }
     );
+
+  } else if (sort === "impact") {
+
+    // Relevância descritiva: publicações que mencionam os dois
+    // candidatos aparecem primeiro; dentro de cada grupo,
+    // prevalece a publicação mais recente. Não é sentimento
+    // nem avaliação favorável/desfavorável.
+    result.sort(
+      (a, b) => {
+
+        const mentionsA =
+          Number(Boolean(a.mentions?.flavio)) +
+          Number(Boolean(a.mentions?.lula));
+
+        const mentionsB =
+          Number(Boolean(b.mentions?.flavio)) +
+          Number(Boolean(b.mentions?.lula));
+
+
+        return (
+          mentionsB - mentionsA ||
+          timeValue(b) -
+          timeValue(a)
+        );
+
+      }
+    );
+
+  } else {
+
+    result.sort(
+      (a, b) =>
+        timeValue(b) -
+        timeValue(a)
+    );
+
+  }
+
+
+  return result;
+
+}
+
+
+function filterMentionsList() {
+
+  renderNewsFeed();
 
 }
 
@@ -4851,10 +4947,19 @@ function bindEvents() {
   if (mentionFilter) {
 
     mentionFilter.oninput =
-      event =>
-        filterMentionsList(
-          event.target.value
-        );
+      filterMentionsList;
+
+  }
+
+
+  const mentionSort =
+    getEl("mentionSort");
+
+
+  if (mentionSort) {
+
+    mentionSort.onchange =
+      filterMentionsList;
 
   }
 
