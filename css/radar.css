@@ -273,3 +273,21 @@ html{font-size:var(--base-font-size)}
 .emerging-methodology{margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--line);color:#94a3b8;font-size:.64rem;line-height:1.45}
 .dark .emerging-item,.dark .emerging-empty{background:#111c31;border-color:#334155}.dark .emerging-heading strong,.dark .emerging-empty strong{color:#f8fafc}.dark .emerging-window{background:#172554;border-color:#1e40af;color:#dbeafe}
 @media(max-width:640px){.emerging-topics{grid-template-columns:1fr}.emerging-window{white-space:normal}.emerging-heading{align-items:flex-start}}
+
+
+/* AJUSTES ABA TEMAS — cards principais */
+#panel-themes .theme-card .attention.stable{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:72px;
+  height:28px;
+  padding:0 .65rem;
+  border-radius:.55rem;
+  white-space:nowrap;
+  line-height:1;
+}
+#panel-themes .theme-card .theme-top{align-items:flex-start}
+@media(max-width:640px){
+  #panel-themes .theme-card .attention.stable{min-width:68px;height:26px}
+}
