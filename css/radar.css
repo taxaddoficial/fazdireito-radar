@@ -175,3 +175,87 @@ html{font-size:var(--base-font-size)}
   .monitoring-item{padding:.8rem}
   .monitoring-value{font-size:1.35rem}
 }
+
+/* ==========================================================
+   AJUSTES FINAIS — FILTROS E COBERTURA
+   ========================================================== */
+.sr-only{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important
+}
+
+.filter-actions{
+  grid-column:span 3;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:.5rem;
+  align-self:end;
+}
+.filter-actions .btn-primary,
+.filter-actions .btn-secondary{
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  margin:0;
+  padding:.65rem .55rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  white-space:nowrap;
+}
+.filter-actions .btn-primary{grid-column:auto}
+
+.coverage-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.65rem;
+  flex-wrap:nowrap;
+}
+.coverage-filter{
+  position:relative;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  border-radius:0!important;
+}
+.coverage-filter select,
+#coverageFilter{
+  width:auto;
+  min-width:112px;
+  max-width:150px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  border-radius:.65rem;
+  padding:.48rem 2rem .48rem .65rem;
+  font-size:.72rem;
+  font-weight:800;
+  line-height:1.2;
+  cursor:pointer;
+}
+.dark .coverage-filter{background:transparent!important;border:0!important}
+.dark .coverage-filter select,
+.dark #coverageFilter{background:#111c31;color:#e2e8f0;border-color:#334155}
+
+@media(max-width:900px){
+  .filter-actions{grid-column:span 4}
+}
+@media(max-width:640px){
+  .filter-actions{grid-column:1/-1}
+  .coverage-actions{width:100%;justify-content:space-between;flex-wrap:wrap}
+  .coverage-filter select,#coverageFilter{width:auto;min-width:112px;max-width:150px}
+}
