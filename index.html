@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Radar 2026 | A Direita faz Direito</title>
-  <meta name="description" content="Rascunho de painel público para acompanhar temas, cobertura, palavras-chave, fontes e tendências relacionadas ao cenário eleitoral de 2026.">
+  <meta name="description" content="Painel público para acompanhar cobertura, palavras-chave, fontes e tendências relacionadas ao cenário eleitoral de 2026.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#0b2341">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 504'&gt;&lt;rect width='720' height='504' fill='%23009b3a'/&gt;&lt;polygon points='360,36 684,252 360,468 36,252' fill='%23fedf00'/&gt;&lt;circle cx='360' cy='252' r='126' fill='%23002776'/&gt;&lt;path d='M 235,260 A 130,130 0 0,0 485,240' fill='none' stroke='%23ffffff' stroke-width='14'/&gt;&lt;/svg&gt;">
@@ -101,77 +101,48 @@
 <main id="conteudo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
   <section class="radar-hero">
     <div>
-      <span class="hero-badge"><span class="live-dot"></span><span data-i18n="prototype">PROTÓTIPO • DADOS DEMONSTRATIVOS</span></span>
+      <span class="hero-badge"><span class="live-dot"></span><span data-i18n="prototype">RADAR • DADOS MONITORADOS</span></span>
       <h2 data-i18n="hero_title">Radar Eleitoral 2026</h2>
-      <p data-i18n="hero_desc">Uma central para acompanhar cobertura pública, temas, palavras-chave, fontes e sinais de atenção. Nesta versão, os números são simulados para validar a experiência antes das integrações.</p>
+      <p data-i18n="hero_desc">Uma central para acompanhar cobertura pública, publicações, palavras-chave, fontes e tendências a partir dos dados coletados pelo Radar.</p>
     </div>
-    <div class="hero-status"><span data-i18n="last_update">Última atualização</span><strong id="lastUpdate">—</strong><small data-i18n="mock_notice">Modo demonstração</small></div>
+    <div class="hero-status"><span data-i18n="last_update">Última atualização</span><strong id="lastUpdate">—</strong><small data-i18n="mock_notice">Dados monitorados</small></div>
   </section>
 
   <section class="filter-panel" aria-labelledby="filterTitle">
-    <div class="filter-heading"><div><span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span><h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3></div><button id="resetFilters" class="btn-secondary" data-i18n="reset">Limpar filtros</button></div>
-<div class="filter-grid">
-  <label>
-    <span data-i18n="period">Período</span>
-    <select id="period">
-      <option value="48h" selected>Últimas 48 horas</option>
-      <option value="24h">Últimas 24 horas</option>
-    </select>
-  </label>
-
-  <label>
-    <span data-i18n="scope">Candidato</span>
-    <select id="scope">
-      <option value="all">Todos</option>
-      <option value="flavio">Flávio Bolsonaro</option>
-      <option value="lula">Lula</option>
-      <option value="both">Ambos na mesma matéria</option>
-    </select>
-  </label>
-
-  <label>
-    <span data-i18n="source">Veículo</span>
-    <select id="source">
-      <option value="all">Todos os veículos</option>
-    </select>
-  </label>
-
-  <label class="search-field">
-    <span data-i18n="search">Buscar termo</span>
-    <input
-      id="searchTerm"
-      type="search"
-      placeholder="Ex.: economia, segurança..."
-    >
-  </label>
-
-  <button
-    id="applyFilters"
-    class="btn-primary"
-    type="button"
-    data-i18n="apply"
-  >
-    Aplicar filtros
-  </button>
-</div>
+    <div class="filter-heading">
+      <div>
+        <span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span>
+        <h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3>
+      </div>
+    </div>
+    <div class="filter-grid">
+      <label><span data-i18n="period">Período</span><select id="period"><option value="48h" selected data-i18n="period_48h">Últimas 48 horas</option><option value="24h" data-i18n="period_24h">Últimas 24 horas</option></select></label>
+      <label><span data-i18n="scope">Candidato</span><select id="scope"><option value="all" data-i18n="candidate_all">Todos</option><option value="flavio" data-i18n="candidate_flavio">Flávio Bolsonaro</option><option value="lula" data-i18n="candidate_lula">Lula</option><option value="both" data-i18n="candidate_both_same">Ambos na mesma matéria</option></select></label>
+      <label><span data-i18n="source">Veículo</span><select id="source"><option value="all" data-i18n="all_publishers">Todos os veículos</option></select></label>
+      <label class="search-field"><span data-i18n="search">Buscar termo</span><input id="searchTerm" type="search" placeholder="Ex.: economia, segurança..."></label>
+      <div class="filter-actions">
+        <button id="resetFilters" class="btn-secondary" type="button" data-i18n="reset">Limpar filtros</button>
+        <button id="applyFilters" class="btn-primary" type="button" data-i18n="apply">Aplicar filtros</button>
+      </div>
+    </div>
   </section>
 
   <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
-    <button role="tab" aria-selected="true" class="tab active" data-tab="overview" data-i18n="tab_overview">Visão geral</button>
-    <button role="tab" aria-selected="false" class="tab" data-tab="themes" data-i18n="tab_themes">Temas</button>
-    <button role="tab" aria-selected="false" class="tab" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
-    <button role="tab" aria-selected="false" class="tab" data-tab="trends" data-i18n="tab_trends">Tendências</button>
-    <button role="tab" aria-selected="false" class="tab" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
-    <button role="tab" aria-selected="false" class="tab" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
+    <button role="tab" aria-selected="true" class="tab tab-btn active" data-tab="overview" data-i18n="tab_overview">Visão geral</button>
+    <button role="tab" aria-selected="false" class="tab tab-btn" data-tab="themes" data-i18n="tab_themes">Temas</button>
+    <button role="tab" aria-selected="false" class="tab tab-btn" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
+    <button role="tab" aria-selected="false" class="tab tab-btn" data-tab="trends" data-i18n="tab_trends">Tendências</button>
+    <button role="tab" aria-selected="false" class="tab tab-btn" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
+    <button role="tab" aria-selected="false" class="tab tab-btn" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
   </div>
 
-  <section id="panel-overview" class="tab-panel active">
+  <section id="tab-overview" class="tab-panel active">
 <div class="metrics-grid">
   <article class="metric-card">
     <span data-i18n="metric_mentions">Matérias coletadas</span>
     <strong id="metricMentions">—</strong>
     <small>
-      <span data-i18n="vs_period">no corpus monitorado</span>
+      <span data-i18n="vs_period">no período monitorado</span>
     </small>
   </article>
 
@@ -184,7 +155,7 @@
   </article>
 
   <article class="metric-card">
-    <span data-i18n="metric_sources">Veículos no corpus</span>
+    <span data-i18n="metric_sources">Veículos monitorados</span>
     <strong id="metricSources">—</strong>
     <small>
       <span data-i18n="source_types">veículos distintos</span>
@@ -203,7 +174,7 @@
       <article class="panel span-8"><div class="panel-head"><div><span class="eyebrow">VOLUME</span><h3 data-i18n="volume_title">Evolução das menções</h3></div><div class="legend">
   <span><i class="legend-main"></i>Flávio Bolsonaro</span>
   <span><i class="legend-all"></i>Lula</span>
-</div></div><div class="canvas-wrap"><canvas id="volumeChart" aria-label="Gráfico demonstrativo de evolução das menções"></canvas></div><p class="chart-caption" data-i18n="demo_chart">Dados ilustrativos para validar o layout. Serão substituídos por dados das APIs.</p></article>
+</div></div><div class="canvas-wrap"><canvas id="trendChart" aria-label="Gráfico da evolução temporal das publicações que mencionam Flávio Bolsonaro e Lula"></canvas></div><p class="chart-caption" data-i18n="demo_chart">Evolução calculada a partir dos horários de publicação dos artigos no período selecionado.</p></article>
       <article class="panel span-4"><div class="panel-head"><div><span class="eyebrow">AGORA</span><h3 data-i18n="hot_title">Assuntos em destaque</h3></div></div><div id="hotTopics" class="ranking"></div></article>
       <article class="panel span-5">
   <div class="panel-head">
@@ -236,38 +207,18 @@
 
     <div class="coverage-actions">
 
-      <label
-        class="coverage-filter"
-        for="coverageFilter"
-      >
-        <span class="sr-only">
-          Filtrar cobertura por candidato
-        </span>
-
-        <select
-          id="coverageFilter"
-          aria-label="Filtrar cobertura por candidato"
-        >
-          <option
-            value="flavio"
-            selected
-          >
-            Flávio
-          </option>
-
-          <option value="lula">
-            Lula
-          </option>
-
-          <option value="both">
-            Ambos
-          </option>
+      <label class="coverage-filter" for="coverageFilter">
+        <span class="sr-only" data-i18n="coverage_filter_label">Filtrar cobertura por candidato</span>
+        <select id="coverageFilter">
+          <option value="flavio" selected data-i18n="coverage_flavio">Flávio</option>
+          <option value="lula" data-i18n="coverage_lula">Lula</option>
+          <option value="both" data-i18n="coverage_both">Ambos</option>
         </select>
       </label>
 
       <button
         class="text-btn"
-        data-open-tab="mentions"
+        onclick="openTab('mentions')"
         data-i18n="view_all"
         type="button"
       >
@@ -286,40 +237,40 @@
 </article>    </div>
   </section>
 
-  <section id="panel-themes" class="tab-panel">
-    <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Cards demonstrativos com volume, variação e nível de atenção. Clique para filtrar o restante do painel.</p></div><button id="addTheme" class="btn-primary">+ <span data-i18n="add_theme">Adicionar tema</span></button></div>
-    <div id="themeCards" class="theme-grid"></div>
+  <section id="tab-themes" class="tab-panel">
+    <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Distribuição descritiva das publicações encontradas no período selecionado.</p></div><button id="addTheme" class="btn-primary">+ <span data-i18n="add_theme">Adicionar tema</span></button></div>
+    <div id="themeGrid" class="theme-grid"></div>
   </section>
 
-  <section id="panel-mentions" class="tab-panel">
-    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte"><select id="mentionSort"><option value="recent">Mais recentes</option><option value="impact">Maior relevância</option><option value="source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
+  <section id="tab-mentions" class="tab-panel">
+    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionsSearch" type="search" placeholder="Filtrar título ou fonte"><select id="mentionSort"><option value="recent">Mais recentes</option><option value="source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
   </section>
 
-  <section id="panel-trends" class="tab-panel">
+  <section id="tab-trends" class="tab-panel">
     <div class="dashboard-grid">
-      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">PALAVRAS-CHAVE</span><h3 data-i18n="keywords_title">Termos com maior presença</h3></div></div><div id="keywordBars" class="keyword-bars"></div></article>
-      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">NUVEM</span><h3 data-i18n="cloud_title">Nuvem de termos</h3></div></div><div id="wordCloud" class="word-cloud"></div><div class="callout" data-i18n="cloud_note">O tamanho representa apenas o peso demonstrativo neste protótipo.</div></article>
-      <article class="panel span-12"><div class="panel-head"><div><span class="eyebrow">PICOS</span><h3 data-i18n="spikes_title">Detecção de picos</h3></div></div><div id="spikeTimeline" class="spike-grid"></div></article>
+      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">PALAVRAS-CHAVE</span><h3 data-i18n="keywords_title">Termos com maior presença</h3></div></div><div id="keywordList" class="keyword-bars"></div></article>
+      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">NUVEM</span><h3 data-i18n="cloud_title">Nuvem de termos</h3></div></div><div id="wordCloud" class="word-cloud"></div><div class="callout" data-i18n="cloud_note">O tamanho representa a frequência no período monitorado.</div></article>
+      <article class="panel span-12"><div class="panel-head"><div><span class="eyebrow">PICOS</span><h3 data-i18n="spikes_title">Detecção de picos</h3></div></div><div id="spikeList" class="spike-grid"></div></article>
     </div>
   </section>
 
-  <section id="panel-videos" class="tab-panel">
+  <section id="tab-videos" class="tab-panel">
     <div class="section-intro"><div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Slots preparados para YouTube Data API e outras fontes permitidas.</p></div></div><div id="videoGrid" class="video-grid"></div>
   </section>
 
-  <section id="panel-sources" class="tab-panel">
+  <section id="tab-sources" class="tab-panel">
     <div class="dashboard-grid">
       <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">INTEGRAÇÕES</span><h3 data-i18n="apis_title">Fontes e serviços planejados</h3></div></div><div id="apiList" class="api-list"></div></article>
-      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">CONFIGURAÇÃO</span><h3 data-i18n="config_title">Parâmetros do radar</h3></div></div><div class="config-list"><label><span>Atualização automática</span><select disabled><option>15 minutos</option></select></label><label><span>Limite por consulta</span><input value="100 registros" disabled></label><label><span>Idioma da coleta</span><input value="Português (BR)" disabled></label></div><div class="callout"><strong>Rascunho:</strong> estes controles serão habilitados quando o backend estiver conectado.</div></article>
+      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">CONFIGURAÇÃO</span><h3 data-i18n="config_title">Parâmetros do radar</h3></div></div><div class="config-list"><label><span>Atualização automática</span><select disabled><option>30 minutos</option></select></label><label><span>Limite por consulta</span><input value="Conforme disponibilidade das fontes" disabled></label><label><span>Idioma da coleta</span><input value="Português (BR)" disabled></label></div><div class="callout"><strong>Informação:</strong> parâmetros exibidos conforme a configuração atual do Radar.</div></article>
     </div>
   </section>
 </main>
 
 <footer class="bg-brand-navy text-slate-400 py-8 mt-8 text-xs">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-    <div><strong class="text-white text-sm">A Direita faz Direito | O Brasil Vai Vencer</strong><p class="mt-1" data-i18n="footer_desc">Protótipo do Radar Eleitoral 2026. Dados demonstrativos nesta versão.</p></div>
+    <div><strong class="text-white text-sm">A Direita faz Direito | O Brasil Vai Vencer</strong><p class="mt-1" data-i18n="footer_desc">Radar Eleitoral 2026. Dados provenientes das fontes monitoradas.</p></div>
     <div class="flex flex-wrap gap-6 text-slate-300 font-medium"><a href="https://fazdireito.neocities.org/" class="hover:text-yellow-400">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html" class="hover:text-yellow-400">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html" class="hover:text-yellow-400">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html" class="hover:text-yellow-400">Guia de Diálogo</a></div>
-    <div class="text-[11px] text-right">Campanha 2026 • Rascunho funcional</div>
+    <div class="text-[11px] text-right">Campanha 2026 • Radar em monitoramento</div>
   </div>
 </footer>
 <script src="/js/radar.js" defer></script>
