@@ -110,14 +110,50 @@
 
   <section class="filter-panel" aria-labelledby="filterTitle">
     <div class="filter-heading"><div><span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span><h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3></div><button id="resetFilters" class="btn-secondary" data-i18n="reset">Limpar filtros</button></div>
-    <div class="filter-grid">
-      <label><span data-i18n="period">Período</span><select id="period"><option value="24h">Últimas 24 horas</option><option value="7d" selected>Últimos 7 dias</option><option value="30d">Últimos 30 dias</option></select></label>
-      <label><span data-i18n="scope">Escopo</span><select id="scope"><option value="all">Todos os temas</option><option value="candidate">Candidato</option><option value="economy">Economia</option><option value="security">Segurança</option><option value="institutions">Instituições</option></select></label>
-      <label><span data-i18n="source">Fonte</span><select id="source"><option value="all">Todas</option><option value="news">Notícias</option><option value="search">Busca</option><option value="video">Vídeo</option><option value="social">Social</option></select></label>
-      <label><span data-i18n="region">Região</span><select id="region"><option value="BR">Brasil</option><option value="SE">Sudeste</option><option value="S">Sul</option><option value="NE">Nordeste</option><option value="CO">Centro-Oeste</option><option value="N">Norte</option></select></label>
-      <label class="search-field"><span data-i18n="search">Buscar termo</span><input id="searchTerm" type="search" placeholder="Ex.: economia, segurança..."></label>
-      <button id="applyFilters" class="btn-primary" data-i18n="apply">Aplicar filtros</button>
-    </div>
+<div class="filter-grid">
+  <label>
+    <span data-i18n="period">Período</span>
+    <select id="period">
+      <option value="48h" selected>Últimas 48 horas</option>
+      <option value="24h">Últimas 24 horas</option>
+    </select>
+  </label>
+
+  <label>
+    <span data-i18n="scope">Candidato</span>
+    <select id="scope">
+      <option value="all">Todos</option>
+      <option value="flavio">Flávio Bolsonaro</option>
+      <option value="lula">Lula</option>
+      <option value="both">Ambos na mesma matéria</option>
+    </select>
+  </label>
+
+  <label>
+    <span data-i18n="source">Veículo</span>
+    <select id="source">
+      <option value="all">Todos os veículos</option>
+    </select>
+  </label>
+
+  <label class="search-field">
+    <span data-i18n="search">Buscar termo</span>
+    <input
+      id="searchTerm"
+      type="search"
+      placeholder="Ex.: economia, segurança..."
+    >
+  </label>
+
+  <button
+    id="applyFilters"
+    class="btn-primary"
+    type="button"
+    data-i18n="apply"
+  >
+    Aplicar filtros
+  </button>
+</div>
   </section>
 
   <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
