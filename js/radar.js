@@ -76,6 +76,281 @@ async function checkRadarApi() {
 
 
 // ============================================================
+// FONTES & APIs — DADOS REAIS DO WORKER
+// ============================================================
+
+let liveSources = null;
+
+function sourceStatusPresentation(status) {
+
+  const labels = {
+    pt: {
+      active: "Ativo",
+      planned: "Planejado",
+      connected: "Conectado",
+      unavailable: "Indisponível"
+    },
+
+    en: {
+      active: "Active",
+      planned: "Planned",
+      connected: "Connected",
+      unavailable: "Unavailable"
+    },
+
+    es: {
+      active: "Activo",
+      planned: "Planeado",
+      connected: "Conectado",
+      unavailable: "No disponible"
+    }
+  };
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+  const normalized =
+    String(status || "")
+      .toLowerCase();
+
+  if (normalized === "active") {
+    return {
+      label: current.active,
+      cls: "ready"
+    };
+  }
+
+  if (normalized === "connected") {
+    return {
+      label: current.connected,
+      cls: "ready"
+    };
+  }
+
+  if (normalized === "planned") {
+    return {
+      label: current.planned,
+      cls: "planned"
+    };
+  }
+
+  return {
+    label: current.unavailable,
+    cls: "mock"
+  };
+}
+
+
+function renderApiSources(items) {
+
+  const list =
+    document.getElementById("apiList");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML =
+    items
+      .map(
+        source => {
+
+          const presentation =
+            sourceStatusPresentation(
+              source.status
+            );
+
+          const endpoint =
+            source.endpoint
+              ? ` • ${source.endpoint}`
+              : "";
+
+          return `
+            <div class="api-row">
+
+              <div>
+
+                <strong>
+                  ${source.name}
+                </strong>
+
+                <span>
+                  ${source.description || ""}${endpoint}
+                </span>
+
+              </div>
+
+              <span class="api-status ${presentation.cls}">
+                ${presentation.label}
+              </span>
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+function renderMockApiSources() {
+
+  const list =
+    document.getElementById("apiList");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML =
+    mock.apis
+      .map(
+        a => `
+          <div class="api-row">
+
+            <div>
+
+              <strong>
+                ${a.name}
+              </strong>
+
+              <span>
+                ${a.desc}
+              </span>
+
+            </div>
+
+            <span class="api-status ${a.cls}">
+              ${a.status}
+            </span>
+
+          </div>
+        `
+      )
+      .join("");
+
+}
+
+
+async function loadRadarSources() {
+
+  try {
+
+    const data =
+      await radarApiFetch(
+        RADAR_API.endpoints.sources
+      );
+
+    if (
+      !data ||
+      data.status !== "ok" ||
+      !Array.isArray(data.sources)
+    ) {
+
+      throw new Error(
+        "RADAR_API_SOURCES_INVALID_RESPONSE"
+      );
+
+    }
+
+    liveSources =
+      data.sources.map(
+        source => ({
+          id:
+            source.id || "",
+
+          name:
+            source.name || "Fonte",
+
+          type:
+            source.type || "",
+
+          description:
+            source.description || "",
+
+          status:
+            source.status || "unavailable",
+
+          endpoint:
+            source.endpoint || null,
+
+          cache:
+            source.cache || null
+        })
+      );
+
+
+    if (
+      data.infrastructure &&
+      data.infrastructure.kv
+    ) {
+
+      liveSources.push({
+        id:
+          "cloudflare-kv",
+
+        name:
+          "Cloudflare Workers KV",
+
+        type:
+          "infrastructure",
+
+        description:
+          "Camada de cache e persistência da infraestrutura do Radar.",
+
+        status:
+          data.infrastructure.kv === "connected"
+            ? "connected"
+            : "unavailable",
+
+        endpoint:
+          null,
+
+        cache:
+          null
+      });
+
+    }
+
+
+    renderApiSources(
+      liveSources
+    );
+
+
+    console.info(
+      "[Radar API] Fontes carregadas:",
+      liveSources
+    );
+
+
+    return liveSources;
+
+  } catch (error) {
+
+    liveSources =
+      null;
+
+
+    console.warn(
+      "[Radar API] Não foi possível carregar /api/sources. Mantendo fallback demonstrativo:",
+      error.message
+    );
+
+
+    renderMockApiSources();
+
+
+    return null;
+
+  }
+
+}
+
+
+// ============================================================
 // DADOS DEMONSTRATIVOS
 // Permanecem como fallback enquanto as APIs reais
 // são conectadas progressivamente.
@@ -281,7 +556,7 @@ const mock = {
       desc:
         "Notícias, cobertura e linha do tempo",
       status:
-        "Pronto para integrar",
+        "Fallback",
       cls:
         "ready"
     },
@@ -325,7 +600,7 @@ const mock = {
       desc:
         "Cloudflare Worker / KV para proteger quotas",
       status:
-        "Arquitetura",
+        "Fallback",
       cls:
         "mock"
     }
@@ -804,7 +1079,7 @@ const translations = {
       "en alta atención",
 
     source_types:
-      "tipos de fuente",
+      "tipos de fonte",
 
     peak_desc:
       "Economía • últimas 6h",
@@ -1114,32 +1389,11 @@ function render() {
       .join("");
 
 
-  document.getElementById("apiList").innerHTML =
-    mock.apis
-      .map(
-        a => `
-          <div class="api-row">
-
-            <div>
-
-              <strong>
-                ${a.name}
-              </strong>
-
-              <span>
-                ${a.desc}
-              </span>
-
-            </div>
-
-            <span class="api-status ${a.cls}">
-              ${a.status}
-            </span>
-
-          </div>
-        `
-      )
-      .join("");
+  if (liveSources) {
+    renderApiSources(liveSources);
+  } else {
+    renderMockApiSources();
+  }
 
 
   renderRadar();
@@ -1730,6 +1984,11 @@ function setLanguage(
 
   syncThemeLabel();
 
+
+  if (liveSources) {
+    renderApiSources(liveSources);
+  }
+
 }
 
 
@@ -2003,10 +2262,18 @@ window.addEventListener(
   render();
 
 
-  // Testa silenciosamente a comunicação
-  // entre o front-end e o Cloudflare Worker.
-  // Neste estágio ainda não substitui os mocks.
+  // Testa a comunicação entre o front-end
+  // e o Cloudflare Worker.
 
   checkRadarApi();
+
+
+  // Carrega a relação REAL de fontes e serviços
+  // informada pelo Cloudflare Worker.
+  //
+  // Se /api/sources estiver indisponível,
+  // o Radar mantém automaticamente o fallback.
+
+  loadRadarSources();
 
 })();
