@@ -2211,154 +2211,151 @@ function renderRadar() {
   }
 
 
+  const texts =
+    translations[lang] ||
+    translations.pt;
+
+
   if (!liveNews) {
 
-    const labels = [
-      "Cobertura",
-      "Fontes",
-      "Tempo",
-      "Menções",
-      "Veículos",
-      "Corpus"
-    ];
+    box.innerHTML = `
+      <div class="monitoring-loading">
 
+        <strong>
+          ${escapeHTML(texts.panorama_waiting)}
+        </strong>
 
-    box.innerHTML =
-      '<div class="radar-poly"></div>' +
+        <span>
+          ${escapeHTML(texts.panorama_waiting_desc)}
+        </span>
 
-      labels
-        .map(
-          (_, index) => `
-            <i
-              class="radar-axis"
-              style="transform:rotate(${index * 60}deg)"
-            ></i>
-          `
-        )
-        .join("") +
-
-      labels
-        .map(
-          (label, index) => {
-
-            const angle =
-              index *
-              60 *
-              Math.PI /
-              180;
-
-
-            const x =
-              50 +
-              47 *
-              Math.cos(angle);
-
-
-            const y =
-              50 +
-              47 *
-              Math.sin(angle);
-
-
-            return `
-              <span
-                class="radar-label"
-                style="
-                  left:${x}%;
-                  top:${y}%;
-                  transform:translate(-50%,-50%)
-                "
-              >
-                ${label}
-              </span>
-            `;
-
-          }
-        )
-        .join("");
-
+      </div>
+    `;
 
     return;
 
   }
 
 
+  const data =
+    filteredNews.length ||
+    hasActiveFilters()
+      ? filteredNews
+      : liveNews;
+
+
   const metrics =
-    calculateMetrics(
-      filteredNews.length ||
-      hasActiveFilters()
-        ? filteredNews
-        : liveNews
-    );
+    calculateMetrics(data);
 
 
-  const labels = [
-    `Flávio ${metrics.flavio}`,
-    `Lula ${metrics.lula}`,
-    `Ambos ${metrics.both}`,
-    `Veículos ${metrics.publishers}`,
-    `Corpus ${metrics.total}`,
-    `${liveNewsMeta?.windowHours || 48}h`
+  const windowHours =
+    liveNewsMeta?.windowHours || 48;
+
+
+  const items = [
+
+    {
+      label:
+        texts.panorama_flavio,
+
+      value:
+        metrics.flavio,
+
+      description:
+        texts.panorama_reference
+    },
+
+    {
+      label:
+        texts.panorama_lula,
+
+      value:
+        metrics.lula,
+
+      description:
+        texts.panorama_reference
+    },
+
+    {
+      label:
+        texts.panorama_both,
+
+      value:
+        metrics.both,
+
+      description:
+        texts.panorama_both_desc
+    },
+
+    {
+      label:
+        texts.panorama_publishers,
+
+      value:
+        metrics.publishers,
+
+      description:
+        texts.panorama_publishers_desc
+    },
+
+    {
+      label:
+        texts.panorama_articles,
+
+      value:
+        metrics.total,
+
+      description:
+        texts.panorama_articles_desc
+    },
+
+    {
+      label:
+        texts.panorama_period,
+
+      value:
+        `${windowHours}h`,
+
+      description:
+        texts.panorama_period_desc
+    }
+
   ];
 
 
-  box.innerHTML =
-    '<div class="radar-poly"></div>' +
+  box.innerHTML = `
+    <div class="monitoring-panorama">
 
-    labels
-      .map(
-        (_, index) => `
-          <i
-            class="radar-axis"
-            style="transform:rotate(${index * 60}deg)"
-          ></i>
-        `
-      )
-      .join("") +
+      ${items
+        .map(
+          (item) => `
+            <div class="monitoring-item">
 
-    labels
-      .map(
-        (label, index) => {
+              <span class="monitoring-label">
+                ${escapeHTML(item.label)}
+              </span>
 
-          const angle =
-            index *
-            60 *
-            Math.PI /
-            180;
+              <strong class="monitoring-value">
+                ${escapeHTML(String(item.value))}
+              </strong>
 
+              <small class="monitoring-description">
+                ${escapeHTML(item.description)}
+              </small>
 
-          const x =
-            50 +
-            47 *
-            Math.cos(angle);
+            </div>
+          `
+        )
+        .join("")}
 
+    </div>
 
-          const y =
-            50 +
-            47 *
-            Math.sin(angle);
-
-
-          return `
-            <span
-              class="radar-label"
-              style="
-                left:${x}%;
-                top:${y}%;
-                transform:translate(-50%,-50%)
-              "
-            >
-              ${escapeHTML(label)}
-            </span>
-          `;
-
-        }
-      )
-      .join("");
+    <p class="monitoring-note">
+      ${escapeHTML(texts.panorama_note)}
+    </p>
+  `;
 
 }
-
-
 // ============================================================
 // GRÁFICO REAL DE EVOLUÇÃO
 // ============================================================
@@ -3620,7 +3617,49 @@ const translations = {
       "Veículos com mais publicações",
 
     radar_title:
-      "Resumo do corpus",
+      "Panorama de Monitoramento",
+
+    panorama_flavio:
+      "Flávio Bolsonaro",
+
+    panorama_lula:
+      "Lula",
+
+    panorama_both:
+      "Ambos",
+
+    panorama_publishers:
+      "Veículos",
+
+    panorama_articles:
+      "Matérias",
+
+    panorama_period:
+      "Período",
+
+    panorama_reference:
+      "matérias com referência identificada",
+
+    panorama_both_desc:
+      "matérias que mencionam os dois",
+
+    panorama_publishers_desc:
+      "veículos distintos no conjunto",
+
+    panorama_articles_desc:
+      "itens no monitoramento atual",
+
+    panorama_period_desc:
+      "janela de coleta considerada",
+
+    panorama_note:
+      "Indicadores calculados a partir das matérias disponíveis no período monitorado.",
+
+    panorama_waiting:
+      "Aguardando dados",
+
+    panorama_waiting_desc:
+      "O panorama será atualizado quando os dados do monitoramento estiverem disponíveis.",
 
     news_title:
       "Últimas publicações encontradas",
@@ -3668,7 +3707,6 @@ const translations = {
       "Radar Eleitoral 2026."
 
   },
-
 
   en: {
 
@@ -3799,7 +3837,49 @@ const translations = {
       "Publishers with most articles",
 
     radar_title:
-      "Corpus summary",
+      "Monitoring Overview",
+
+    panorama_flavio:
+      "Flávio Bolsonaro",
+
+    panorama_lula:
+      "Lula",
+
+    panorama_both:
+      "Both",
+
+    panorama_publishers:
+      "Publishers",
+
+    panorama_articles:
+      "Articles",
+
+    panorama_period:
+      "Period",
+
+    panorama_reference:
+      "articles with an identified reference",
+
+    panorama_both_desc:
+      "articles mentioning both candidates",
+
+    panorama_publishers_desc:
+      "distinct publishers in the dataset",
+
+    panorama_articles_desc:
+      "items in the current monitoring dataset",
+
+    panorama_period_desc:
+      "collection window considered",
+
+    panorama_note:
+      "Indicators calculated from the articles available during the monitored period.",
+
+    panorama_waiting:
+      "Waiting for data",
+
+    panorama_waiting_desc:
+      "The overview will be updated when monitoring data becomes available.",
 
     news_title:
       "Latest publications found",
@@ -3847,7 +3927,6 @@ const translations = {
       "2026 Election Radar."
 
   },
-
 
   es: {
 
@@ -3978,7 +4057,49 @@ const translations = {
       "Medios con más publicaciones",
 
     radar_title:
-      "Resumen del corpus",
+      "Panorama de Monitoreo",
+
+    panorama_flavio:
+      "Flávio Bolsonaro",
+
+    panorama_lula:
+      "Lula",
+
+    panorama_both:
+      "Ambos",
+
+    panorama_publishers:
+      "Medios",
+
+    panorama_articles:
+      "Artículos",
+
+    panorama_period:
+      "Período",
+
+    panorama_reference:
+      "artículos con una referencia identificada",
+
+    panorama_both_desc:
+      "artículos que mencionan a ambos candidatos",
+
+    panorama_publishers_desc:
+      "medios distintos en el conjunto",
+
+    panorama_articles_desc:
+      "elementos en el monitoreo actual",
+
+    panorama_period_desc:
+      "ventana de recopilación considerada",
+
+    panorama_note:
+      "Indicadores calculados a partir de los artículos disponibles durante el período monitoreado.",
+
+    panorama_waiting:
+      "Esperando datos",
+
+    panorama_waiting_desc:
+      "El panorama se actualizará cuando los datos del monitoreo estén disponibles.",
 
     news_title:
       "Últimas publicaciones encontradas",
@@ -4026,7 +4147,6 @@ const translations = {
       "Radar Electoral 2026."
 
   }
-
 };
 
 
@@ -4186,10 +4306,11 @@ function setLanguage(
 
     updateRealDataLabels();
 
+    renderRadar();
+
   }
 
 }
-
 
 // ============================================================
 // TAMANHO DA FONTE
