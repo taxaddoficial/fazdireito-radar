@@ -65,10 +65,57 @@ function normalizeText(value) {
 }
 
 
+// ============================================================
+// FORMATAÇÃO LOCALIZADA
+// ============================================================
+
+function getLocale() {
+
+  const locales = {
+    pt: "pt-BR",
+    en: "en-US",
+    es: "es-ES"
+  };
+
+  return locales[lang] || locales.pt;
+
+}
+
+
+function getTexts() {
+
+  return (
+    translations?.[lang] ||
+    translations?.pt ||
+    {}
+  );
+
+}
+
+
+function interpolateText(
+  template,
+  values = {}
+) {
+
+  return String(template || "")
+    .replace(
+      /\{(\w+)\}/g,
+      (_, key) =>
+        values[key] !== undefined
+          ? String(values[key])
+          : `{${key}}`
+    );
+
+}
+
+
 function formatNumber(value) {
 
   return Number(value || 0)
-    .toLocaleString("pt-BR");
+    .toLocaleString(
+      getLocale()
+    );
 
 }
 
@@ -79,9 +126,16 @@ function validDate(value) {
     return null;
   }
 
-  const date = new Date(value);
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return null;
   }
 
@@ -92,14 +146,15 @@ function validDate(value) {
 
 function formatDateTime(value) {
 
-  const date = validDate(value);
+  const date =
+    validDate(value);
 
   if (!date) {
     return "—";
   }
 
   return date.toLocaleString(
-    "pt-BR",
+    getLocale(),
     {
       day: "2-digit",
       month: "2-digit",
@@ -113,48 +168,103 @@ function formatDateTime(value) {
 
 function relativeTime(value) {
 
-  const date = validDate(value);
+  const date =
+    validDate(value);
 
   if (!date) {
     return "";
   }
 
   const diff =
-    Date.now() - date.getTime();
+    Date.now() -
+    date.getTime();
 
   const minutes =
     Math.max(
       0,
-      Math.floor(diff / 60000)
+      Math.floor(
+        diff / 60000
+      )
     );
 
+  const labels = {
+
+    pt: {
+      now: "agora",
+      minute: "há {count} min",
+      hour: "há {count} h",
+      day: "há {count} d"
+    },
+
+    en: {
+      now: "now",
+      minute: "{count} min ago",
+      hour: "{count}h ago",
+      day: "{count}d ago"
+    },
+
+    es: {
+      now: "ahora",
+      minute: "hace {count} min",
+      hour: "hace {count} h",
+      day: "hace {count} d"
+    }
+
+  };
+
+  const current =
+    labels[lang] ||
+    labels.pt;
 
   if (minutes < 1) {
-    return "agora";
+    return current.now;
   }
-
 
   if (minutes < 60) {
-    return `há ${minutes} min`;
-  }
 
+    return interpolateText(
+      current.minute,
+      {
+        count: minutes
+      }
+    );
+
+  }
 
   const hours =
-    Math.floor(minutes / 60);
-
+    Math.floor(
+      minutes / 60
+    );
 
   if (hours < 24) {
-    return `há ${hours} h`;
+
+    return interpolateText(
+      current.hour,
+      {
+        count: hours
+      }
+    );
+
   }
 
-
   const days =
-    Math.floor(hours / 24);
+    Math.floor(
+      hours / 24
+    );
 
-  return `há ${days} d`;
+  return interpolateText(
+    current.day,
+    {
+      count: days
+    }
+  );
 
 }
 
+
+// ============================================================
+// CANDIDATOS
+// ============================================================
 
 function candidateLabel(article) {
 
@@ -167,7 +277,6 @@ function candidateLabel(article) {
     Boolean(
       article?.mentions?.lula
     );
-
 
   if (flavio && lula) {
     return "Flávio + Lula";
@@ -182,6 +291,7 @@ function candidateLabel(article) {
   }
 
   return "Cobertura";
+
 }
 
 
@@ -197,7 +307,6 @@ function candidateClass(article) {
       article?.mentions?.lula
     );
 
-
   if (flavio && lula) {
     return "both";
   }
@@ -211,6 +320,7 @@ function candidateClass(article) {
   }
 
   return "general";
+
 }
 
 
@@ -234,9 +344,7 @@ async function radarApiFetch(endpoint) {
       }
     );
 
-
   let data = null;
-
 
   try {
 
@@ -250,7 +358,6 @@ async function radarApiFetch(endpoint) {
 
   }
 
-
   if (!response.ok) {
 
     const message =
@@ -261,7 +368,6 @@ async function radarApiFetch(endpoint) {
     throw new Error(message);
 
   }
-
 
   return data;
 
@@ -281,16 +387,13 @@ async function checkRadarApi() {
         RADAR_API.endpoints.status
       );
 
-
     liveStatus =
       data;
-
 
     console.info(
       "[Radar API] Conexão estabelecida:",
       data
     );
-
 
     return data;
 
@@ -299,12 +402,10 @@ async function checkRadarApi() {
     liveStatus =
       null;
 
-
     console.warn(
       "[Radar API] API indisponível:",
       error.message
     );
-
 
     return null;
 
@@ -350,16 +451,13 @@ function sourceStatusPresentation(status) {
 
   };
 
-
   const current =
     labels[lang] ||
     labels.pt;
 
-
   const normalized =
     String(status || "")
       .toLowerCase();
-
 
   if (
     normalized === "active" ||
@@ -377,7 +475,6 @@ function sourceStatusPresentation(status) {
 
   }
 
-
   if (normalized === "planned") {
 
     return {
@@ -386,7 +483,6 @@ function sourceStatusPresentation(status) {
     };
 
   }
-
 
   if (normalized === "paused") {
 
@@ -397,7 +493,6 @@ function sourceStatusPresentation(status) {
 
   }
 
-
   if (normalized === "pending") {
 
     return {
@@ -406,7 +501,6 @@ function sourceStatusPresentation(status) {
     };
 
   }
-
 
   return {
     label: current.unavailable,
@@ -421,25 +515,58 @@ function renderApiSources(items) {
   const list =
     getEl("apiList");
 
-
   if (!list) {
     return;
   }
-
 
   if (
     !Array.isArray(items) ||
     !items.length
   ) {
 
+    const messages = {
+
+      pt: {
+        title: "Fontes",
+        description:
+          "Nenhuma informação disponível neste momento.",
+        status: "Indisponível"
+      },
+
+      en: {
+        title: "Sources",
+        description:
+          "No information is available at this time.",
+        status: "Unavailable"
+      },
+
+      es: {
+        title: "Fuentes",
+        description:
+          "No hay información disponible en este momento.",
+        status: "No disponible"
+      }
+
+    };
+
+    const current =
+      messages[lang] ||
+      messages.pt;
+
     list.innerHTML = `
       <div class="api-row">
         <div>
-          <strong>Fontes</strong>
-          <span>Nenhuma informação disponível neste momento.</span>
+          <strong>
+            ${escapeHTML(current.title)}
+          </strong>
+
+          <span>
+            ${escapeHTML(current.description)}
+          </span>
         </div>
+
         <span class="api-status mock">
-          Indisponível
+          ${escapeHTML(current.status)}
         </span>
       </div>
     `;
@@ -447,7 +574,6 @@ function renderApiSources(items) {
     return;
 
   }
-
 
   list.innerHTML =
     items
@@ -459,34 +585,35 @@ function renderApiSources(items) {
               source.status
             );
 
-
           const details = [];
 
-
           if (source.description) {
+
             details.push(
               escapeHTML(
                 source.description
               )
             );
+
           }
 
-
           if (source.charset) {
+
             details.push(
               `charset: ${escapeHTML(source.charset)}`
             );
+
           }
 
-
           if (source.endpoint) {
+
             details.push(
               escapeHTML(
                 source.endpoint
               )
             );
-          }
 
+          }
 
           return `
             <div class="api-row">
@@ -504,7 +631,7 @@ function renderApiSources(items) {
               </div>
 
               <span class="api-status ${presentation.cls}">
-                ${presentation.label}
+                ${escapeHTML(presentation.label)}
               </span>
 
             </div>
@@ -526,7 +653,6 @@ async function loadRadarSources() {
         RADAR_API.endpoints.sources
       );
 
-
     if (
       !data ||
       data.status !== "ok" ||
@@ -538,7 +664,6 @@ async function loadRadarSources() {
       );
 
     }
-
 
     liveSources =
       data.sources.map(
@@ -570,7 +695,6 @@ async function loadRadarSources() {
 
         })
       );
-
 
     if (
       data.infrastructure &&
@@ -609,23 +733,18 @@ async function loadRadarSources() {
 
     }
 
-
     renderApiSources(
       liveSources
     );
 
-
     renderSourceFilter();
 
-
     renderMetrics();
-
 
     console.info(
       "[Radar API] Fontes carregadas:",
       liveSources
     );
-
 
     return liveSources;
 
@@ -634,15 +753,12 @@ async function loadRadarSources() {
     liveSources =
       null;
 
-
     console.warn(
       "[Radar API] Não foi possível carregar /api/sources:",
       error.message
     );
 
-
     renderApiSources([]);
-
 
     return null;
 
@@ -664,7 +780,6 @@ async function loadRadarNews() {
         RADAR_API.endpoints.news
       );
 
-
     if (
       !data ||
       data.status !== "ok" ||
@@ -676,7 +791,6 @@ async function loadRadarNews() {
       );
 
     }
-
 
     liveNewsMeta = {
 
@@ -712,7 +826,6 @@ async function loadRadarNews() {
         data.metrics || null
 
     };
-
 
     liveNews =
       data.articles
@@ -804,7 +917,6 @@ async function loadRadarNews() {
             const db =
               validDate(b.publishedAt);
 
-
             return (
               (db?.getTime() || 0) -
               (da?.getTime() || 0)
@@ -813,10 +925,8 @@ async function loadRadarNews() {
           }
         );
 
-
     filteredNews =
       [...liveNews];
-
 
     console.info(
       "[Radar API] Notícias carregadas:",
@@ -832,9 +942,7 @@ async function loadRadarNews() {
       }
     );
 
-
     renderRealData();
-
 
     return liveNews;
 
@@ -849,15 +957,12 @@ async function loadRadarNews() {
     filteredNews =
       [];
 
-
     console.warn(
       "[Radar API] Não foi possível carregar /api/news:",
       error.message
     );
 
-
     renderNewsUnavailable();
-
 
     return null;
 
@@ -877,13 +982,11 @@ function calculateMetrics(
   const total =
     articles.length;
 
-
   const flavio =
     articles.filter(
       article =>
         article.mentions?.flavio
     ).length;
-
 
   const lula =
     articles.filter(
@@ -891,14 +994,12 @@ function calculateMetrics(
         article.mentions?.lula
     ).length;
 
-
   const both =
     articles.filter(
       article =>
         article.mentions?.flavio &&
         article.mentions?.lula
     ).length;
-
 
   const publishers =
     new Set(
@@ -910,14 +1011,12 @@ function calculateMetrics(
         .filter(Boolean)
     );
 
-
   const candidateMentions =
     articles.filter(
       article =>
         article.mentions?.flavio ||
         article.mentions?.lula
     ).length;
-
 
   return {
 
@@ -962,14 +1061,12 @@ function publisherRanking(
   const map =
     new Map();
 
-
   articles.forEach(
     article => {
 
       const publisher =
         article.publisher ||
         "Fonte não identificada";
-
 
       map.set(
         publisher,
@@ -978,7 +1075,6 @@ function publisherRanking(
 
     }
   );
-
 
   return [...map.entries()]
     .map(
@@ -990,12 +1086,13 @@ function publisherRanking(
     .sort(
       (a, b) =>
         b.count - a.count ||
-        a.name.localeCompare(b.name)
+        a.name.localeCompare(
+          b.name,
+          getLocale()
+        )
     );
 
 }
-
-
 // ============================================================
 // PALAVRAS MAIS FREQUENTES
 // ============================================================
@@ -1403,6 +1500,32 @@ function calculatePeak(
 
 }
 
+
+// ============================================================
+// PERÍODO E CONJUNTO DE DADOS ATIVO
+// ============================================================
+
+function getSelectedPeriodHours() {
+
+  return getEl("period")?.value === "24h"
+    ? 24
+    : 48;
+
+}
+
+
+function getActiveNews() {
+
+  if (!Array.isArray(liveNews)) {
+    return [];
+  }
+
+
+  return hasActiveFilters()
+    ? filteredNews
+    : liveNews;
+
+}
 // ============================================================
 // RENDERIZAÇÃO DOS INDICADORES
 // ============================================================
@@ -1414,33 +1537,41 @@ function renderMetrics() {
   }
 
 
+  const articles =
+    getActiveNews();
+
+
   const metrics =
     calculateMetrics(
-      filteredNews.length
-        ? filteredNews
-        : liveNews
+      articles
     );
 
 
   const peak =
     calculatePeak(
-      filteredNews.length
-        ? filteredNews
-        : liveNews
+      articles
     );
 
 
   const metricMentions =
-    getEl("metricMentions");
+    getEl(
+      "metricMentions"
+    );
 
   const metricTopics =
-    getEl("metricTopics");
+    getEl(
+      "metricTopics"
+    );
 
   const metricSources =
-    getEl("metricSources");
+    getEl(
+      "metricSources"
+    );
 
   const metricPeak =
-    getEl("metricPeak");
+    getEl(
+      "metricPeak"
+    );
 
 
   if (metricMentions) {
@@ -1476,9 +1607,212 @@ function renderMetrics() {
   if (metricPeak) {
 
     metricPeak.textContent =
-      formatNumber(
-        peak.count
-      );
+      peak.count
+        ? formatNumber(
+            peak.count
+          )
+        : "0";
+
+  }
+
+
+  const mentionsTrend =
+    document.querySelector(
+      "#metricMentions + .trend"
+    );
+
+
+  if (mentionsTrend) {
+
+    const hours =
+      getSelectedPeriodHours();
+
+
+    const labels = {
+
+      pt:
+        `artigos nas últimas ${hours} horas`,
+
+      en:
+        `articles in the last ${hours} hours`,
+
+      es:
+        `artículos en las últimas ${hours} horas`
+
+    };
+
+
+    mentionsTrend.textContent =
+      labels[lang] ||
+      labels.pt;
+
+  }
+
+
+  const topicsTrend =
+    document.querySelector(
+      "#metricTopics + .trend"
+    );
+
+
+  if (topicsTrend) {
+
+    const labels = {
+
+      pt:
+        "com referência aos candidatos monitorados",
+
+      en:
+        "referencing monitored candidates",
+
+      es:
+        "con referencia a los candidatos monitoreados"
+
+    };
+
+
+    topicsTrend.textContent =
+      labels[lang] ||
+      labels.pt;
+
+  }
+
+
+  const sourcesTrend =
+    document.querySelector(
+      "#metricSources + .trend"
+    );
+
+
+  if (sourcesTrend) {
+
+    const labels = {
+
+      pt:
+        "veículos com publicações encontradas",
+
+      en:
+        "publishers with publications found",
+
+      es:
+        "medios con publicaciones encontradas"
+
+    };
+
+
+    sourcesTrend.textContent =
+      labels[lang] ||
+      labels.pt;
+
+  }
+
+
+  const peakTrend =
+    document.querySelector(
+      "#metricPeak + .trend"
+    );
+
+
+  if (peakTrend) {
+
+    const labels = {
+
+      pt:
+        peak.start
+          ? `publicações entre ${new Date(
+              peak.start
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )} e ${new Date(
+              peak.start +
+              60 *
+              60 *
+              1000
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )}`
+          : "sem publicações no período",
+
+      en:
+        peak.start
+          ? `publications between ${new Date(
+              peak.start
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )} and ${new Date(
+              peak.start +
+              60 *
+              60 *
+              1000
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )}`
+          : "no publications in this period",
+
+      es:
+        peak.start
+          ? `publicaciones entre ${new Date(
+              peak.start
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )} y ${new Date(
+              peak.start +
+              60 *
+              60 *
+              1000
+            ).toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            )}`
+          : "sin publicaciones en el período"
+
+    };
+
+
+    peakTrend.textContent =
+      labels[lang] ||
+      labels.pt;
 
   }
 
@@ -1486,10 +1820,635 @@ function renderMetrics() {
 
 
 // ============================================================
-// CARDS DE NOTÍCIA
+// FILTRO DE VEÍCULOS
 // ============================================================
 
-function newsHTML(article) {
+function renderSourceFilter() {
+
+  const select =
+    getEl("source");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const selected =
+    select.value ||
+    "all";
+
+
+  const articles =
+    Array.isArray(liveNews)
+      ? liveNews
+      : [];
+
+
+  const publishers =
+    [...new Set(
+      articles
+        .map(
+          article =>
+            article.publisher
+        )
+        .filter(Boolean)
+    )]
+      .sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            getLocale()
+          )
+      );
+
+
+  const allLabels = {
+
+    pt:
+      "Todos os veículos",
+
+    en:
+      "All publishers",
+
+    es:
+      "Todos los medios"
+
+  };
+
+
+  select.innerHTML = `
+
+    <option value="all">
+
+      ${
+        allLabels[lang] ||
+        allLabels.pt
+      }
+
+    </option>
+
+    ${publishers
+      .map(
+        publisher => `
+
+          <option
+            value="${escapeHTML(
+              normalizeText(
+                publisher
+              )
+            )}"
+          >
+
+            ${escapeHTML(
+              publisher
+            )}
+
+          </option>
+
+        `
+      )
+      .join("")}
+
+  `;
+
+
+  const optionExists =
+    [...select.options]
+      .some(
+        option =>
+          option.value ===
+          selected
+      );
+
+
+  select.value =
+    optionExists
+      ? selected
+      : "all";
+
+}
+
+
+// ============================================================
+// RANKING DE VEÍCULOS
+// ============================================================
+
+function renderPublisherRanking() {
+
+  const container =
+    getEl(
+      "sourceRanking"
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  const articles =
+    getActiveNews();
+
+
+  const ranking =
+    publisherRanking(
+      articles
+    );
+
+
+  if (!ranking.length) {
+
+    const messages = {
+
+      pt:
+        "Nenhum veículo encontrado para os filtros atuais.",
+
+      en:
+        "No publishers found for the current filters.",
+
+      es:
+        "No se encontraron medios para los filtros actuales."
+
+    };
+
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+
+        ${
+          escapeHTML(
+            messages[lang] ||
+            messages.pt
+          )
+        }
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const max =
+    Math.max(
+      ...ranking.map(
+        item =>
+          item.count
+      ),
+      1
+    );
+
+
+  const hours =
+    getSelectedPeriodHours();
+
+
+  const publicationText =
+    count => {
+
+      const labels = {
+
+        pt:
+          count === 1
+            ? `${formatNumber(
+                count
+              )} publicação nas últimas ${hours}h`
+            : `${formatNumber(
+                count
+              )} publicações nas últimas ${hours}h`,
+
+        en:
+          count === 1
+            ? `${formatNumber(
+                count
+              )} publication in the last ${hours}h`
+            : `${formatNumber(
+                count
+              )} publications in the last ${hours}h`,
+
+        es:
+          count === 1
+            ? `${formatNumber(
+                count
+              )} publicación en las últimas ${hours}h`
+            : `${formatNumber(
+                count
+              )} publicaciones en las últimas ${hours}h`
+
+      };
+
+
+      return (
+        labels[lang] ||
+        labels.pt
+      );
+
+    };
+
+
+  container.innerHTML =
+    ranking
+      .slice(
+        0,
+        10
+      )
+      .map(
+        (
+          item,
+          index
+        ) => {
+
+          const width =
+            Math.max(
+              4,
+              item.count /
+              max *
+              100
+            );
+
+
+          return `
+
+            <div class="source-rank">
+
+              <div class="rank-position">
+
+                ${index + 1}
+
+              </div>
+
+              <div class="rank-main">
+
+                <div class="rank-head">
+
+                  <strong>
+
+                    ${escapeHTML(
+                      item.name
+                    )}
+
+                  </strong>
+
+                  <span>
+
+                    ${formatNumber(
+                      item.count
+                    )}
+
+                  </span>
+
+                </div>
+
+                <div class="rank-bar">
+
+                  <span
+                    style="width:${width}%"
+                  ></span>
+
+                </div>
+
+                <small>
+
+                  ${escapeHTML(
+                    publicationText(
+                      item.count
+                    )
+                  )}
+
+                </small>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+// ============================================================
+// CARDS DE COBERTURA
+// ============================================================
+
+function renderCoverageCards() {
+
+  const grid =
+    getEl(
+      "themeGrid"
+    );
+
+
+  if (!grid) {
+    return;
+  }
+
+
+  const articles =
+    getActiveNews();
+
+
+  const metrics =
+    calculateMetrics(
+      articles
+    );
+
+
+  const texts =
+    getTexts();
+
+
+  const periodHours =
+    getSelectedPeriodHours();
+
+
+  const periodLabels = {
+
+    pt:
+      `${periodHours} horas`,
+
+    en:
+      `${periodHours} hours`,
+
+    es:
+      `${periodHours} horas`
+
+  };
+
+
+  const periodLabel =
+    periodLabels[lang] ||
+    periodLabels.pt;
+
+
+  const descriptions = {
+
+    pt: {
+
+      flavio:
+        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Flávio Bolsonaro.`,
+
+      lula:
+        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Lula.`,
+
+      both:
+        `Artigos das últimas ${periodHours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.`,
+
+      total:
+        `Total de artigos retornados pelas fontes monitoradas nas últimas ${periodHours}h.`,
+
+      bothName:
+        "Ambos",
+
+      totalName:
+        "Total monitorado"
+
+    },
+
+    en: {
+
+      flavio:
+        `Articles from the last ${periodHours}h in which the monitor identified a reference to Flávio Bolsonaro.`,
+
+      lula:
+        `Articles from the last ${periodHours}h in which the monitor identified a reference to Lula.`,
+
+      both:
+        `Articles from the last ${periodHours}h in which references to Flávio Bolsonaro and Lula were identified in the same publication.`,
+
+      total:
+        `Total articles returned by the monitored sources in the last ${periodHours}h.`,
+
+      bothName:
+        "Both",
+
+      totalName:
+        "Total monitored"
+
+    },
+
+    es: {
+
+      flavio:
+        `Artículos de las últimas ${periodHours}h en los que el monitor identificó una referencia a Flávio Bolsonaro.`,
+
+      lula:
+        `Artículos de las últimas ${periodHours}h en los que el monitor identificó una referencia a Lula.`,
+
+      both:
+        `Artículos de las últimas ${periodHours}h en los que se identificaron referencias a Flávio Bolsonaro y Lula en la misma publicación.`,
+
+      total:
+        `Total de artículos devueltos por las fuentes monitoreadas en las últimas ${periodHours}h.`,
+
+      bothName:
+        "Ambos",
+
+      totalName:
+        "Total monitoreado"
+
+    }
+
+  };
+
+
+  const current =
+    descriptions[lang] ||
+    descriptions.pt;
+
+
+  const cards = [
+
+    {
+
+      name:
+        "Flávio Bolsonaro",
+
+      value:
+        metrics.flavio,
+
+      description:
+        texts.coverage_card_flavio
+          ? interpolateText(
+              texts.coverage_card_flavio,
+              {
+                hours:
+                  periodHours
+              }
+            )
+          : current.flavio
+
+    },
+
+    {
+
+      name:
+        "Lula",
+
+      value:
+        metrics.lula,
+
+      description:
+        texts.coverage_card_lula
+          ? interpolateText(
+              texts.coverage_card_lula,
+              {
+                hours:
+                  periodHours
+              }
+            )
+          : current.lula
+
+    },
+
+    {
+
+      name:
+        texts.both_candidates ||
+        current.bothName,
+
+      value:
+        metrics.both,
+
+      description:
+        texts.coverage_card_both
+          ? interpolateText(
+              texts.coverage_card_both,
+              {
+                hours:
+                  periodHours
+              }
+            )
+          : current.both
+
+    },
+
+    {
+
+      name:
+        texts.total_monitored ||
+        current.totalName,
+
+      value:
+        metrics.total,
+
+      description:
+        texts.coverage_card_total
+          ? interpolateText(
+              texts.coverage_card_total,
+              {
+                hours:
+                  periodHours
+              }
+            )
+          : current.total
+
+    }
+
+  ];
+
+
+  grid.innerHTML =
+    cards
+      .map(
+        item => `
+
+          <button
+            class="theme-card"
+            type="button"
+          >
+
+            <div class="theme-top">
+
+              <div>
+
+                <h4>
+
+                  ${escapeHTML(
+                    item.name
+                  )}
+
+                </h4>
+
+                <p>
+
+                  ${escapeHTML(
+                    item.description
+                  )}
+
+                </p>
+
+              </div>
+
+              <span
+                class="attention stable"
+              >
+
+                ${escapeHTML(
+                  periodLabel
+                )}
+
+              </span>
+
+            </div>
+
+            <strong>
+
+              ${formatNumber(
+                item.value
+              )}
+
+            </strong>
+
+          </button>
+
+        `
+      )
+      .join("");
+
+}
+
+
+// ============================================================
+// ITEM DE NOTÍCIA
+// ============================================================
+
+function createNewsItem(
+  article
+) {
+
+  const label =
+    candidateLabel(
+      article
+    );
+
+
+  const cls =
+    candidateClass(
+      article
+    );
+
+
+  const time =
+    relativeTime(
+      article.publishedAt
+    );
+
+
+  const safeUrl =
+    /^https?:\/\//i.test(
+      article.url || ""
+    )
+      ? article.url
+      : "";
+
 
   const title =
     escapeHTML(
@@ -1500,124 +2459,154 @@ function newsHTML(article) {
   const publisher =
     escapeHTML(
       article.publisher ||
+      article.domain ||
       "Fonte"
-    );
-
-
-  const url =
-    escapeHTML(
-      article.url || ""
-    );
-
-
-  const time =
-    relativeTime(
-      article.publishedAt
-    );
-
-
-  const date =
-    formatDateTime(
-      article.publishedAt
-    );
-
-
-  const label =
-    candidateLabel(
-      article
-    );
-
-
-  const candidate =
-    candidateClass(
-      article
-    );
-
-
-  const searchable =
-    normalizeText(
-      [
-        article.title,
-        article.subtitle,
-        article.publisher,
-        article.domain,
-        article.category,
-        label
-      ].join(" ")
     );
 
 
   const subtitle =
     article.subtitle
-      ? `
-        <p>
-          ${escapeHTML(article.subtitle)}
-        </p>
-      `
+      ? escapeHTML(
+          article.subtitle
+        )
       : "";
 
 
-  const titleMarkup =
-    article.url
-      ? `
-        <a
-          href="${url}"
-          target="_blank"
-          rel="noopener noreferrer"
-          style="color:inherit;text-decoration:none"
-        >
-          ${title}
-        </a>
-      `
-      : title;
+  const externalLabels = {
+
+    pt:
+      "Abrir publicação original",
+
+    en:
+      "Open original publication",
+
+    es:
+      "Abrir publicación original"
+
+  };
+
+
+  const externalLabel =
+    externalLabels[lang] ||
+    externalLabels.pt;
 
 
   return `
+
     <article
       class="news-item"
-      data-title="${escapeHTML(searchable)}"
-      data-candidate="${candidate}"
-      data-source="${escapeHTML(normalizeText(article.publisher))}"
+      data-title="${escapeHTML(
+        article.title
+      )}"
     >
 
       <div class="source">
 
         <span>
+
           ${publisher}
-          •
-          ${escapeHTML(time || date)}
+
         </span>
 
-        <span class="tag">
-          ${escapeHTML(label)}
+        <span
+          class="tag ${cls}"
+        >
+
+          ${escapeHTML(
+            label
+          )}
+
         </span>
 
       </div>
 
       <h4>
-        ${titleMarkup}
+
+        ${
+          safeUrl
+            ? `
+              <a
+                href="${escapeHTML(
+                  safeUrl
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="${escapeHTML(
+                  externalLabel
+                )}: ${title}"
+              >
+
+                ${title}
+
+              </a>
+            `
+            : title
+        }
+
       </h4>
 
-      ${subtitle}
+      ${
+        subtitle
+          ? `
+
+            <p>
+
+              ${subtitle}
+
+            </p>
+
+          `
+          : ""
+      }
+
+      <div class="news-meta">
+
+        ${
+          time
+            ? `
+
+              <span>
+
+                ${escapeHTML(
+                  time
+                )}
+
+              </span>
+
+            `
+            : ""
+        }
+
+        ${
+          article.category
+            ? `
+
+              <span>
+
+                ${escapeHTML(
+                  article.category
+                )}
+
+              </span>
+
+            `
+            : ""
+        }
+
+      </div>
 
     </article>
+
   `;
 
 }
 
 
 // ============================================================
-// ÚLTIMAS NOTÍCIAS
+// FEED DE NOTÍCIAS
 // ============================================================
 
 function renderNewsFeed() {
-
-  const newsFeed =
-    getEl("newsFeed");
-
-  const mentionsList =
-    getEl("mentionsList");
-
 
   if (!liveNews) {
     return;
@@ -1625,15 +2614,13 @@ function renderNewsFeed() {
 
 
   const items =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
+    getActiveNews();
 
 
   const coverageFilter =
-    getEl("coverageFilter")
-      ?.value ||
+    getEl(
+      "coverageFilter"
+    )?.value ||
     "flavio";
 
 
@@ -1647,8 +2634,7 @@ function renderNewsFeed() {
         ) {
 
           return Boolean(
-            article.mentions
-              ?.lula
+            article.mentions?.lula
           );
 
         }
@@ -1660,129 +2646,452 @@ function renderNewsFeed() {
         ) {
 
           return Boolean(
-            article.mentions
-              ?.flavio ||
-            article.mentions
-              ?.lula
+            article.mentions?.flavio ||
+            article.mentions?.lula
           );
 
         }
 
 
         return Boolean(
-          article.mentions
-            ?.flavio
+          article.mentions?.flavio
         );
 
       }
     );
 
 
-  if (newsFeed) {
+  const newsFeed =
+    getEl(
+      "newsFeed"
+    );
 
-    if (
-      !coverageItems.length
-    ) {
 
-      newsFeed.innerHTML = `
-        <article class="news-item">
-          <h4>
-            Nenhuma publicação encontrada
-          </h4>
-          <p>
-            Não há resultados para os filtros selecionados.
-          </p>
-        </article>
-      `;
+  const mentionsList =
+    getEl(
+      "mentionsList"
+    );
 
-    } else {
 
-      newsFeed.innerHTML =
-        coverageItems
-          .slice(0, 6)
-          .map(newsHTML)
-          .join("");
+  const emptyLabels = {
+
+    pt: {
+
+      title:
+        "Nenhuma publicação encontrada",
+
+      description:
+        "Não há resultados para os filtros selecionados. Ajuste os filtros para ampliar a consulta."
+
+    },
+
+    en: {
+
+      title:
+        "No publications found",
+
+      description:
+        "There are no results for the selected filters. Adjust the filters to broaden the search."
+
+    },
+
+    es: {
+
+      title:
+        "No se encontraron publicaciones",
+
+      description:
+        "No hay resultados para los filtros seleccionados. Ajuste los filtros para ampliar la búsqueda."
 
     }
+
+  };
+
+
+  const empty =
+    emptyLabels[lang] ||
+    emptyLabels.pt;
+
+
+  const emptyState = `
+
+    <article class="news-item">
+
+      <div class="source">
+
+        <span>
+          Radar 2026
+        </span>
+
+      </div>
+
+      <h4>
+
+        ${escapeHTML(
+          empty.title
+        )}
+
+      </h4>
+
+      <p>
+
+        ${escapeHTML(
+          empty.description
+        )}
+
+      </p>
+
+    </article>
+
+  `;
+
+
+  if (newsFeed) {
+
+    newsFeed.innerHTML =
+      coverageItems.length
+        ? coverageItems
+            .slice(
+              0,
+              6
+            )
+            .map(
+              createNewsItem
+            )
+            .join("")
+        : emptyState;
 
   }
 
 
   if (mentionsList) {
 
-    if (!items.length) {
-
-      mentionsList.innerHTML = `
-        <article class="news-item">
-          <h4>
-            Nenhuma publicação encontrada
-          </h4>
-          <p>
-            Ajuste os filtros para ampliar a consulta.
-          </p>
-        </article>
-      `;
-
-    } else {
-
-      mentionsList.innerHTML =
-        items
-          .map(newsHTML)
-          .join("");
-
-    }
+    mentionsList.innerHTML =
+      items.length
+        ? items
+            .map(
+              createNewsItem
+            )
+            .join("")
+        : emptyState;
 
   }
 
 }
 // ============================================================
-// RANKING DESCRITIVO DE VEÍCULOS
+// PALAVRAS-CHAVE
 // ============================================================
 
-function renderPublisherRanking() {
+function renderKeywords() {
 
-  const container =
-    getEl("hotTopics");
+  const list =
+    getEl("keywordList");
+
+  const cloud =
+    getEl("wordCloud");
 
 
   if (
-    !container ||
-    !liveNews
+    !list &&
+    !cloud
   ) {
     return;
   }
 
 
   const articles =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
+    getActiveNews();
 
 
-  const ranking =
-    publisherRanking(
-      articles
-    )
+  const keywords =
+    extractKeywords(
+      articles,
+      14
+    );
+
+
+  const emptyLabels = {
+
+    pt:
+      "Sem termos suficientes no período selecionado.",
+
+    en:
+      "Not enough terms in the selected period.",
+
+    es:
+      "No hay suficientes términos en el período seleccionado."
+
+  };
+
+
+  const emptyLabel =
+    emptyLabels[lang] ||
+    emptyLabels.pt;
+
+
+  if (!keywords.length) {
+
+    if (list) {
+
+      list.innerHTML = `
+
+        <div class="empty-state">
+
+          ${escapeHTML(
+            emptyLabel
+          )}
+
+        </div>
+
+      `;
+
+    }
+
+
+    if (cloud) {
+
+      cloud.innerHTML = `
+
+        <span class="muted">
+
+          ${escapeHTML(
+            emptyLabel
+          )}
+
+        </span>
+
+      `;
+
+    }
+
+
+    return;
+
+  }
+
+
+  const max =
+    Math.max(
+      ...keywords.map(
+        item =>
+          item.count
+      ),
+      1
+    );
+
+
+  if (list) {
+
+    list.innerHTML =
+      keywords
+        .slice(
+          0,
+          8
+        )
+        .map(
+          (
+            item,
+            index
+          ) => {
+
+            const percentage =
+              Math.round(
+                item.count /
+                max *
+                100
+              );
+
+
+            return `
+
+              <div class="keyword-row">
+
+                <span
+                  class="keyword-position"
+                >
+
+                  ${index + 1}
+
+                </span>
+
+                <div
+                  class="keyword-main"
+                >
+
+                  <div
+                    class="keyword-head"
+                  >
+
+                    <strong>
+
+                      ${escapeHTML(
+                        item.word
+                      )}
+
+                    </strong>
+
+                    <span>
+
+                      ${formatNumber(
+                        item.count
+                      )}
+
+                    </span>
+
+                  </div>
+
+                  <div
+                    class="keyword-bar"
+                  >
+
+                    <span
+                      style="width:${percentage}%"
+                    ></span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+  }
+
+
+  if (cloud) {
+
+    const minSize =
+      0.8;
+
+    const maxSize =
+      1.7;
+
+
+    cloud.innerHTML =
+      keywords
+        .map(
+          item => {
+
+            const ratio =
+              max
+                ? item.count /
+                  max
+                : 0;
+
+
+            const size =
+              minSize +
+              (
+                maxSize -
+                minSize
+              ) *
+              ratio;
+
+
+            return `
+
+              <span
+                class="cloud-word"
+                style="font-size:${size.toFixed(
+                  2
+                )}rem"
+                title="${formatNumber(
+                  item.count
+                )}"
+              >
+
+                ${escapeHTML(
+                  item.word
+                )}
+
+              </span>
+
+            `;
+
+          }
+        )
+        .join("");
+
+  }
+
+}
+
+
+// ============================================================
+// HORAS COM MAIOR VOLUME
+// ============================================================
+
+function renderSpikes() {
+
+  const container =
+    getEl("spikeList");
+
+
+  if (!container) {
+    return;
+  }
+
+
+  const articles =
+    getActiveNews();
+
+
+  const timeline =
+    buildTimeline(
+      articles,
+      1
+    );
+
+
+  const spikes =
+    [...timeline]
+      .filter(
+        item =>
+          item.total > 0
+      )
+      .sort(
+        (a, b) =>
+          b.total -
+          a.total
+      )
       .slice(
         0,
         5
       );
 
 
-  if (!ranking.length) {
+  if (!spikes.length) {
+
+    const messages = {
+
+      pt:
+        "Nenhum pico de publicação identificado no período selecionado.",
+
+      en:
+        "No publication peak was identified in the selected period.",
+
+      es:
+        "No se identificó ningún pico de publicaciones en el período seleccionado."
+
+    };
+
 
     container.innerHTML = `
-      <div class="rank-row">
-        <div>
-          <div class="rank-name">
-            Sem dados
-          </div>
-          <div class="rank-meta">
-            Nenhum veículo encontrado para os filtros atuais.
-          </div>
-        </div>
+
+      <div class="empty-state">
+
+        ${escapeHTML(
+          messages[lang] ||
+          messages.pt
+        )}
+
       </div>
+
     `;
 
     return;
@@ -1790,49 +3099,157 @@ function renderPublisherRanking() {
   }
 
 
-  container.innerHTML =
-    ranking
-      .map(
-        (item, index) => {
+  const max =
+    Math.max(
+      ...spikes.map(
+        item =>
+          item.total
+      ),
+      1
+    );
 
-          const share =
-            articles.length
-              ? item.count /
-                articles.length *
-                100
-              : 0;
+
+  const publicationLabel =
+    count => {
+
+      const labels = {
+
+        pt:
+          count === 1
+            ? "publicação"
+            : "publicações",
+
+        en:
+          count === 1
+            ? "publication"
+            : "publications",
+
+        es:
+          count === 1
+            ? "publicación"
+            : "publicaciones"
+
+      };
+
+
+      return (
+        labels[lang] ||
+        labels.pt
+      );
+
+    };
+
+
+  container.innerHTML =
+    spikes
+      .map(
+        item => {
+
+          const date =
+            new Date(
+              item.start
+            );
+
+
+          const end =
+            new Date(
+              item.start +
+              60 *
+              60 *
+              1000
+            );
+
+
+          const startTime =
+            date.toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            );
+
+
+          const endTime =
+            end.toLocaleTimeString(
+              getLocale(),
+              {
+                hour:
+                  "2-digit",
+
+                minute:
+                  "2-digit"
+              }
+            );
+
+
+          const width =
+            Math.max(
+              5,
+              item.total /
+              max *
+              100
+            );
 
 
           return `
-            <div class="rank-row">
 
-              <span class="rank-no">
-                ${index + 1}
-              </span>
+            <div class="spike-row">
 
-              <div>
+              <div class="spike-time">
 
-                <div class="rank-name">
-                  ${escapeHTML(item.name)}
+                <strong>
+
+                  ${escapeHTML(
+                    startTime
+                  )}
+
+                </strong>
+
+                <span>
+
+                  ${escapeHTML(
+                    endTime
+                  )}
+
+                </span>
+
+              </div>
+
+              <div class="spike-main">
+
+                <div class="spike-head">
+
+                  <span>
+
+                    ${formatNumber(
+                      item.total
+                    )}
+                    ${escapeHTML(
+                      publicationLabel(
+                        item.total
+                      )
+                    )}
+
+                  </span>
+
                 </div>
 
-                <div class="rank-meta">
-                  ${formatNumber(item.count)}
-                  ${
-                    item.count === 1
-                      ? "publicação"
-                      : "publicações"
-                  }
-                  no corpus
+                <div class="spike-bar">
+
+                  <span
+                    style="width:${width}%"
+                  ></span>
+
                 </div>
 
               </div>
 
-              <span class="rank-score">
-                ${share.toFixed(1)}%
-              </span>
-
             </div>
+
           `;
 
         }
@@ -1843,159 +3260,88 @@ function renderPublisherRanking() {
 
 
 // ============================================================
-// PALAVRAS FREQUENTES
+// PANORAMA
 // ============================================================
 
-function renderKeywords() {
+function renderRadar() {
 
-  const keywordBars =
-    getEl("keywordBars");
-
-  const wordCloud =
-    getEl("wordCloud");
-
-
-  if (
-    !liveNews ||
-    (
-      !keywordBars &&
-      !wordCloud
-    )
-  ) {
-    return;
-  }
-
-
-  const articles =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
-
-
-  const keywords =
-    extractKeywords(
-      articles,
-      12
+  const container =
+    getEl(
+      "radarVisual"
     );
 
 
-  const max =
-    keywords[0]?.count ||
-    1;
-
-
-  if (keywordBars) {
-
-    keywordBars.innerHTML =
-      keywords.length
-        ? keywords
-          .map(
-            item => {
-
-              const width =
-                item.count /
-                max *
-                100;
-
-
-              return `
-                <div class="keyword-row">
-
-                  <strong>
-                    ${escapeHTML(item.word)}
-                  </strong>
-
-                  <div class="keyword-track">
-                    <i style="width:${width}%"></i>
-                  </div>
-
-                  <span>
-                    ${formatNumber(item.count)}
-                  </span>
-
-                </div>
-              `;
-
-            }
-          )
-          .join("")
-        : `
-          <p>
-            Não há termos suficientes para esta seleção.
-          </p>
-        `;
-
-  }
-
-
-  if (wordCloud) {
-
-    wordCloud.innerHTML =
-      keywords.length
-        ? keywords
-          .map(
-            item => {
-
-              const weight =
-                item.count /
-                max;
-
-
-              const size =
-                0.8 +
-                weight *
-                0.9;
-
-
-              return `
-                <button
-                  class="word"
-                  data-theme="${escapeHTML(item.word)}"
-                  style="font-size:${size}rem"
-                  type="button"
-                >
-                  ${escapeHTML(item.word)}
-                </button>
-              `;
-
-            }
-          )
-          .join("")
-        : `
-          <span>
-            Sem dados suficientes.
-          </span>
-        `;
-
-  }
-
-}
-
-
-// ============================================================
-// CARDS DE DISTRIBUIÇÃO DA COBERTURA
-// ============================================================
-
-function renderCoverageCards() {
-
-  const container =
-    getEl("themeCards");
-
-
-  if (
-    !container ||
-    !liveNews
-  ) {
+  if (!container) {
     return;
   }
 
 
+  if (!liveNews) {
+
+    const waiting = {
+
+      pt: {
+        title:
+          "Aguardando dados",
+        description:
+          "O panorama será atualizado quando os dados do monitoramento estiverem disponíveis."
+      },
+
+      en: {
+        title:
+          "Waiting for data",
+        description:
+          "The overview will be updated when monitoring data becomes available."
+      },
+
+      es: {
+        title:
+          "Esperando datos",
+        description:
+          "El panorama se actualizará cuando los datos del monitoreo estén disponibles."
+      }
+
+    };
+
+
+    const current =
+      waiting[lang] ||
+      waiting.pt;
+
+
+    container.innerHTML = `
+
+      <div
+        class="radar-empty"
+      >
+
+        <strong>
+
+          ${escapeHTML(
+            current.title
+          )}
+
+        </strong>
+
+        <span>
+
+          ${escapeHTML(
+            current.description
+          )}
+
+        </span>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
   const articles =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
+    getActiveNews();
 
 
   const metrics =
@@ -2004,437 +3350,382 @@ function renderCoverageCards() {
     );
 
 
-  const selectedPeriod =
-    getEl("period")
-      ?.value ||
-    "48h";
+  const total =
+    Math.max(
+      metrics.total,
+      1
+    );
 
 
-  const periodHours =
-    selectedPeriod === "24h"
-      ? 24
-      : 48;
+  const flavio =
+    metrics.flavio;
 
 
-  const periodLabel =
-    `${periodHours} horas`;
+  const lula =
+    metrics.lula;
 
 
-  const cards = [
+  const both =
+    metrics.both;
 
-    {
-      name:
-        "Flávio Bolsonaro",
 
-      count:
-        metrics.flavio,
+  const other =
+    Math.max(
+      0,
+      metrics.total -
+      (
+        flavio +
+        lula -
+        both
+      )
+    );
 
-      share:
-        metrics.flavioShare,
 
-      description:
-        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Flávio Bolsonaro.`
+  const flavioPercent =
+    metrics.total
+      ? flavio /
+        metrics.total *
+        100
+      : 0;
+
+
+  const lulaPercent =
+    metrics.total
+      ? lula /
+        metrics.total *
+        100
+      : 0;
+
+
+  const bothPercent =
+    metrics.total
+      ? both /
+        metrics.total *
+        100
+      : 0;
+
+
+  const otherPercent =
+    metrics.total
+      ? other /
+        metrics.total *
+        100
+      : 0;
+
+
+  const labels = {
+
+    pt: {
+      articles:
+        "artigos",
+      both:
+        "Ambos na mesma publicação",
+      other:
+        "Outras publicações",
+      note:
+        "Percentuais descritivos calculados a partir das publicações encontradas no período selecionado."
     },
 
-    {
-      name:
-        "Lula",
-
-      count:
-        metrics.lula,
-
-      share:
-        metrics.lulaShare,
-
-      description:
-        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Lula.`
+    en: {
+      articles:
+        "articles",
+      both:
+        "Both in the same publication",
+      other:
+        "Other publications",
+      note:
+        "Descriptive percentages calculated from publications found in the selected period."
     },
 
-    {
-      name:
-        "Ambos",
-
-      count:
-        metrics.both,
-
-      share:
-        metrics.bothShare,
-
-      description:
-        `Artigos das últimas ${periodHours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.`
-    },
-
-    {
-      name:
-        "Total monitorado",
-
-      count:
-        metrics.total,
-
-      share:
-        metrics.total
-          ? 100
-          : 0,
-
-      description:
-        `Total de artigos retornados pelas fontes monitoradas nas últimas ${periodHours}h.`
+    es: {
+      articles:
+        "artículos",
+      both:
+        "Ambos en la misma publicación",
+      other:
+        "Otras publicaciones",
+      note:
+        "Porcentajes descriptivos calculados a partir de las publicaciones encontradas en el período seleccionado."
     }
 
-  ];
+  };
 
 
-  container.innerHTML =
-    cards
-      .map(
-        card => `
-          <button
-            class="theme-card"
-            data-theme="${escapeHTML(card.name)}"
-            type="button"
-          >
-
-            <div class="theme-top">
-
-              <div>
-
-                <h4>
-                  ${escapeHTML(card.name)}
-                </h4>
-
-                <small>
-                  ${escapeHTML(card.description)}
-                </small>
-
-              </div>
-
-              <span class="attention stable">
-                ${escapeHTML(periodLabel)}
-              </span>
-
-            </div>
-
-            <div
-              style="
-                display:flex;
-                justify-content:space-between;
-                align-items:end;
-                margin-top:.8rem
-              "
-            >
-
-              <strong>
-                ${formatNumber(card.count)}
-              </strong>
-
-              <span>
-                ${card.share.toFixed(1)}%
-              </span>
-
-            </div>
-
-            <div class="mini-track">
-              <i
-                style="
-                  width:${Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      card.share
-                    )
-                  )}%
-                "
-              ></i>
-            </div>
-
-          </button>
-        `
-      )
-      .join("");
-
-}
-
-// ============================================================
-// PICO DE PUBLICAÇÕES
-// ============================================================
-
-function renderSpikes() {
-
-  const container =
-    getEl("spikeTimeline");
+  const current =
+    labels[lang] ||
+    labels.pt;
 
 
-  if (
-    !container ||
-    !liveNews
-  ) {
-    return;
-  }
+  container.innerHTML = `
 
+    <div
+      class="radar-summary"
+    >
 
-  const articles =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
-
-
-  const timeline =
-    buildTimeline(
-      articles,
-      1
-    )
-      .filter(
-        bucket =>
-          bucket.total > 0
-      )
-      .sort(
-        (a, b) =>
-          b.total - a.total
-      )
-      .slice(
-        0,
-        4
-      );
-
-
-  if (!timeline.length) {
-
-    container.innerHTML = `
-      <div class="spike">
-        <strong>
-          Sem picos identificáveis
-        </strong>
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    timeline
-      .map(
-        bucket => {
-
-          const date =
-            new Date(
-              bucket.start
-            );
-
-
-          const time =
-            date.toLocaleString(
-              "pt-BR",
-              {
-                day: "2-digit",
-                month: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit"
-              }
-            );
-
-
-          return `
-            <div class="spike">
-
-              <time>
-                ${escapeHTML(time)}
-              </time>
-
-              <strong>
-                ${formatNumber(bucket.total)}
-                ${
-                  bucket.total === 1
-                    ? "publicação"
-                    : "publicações"
-                }
-              </strong>
-
-              <span>
-                Flávio ${bucket.flavio}
-                •
-                Lula ${bucket.lula}
-              </span>
-
-            </div>
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-// ============================================================
-// RADAR VISUAL
-// ============================================================
-
-function renderRadar() {
-
-  const box =
-    getEl("radarVisual");
-
-
-  if (!box) {
-    return;
-  }
-
-
-  const texts =
-    translations[lang] ||
-    translations.pt;
-
-
-  if (!liveNews) {
-
-    box.innerHTML = `
-      <div class="monitoring-loading">
+      <div
+        class="radar-summary-main"
+      >
 
         <strong>
-          ${escapeHTML(texts.panorama_waiting)}
+
+          ${formatNumber(
+            metrics.total
+          )}
+
         </strong>
 
         <span>
-          ${escapeHTML(texts.panorama_waiting_desc)}
+
+          ${escapeHTML(
+            current.articles
+          )}
+
         </span>
 
       </div>
-    `;
-
-    return;
-
-  }
 
 
-  const data =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
+      <div
+        class="radar-breakdown"
+      >
+
+        <div
+          class="radar-stat flavio"
+        >
+
+          <div
+            class="radar-stat-head"
+          >
+
+            <span>
+              Flávio Bolsonaro
+            </span>
+
+            <strong>
+
+              ${formatNumber(
+                flavio
+              )}
+
+            </strong>
+
+          </div>
+
+          <div
+            class="radar-stat-bar"
+          >
+
+            <span
+              style="width:${Math.min(
+                100,
+                flavioPercent
+              )}%"
+            ></span>
+
+          </div>
+
+          <small>
+
+            ${flavioPercent.toLocaleString(
+              getLocale(),
+              {
+                maximumFractionDigits:
+                  1
+              }
+            )}%
+
+          </small>
+
+        </div>
 
 
-  const metrics =
-    calculateMetrics(data);
+        <div
+          class="radar-stat lula"
+        >
+
+          <div
+            class="radar-stat-head"
+          >
+
+            <span>
+              Lula
+            </span>
+
+            <strong>
+
+              ${formatNumber(
+                lula
+              )}
+
+            </strong>
+
+          </div>
+
+          <div
+            class="radar-stat-bar"
+          >
+
+            <span
+              style="width:${Math.min(
+                100,
+                lulaPercent
+              )}%"
+            ></span>
+
+          </div>
+
+          <small>
+
+            ${lulaPercent.toLocaleString(
+              getLocale(),
+              {
+                maximumFractionDigits:
+                  1
+              }
+            )}%
+
+          </small>
+
+        </div>
 
 
-  const windowHours =
-    liveNewsMeta?.windowHours || 48;
+        <div
+          class="radar-stat both"
+        >
+
+          <div
+            class="radar-stat-head"
+          >
+
+            <span>
+
+              ${escapeHTML(
+                current.both
+              )}
+
+            </span>
+
+            <strong>
+
+              ${formatNumber(
+                both
+              )}
+
+            </strong>
+
+          </div>
+
+          <div
+            class="radar-stat-bar"
+          >
+
+            <span
+              style="width:${Math.min(
+                100,
+                bothPercent
+              )}%"
+            ></span>
+
+          </div>
+
+          <small>
+
+            ${bothPercent.toLocaleString(
+              getLocale(),
+              {
+                maximumFractionDigits:
+                  1
+              }
+            )}%
+
+          </small>
+
+        </div>
 
 
-  const items = [
+        <div
+          class="radar-stat general"
+        >
 
-    {
-      label:
-        texts.panorama_flavio,
+          <div
+            class="radar-stat-head"
+          >
 
-      value:
-        metrics.flavio,
+            <span>
 
-      description:
-        texts.panorama_reference
-    },
+              ${escapeHTML(
+                current.other
+              )}
 
-    {
-      label:
-        texts.panorama_lula,
+            </span>
 
-      value:
-        metrics.lula,
+            <strong>
 
-      description:
-        texts.panorama_reference
-    },
+              ${formatNumber(
+                other
+              )}
 
-    {
-      label:
-        texts.panorama_both,
+            </strong>
 
-      value:
-        metrics.both,
+          </div>
 
-      description:
-        texts.panorama_both_desc
-    },
+          <div
+            class="radar-stat-bar"
+          >
 
-    {
-      label:
-        texts.panorama_publishers,
+            <span
+              style="width:${Math.min(
+                100,
+                otherPercent
+              )}%"
+            ></span>
 
-      value:
-        metrics.publishers,
+          </div>
 
-      description:
-        texts.panorama_publishers_desc
-    },
+          <small>
 
-    {
-      label:
-        texts.panorama_articles,
+            ${otherPercent.toLocaleString(
+              getLocale(),
+              {
+                maximumFractionDigits:
+                  1
+              }
+            )}%
 
-      value:
-        metrics.total,
+          </small>
 
-      description:
-        texts.panorama_articles_desc
-    },
+        </div>
 
-    {
-      label:
-        texts.panorama_period,
-
-      value:
-        `${windowHours}h`,
-
-      description:
-        texts.panorama_period_desc
-    }
-
-  ];
+      </div>
 
 
-  box.innerHTML = `
-    <div class="monitoring-panorama">
+      <p
+        class="radar-note"
+      >
 
-      ${items
-        .map(
-          (item) => `
-            <div class="monitoring-item">
+        ${escapeHTML(
+          current.note
+        )}
 
-              <span class="monitoring-label">
-                ${escapeHTML(item.label)}
-              </span>
-
-              <strong class="monitoring-value">
-                ${escapeHTML(String(item.value))}
-              </strong>
-
-              <small class="monitoring-description">
-                ${escapeHTML(item.description)}
-              </small>
-
-            </div>
-          `
-        )
-        .join("")}
+      </p>
 
     </div>
 
-    <p class="monitoring-note">
-      ${escapeHTML(texts.panorama_note)}
-    </p>
   `;
 
 }
+
+
 // ============================================================
-// GRÁFICO REAL DE EVOLUÇÃO
+// GRÁFICO DE EVOLUÇÃO
 // ============================================================
 
 function drawChart() {
 
   const canvas =
-    getEl("volumeChart");
+    getEl(
+      "trendChart"
+    );
 
 
   if (!canvas) {
@@ -2442,59 +3733,81 @@ function drawChart() {
   }
 
 
-  const rect =
-    canvas.getBoundingClientRect();
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
 
 
-  if (
-    !rect.width ||
-    !rect.height
-  ) {
+  if (!ctx) {
     return;
   }
 
 
-  const dpr =
+  const articles =
+    getActiveNews();
+
+
+  const timeline =
+    buildTimeline(
+      articles,
+      4
+    );
+
+
+  const ratio =
     window.devicePixelRatio ||
     1;
 
 
+  const rect =
+    canvas.getBoundingClientRect();
+
+
+  const width =
+    Math.max(
+      320,
+      Math.floor(
+        rect.width ||
+        canvas.clientWidth ||
+        760
+      )
+    );
+
+
+  const height =
+    Math.max(
+      230,
+      Math.floor(
+        rect.height ||
+        canvas.clientHeight ||
+        300
+      )
+    );
+
+
   canvas.width =
-    Math.round(
-      rect.width *
-      dpr
+    Math.floor(
+      width *
+      ratio
     );
 
 
   canvas.height =
-    Math.round(
-      rect.height *
-      dpr
+    Math.floor(
+      height *
+      ratio
     );
 
 
-  const ctx =
-    canvas.getContext("2d");
-
-
   ctx.setTransform(
-    dpr,
+    ratio,
     0,
     0,
-    dpr,
+    ratio,
     0,
     0
   );
-
-
-  const width =
-    rect.width;
-
-  const height =
-    rect.height;
-
-  const padding =
-    28;
 
 
   ctx.clearRect(
@@ -2505,98 +3818,78 @@ function drawChart() {
   );
 
 
-  ctx.strokeStyle =
-    "#e2e8f0";
-
-  ctx.lineWidth =
-    1;
-
-
-  for (
-    let index = 0;
-    index < 5;
-    index++
-  ) {
-
-    const y =
-      padding +
-      (
-        height -
-        padding * 2
-      ) *
-      index /
-      4;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      padding,
-      y
-    );
-
-    ctx.lineTo(
-      width - padding,
-      y
-    );
-
-    ctx.stroke();
-
-  }
-
-
-  if (!liveNews) {
-
-    ctx.fillStyle =
-      "#64748b";
-
-    ctx.font =
-      "13px sans-serif";
-
-    ctx.textAlign =
-      "center";
-
-
-    ctx.fillText(
-      "Aguardando dados reais da API",
-      width / 2,
-      height / 2
+  const styles =
+    getComputedStyle(
+      document.documentElement
     );
 
 
-    return;
-
-  }
-
-
-  const articles =
-    filteredNews.length ||
-    hasActiveFilters()
-      ? filteredNews
-      : liveNews;
+  const ink =
+    styles
+      .getPropertyValue(
+        "--ink"
+      )
+      .trim() ||
+    "#10233f";
 
 
-  const timeline =
-    buildTimeline(
-      articles,
-      4
-    );
+  const muted =
+    styles
+      .getPropertyValue(
+        "--muted"
+      )
+      .trim() ||
+    "#65758b";
+
+
+  const line =
+    styles
+      .getPropertyValue(
+        "--line"
+      )
+      .trim() ||
+    "#dce3ec";
+
+
+  const flavioColor =
+    "#0b4da2";
+
+
+  const lulaColor =
+    "#b43a3a";
 
 
   if (!timeline.length) {
 
+    const emptyLabels = {
+
+      pt:
+        "Sem dados suficientes para gerar o gráfico.",
+
+      en:
+        "Not enough data to generate the chart.",
+
+      es:
+        "No hay datos suficientes para generar el gráfico."
+
+    };
+
+
     ctx.fillStyle =
-      "#64748b";
+      muted;
+
 
     ctx.font =
-      "13px sans-serif";
+      "600 14px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
 
     ctx.textAlign =
       "center";
 
 
     ctx.fillText(
-      "Sem dados temporais suficientes",
+      emptyLabels[lang] ||
+      emptyLabels.pt,
       width / 2,
       height / 2
     );
@@ -2607,104 +3900,213 @@ function drawChart() {
   }
 
 
-  const flavio =
-    timeline.map(
-      bucket =>
-        bucket.flavio
-    );
+  const padding = {
+    top: 24,
+    right: 20,
+    bottom: 46,
+    left: 42
+  };
 
 
-  const lula =
-    timeline.map(
-      bucket =>
-        bucket.lula
-    );
+  const chartWidth =
+    width -
+    padding.left -
+    padding.right;
+
+
+  const chartHeight =
+    height -
+    padding.top -
+    padding.bottom;
 
 
   const maxValue =
     Math.max(
       1,
-      ...flavio,
-      ...lula
+      ...timeline.map(
+        item =>
+          Math.max(
+            item.flavio,
+            item.lula
+          )
+      )
     );
 
 
-  const series = [
-
-    {
-      values:
-        flavio,
-
-      color:
-        "#154b8b"
-    },
-
-    {
-      values:
-        lula,
-
-      color:
-        "#fdb813"
-    }
-
-  ];
+  ctx.strokeStyle =
+    line;
 
 
-  series.forEach(
-    seriesItem => {
+  ctx.lineWidth =
+    1;
 
-      ctx.strokeStyle =
-        seriesItem.color;
 
-      ctx.lineWidth =
-        3;
+  ctx.fillStyle =
+    muted;
+
+
+  ctx.font =
+    "11px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+
+  ctx.textAlign =
+    "right";
+
+
+  const gridLines =
+    4;
+
+
+  for (
+    let i = 0;
+    i <= gridLines;
+    i += 1
+  ) {
+
+    const y =
+      padding.top +
+      chartHeight *
+      (
+        i /
+        gridLines
+      );
+
+
+    const value =
+      Math.round(
+        maxValue *
+        (
+          1 -
+          i /
+          gridLines
+        )
+      );
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+      padding.left,
+      y
+    );
+
+
+    ctx.lineTo(
+      width -
+      padding.right,
+      y
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.fillText(
+      String(value),
+      padding.left - 8,
+      y + 4
+    );
+
+  }
+
+
+  const getX =
+    index => {
+
+      if (
+        timeline.length === 1
+      ) {
+
+        return (
+          padding.left +
+          chartWidth / 2
+        );
+
+      }
+
+
+      return (
+        padding.left +
+        index /
+        (
+          timeline.length -
+          1
+        ) *
+        chartWidth
+      );
+
+    };
+
+
+  const getY =
+    value =>
+      padding.top +
+      chartHeight -
+      (
+        value /
+        maxValue
+      ) *
+      chartHeight;
+
+
+  const drawSeries =
+    (
+      key,
+      color
+    ) => {
 
       ctx.beginPath();
 
 
-      seriesItem.values.forEach(
-        (value, index) => {
+      ctx.strokeStyle =
+        color;
 
-          const denominator =
-            Math.max(
-              1,
-              seriesItem.values.length - 1
+
+      ctx.lineWidth =
+        2.5;
+
+
+      ctx.lineJoin =
+        "round";
+
+
+      ctx.lineCap =
+        "round";
+
+
+      timeline.forEach(
+        (
+          item,
+          index
+        ) => {
+
+          const x =
+            getX(
+              index
             );
 
 
-          const px =
-            padding +
-            (
-              width -
-              padding * 2
-            ) *
-            index /
-            denominator;
+          const y =
+            getY(
+              item[key]
+            );
 
 
-          const py =
-            height -
-            padding -
-            (
-              height -
-              padding * 2
-            ) *
-            value /
-            maxValue;
-
-
-          if (index === 0) {
+          if (
+            index === 0
+          ) {
 
             ctx.moveTo(
-              px,
-              py
+              x,
+              y
             );
 
           } else {
 
             ctx.lineTo(
-              px,
-              py
+              x,
+              y
             );
 
           }
@@ -2715,88 +4117,179 @@ function drawChart() {
 
       ctx.stroke();
 
+
+      timeline.forEach(
+        (
+          item,
+          index
+        ) => {
+
+          const x =
+            getX(
+              index
+            );
+
+
+          const y =
+            getY(
+              item[key]
+            );
+
+
+          ctx.beginPath();
+
+
+          ctx.fillStyle =
+            color;
+
+
+          ctx.arc(
+            x,
+            y,
+            3,
+            0,
+            Math.PI * 2
+          );
+
+
+          ctx.fill();
+
+        }
+      );
+
+    };
+
+
+  drawSeries(
+    "flavio",
+    flavioColor
+  );
+
+
+  drawSeries(
+    "lula",
+    lulaColor
+  );
+
+
+  ctx.fillStyle =
+    muted;
+
+
+  ctx.font =
+    "10px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+
+  ctx.textAlign =
+    "center";
+
+
+  const labelEvery =
+    Math.max(
+      1,
+      Math.ceil(
+        timeline.length /
+        6
+      )
+    );
+
+
+  timeline.forEach(
+    (
+      item,
+      index
+    ) => {
+
+      if (
+        index %
+        labelEvery !== 0 &&
+        index !==
+          timeline.length - 1
+      ) {
+        return;
+      }
+
+
+      const date =
+        new Date(
+          item.start
+        );
+
+
+      const label =
+        date.toLocaleTimeString(
+          getLocale(),
+          {
+            hour:
+              "2-digit",
+
+            minute:
+              "2-digit"
+          }
+        );
+
+
+      ctx.fillText(
+        label,
+        getX(
+          index
+        ),
+        height - 17
+      );
+
     }
   );
 
-}
+
+  canvas.setAttribute(
+    "aria-label",
+    (
+      {
+        pt:
+          "Gráfico da evolução temporal das publicações que mencionam Flávio Bolsonaro e Lula.",
+
+        en:
+          "Chart showing the temporal evolution of publications mentioning Flávio Bolsonaro and Lula.",
+
+        es:
+          "Gráfico de la evolución temporal de las publicaciones que mencionan a Flávio Bolsonaro y Lula."
+      }[lang] ||
+      "Gráfico da evolução temporal das publicações que mencionam Flávio Bolsonaro e Lula."
+    )
+  );
 
 
-// ============================================================
-// FILTRO DE FONTES
-// ============================================================
-
-function renderSourceFilter() {
-
-  const select =
-    getEl("source");
+  const caption =
+    document.querySelector(
+      ".chart-caption"
+    );
 
 
-  if (
-    !select ||
-    !liveNews
-  ) {
-    return;
+  if (caption) {
+
+    const captions = {
+
+      pt:
+        "Evolução calculada a partir dos horários de publicação dos artigos no período selecionado.",
+
+      en:
+        "Evolution calculated from article publication times during the selected period.",
+
+      es:
+        "Evolución calculada a partir de los horarios de publicación de los artículos durante el período seleccionado."
+
+    };
+
+
+    caption.textContent =
+      captions[lang] ||
+      captions.pt;
+
   }
 
-
-  const current =
-    select.value;
-
-
-  const publishers =
-    [...new Set(
-      liveNews
-        .map(
-          article =>
-            article.publisher
-        )
-        .filter(Boolean)
-    )]
-      .sort(
-        (a, b) =>
-          a.localeCompare(
-            b,
-            "pt-BR"
-          )
-      );
-
-
-  select.innerHTML =
-    `
-      <option value="all">
-        Todas
-      </option>
-    ` +
-
-    publishers
-      .map(
-        publisher => `
-          <option value="${escapeHTML(normalizeText(publisher))}">
-            ${escapeHTML(publisher)}
-          </option>
-        `
-      )
-      .join("");
-
-
-  const stillExists =
-    [...select.options]
-      .some(
-        option =>
-          option.value === current
-      );
-
-
-  select.value =
-    stillExists
-      ? current
-      : "all";
-
 }
-
-
 // ============================================================
-// FILTROS
+// DETECÇÃO DE FILTROS ATIVOS
 // ============================================================
 
 function hasActiveFilters() {
@@ -2807,18 +4300,15 @@ function hasActiveFilters() {
       ?.trim() ||
     "";
 
-
   const source =
     getEl("source")
       ?.value ||
     "all";
 
-
   const scope =
     getEl("scope")
       ?.value ||
     "all";
-
 
   const period =
     getEl("period")
@@ -2836,6 +4326,10 @@ function hasActiveFilters() {
 }
 
 
+// ============================================================
+// APLICAÇÃO DOS FILTROS
+// ============================================================
+
 function applyRadarFilters() {
 
   if (!liveNews) {
@@ -2846,8 +4340,7 @@ function applyRadarFilters() {
   const query =
     normalizeText(
       getEl("searchTerm")
-        ?.value
-        ?.trim() ||
+        ?.value ||
       ""
     );
 
@@ -2861,11 +4354,9 @@ function applyRadarFilters() {
 
 
   const scope =
-    normalizeText(
-      getEl("scope")
-        ?.value ||
-      "all"
-    );
+    getEl("scope")
+      ?.value ||
+    "all";
 
 
   const period =
@@ -2900,7 +4391,9 @@ function applyRadarFilters() {
               article.publisher,
               article.domain,
               article.category,
-              candidateLabel(article)
+              candidateLabel(
+                article
+              )
             ].join(" ")
           );
 
@@ -2947,6 +4440,9 @@ function applyRadarFilters() {
           scope === "both"
         ) {
 
+          // Filtro principal:
+          // "Ambos na mesma matéria"
+          // exige Flávio E Lula.
           scopeMatch =
             Boolean(
               article.mentions
@@ -2988,6 +4484,10 @@ function applyRadarFilters() {
 }
 
 
+// ============================================================
+// RENDERIZAÇÃO APÓS FILTROS
+// ============================================================
+
 function renderFilteredData() {
 
   renderMetrics();
@@ -3007,6 +4507,7 @@ function renderFilteredData() {
   drawChart();
 
 }
+
 
 // ============================================================
 // RESET DOS FILTROS
@@ -3031,27 +4532,44 @@ function resetRadarFilters() {
 
 
   if (period) {
-    period.value = "7d";
+
+    // Corrigido:
+    // o período padrão do Radar é 48h.
+    period.value =
+      "48h";
+
   }
 
 
   if (scope) {
-    scope.value = "all";
+
+    scope.value =
+      "all";
+
   }
 
 
   if (source) {
-    source.value = "all";
+
+    source.value =
+      "all";
+
   }
 
 
   if (region) {
-    region.value = "BR";
+
+    region.value =
+      "BR";
+
   }
 
 
   if (searchTerm) {
-    searchTerm.value = "";
+
+    searchTerm.value =
+      "";
+
   }
 
 
@@ -3070,7 +4588,9 @@ function resetRadarFilters() {
 // FILTRO INTERNO DA ABA MENÇÕES
 // ============================================================
 
-function filterMentionsList(value) {
+function filterMentionsList(
+  value
+) {
 
   const query =
     normalizeText(
@@ -3090,7 +4610,9 @@ function filterMentionsList(value) {
           !normalizeText(
             item.dataset.title ||
             ""
-          ).includes(query);
+          ).includes(
+            query
+          );
 
       }
     );
@@ -3147,7 +4669,9 @@ function renderRealData() {
 function renderLastUpdate() {
 
   const element =
-    getEl("lastUpdate");
+    getEl(
+      "lastUpdate"
+    );
 
 
   if (!element) {
@@ -3184,427 +4708,165 @@ function renderLastUpdate() {
 
   element.textContent =
     date
-      ? formatDateTime(date)
+      ? formatDateTime(
+          date
+        )
       : new Date()
-        .toLocaleTimeString(
-          "pt-BR",
-          {
-            hour: "2-digit",
-            minute: "2-digit"
-          }
-        );
+          .toLocaleTimeString(
+            getLocale(),
+            {
+              hour:
+                "2-digit",
+
+              minute:
+                "2-digit"
+            }
+          );
 
 }
 
 
 // ============================================================
-// ESTADOS SEM DADOS
+// ESTADO — NOTÍCIAS INDISPONÍVEIS
 // ============================================================
 
 function renderNewsUnavailable() {
 
-  const message = `
-    <article class="news-item">
+  const labels = {
 
-      <div class="source">
+    pt: {
+
+      title:
+        "Dados temporariamente indisponíveis",
+
+      description:
+        "O Radar não recebeu uma coleta válida de notícias neste momento. Nenhum número demonstrativo foi utilizado como substituição."
+
+    },
+
+    en: {
+
+      title:
+        "Data temporarily unavailable",
+
+      description:
+        "The Radar did not receive a valid news collection at this time. No demonstration figures were used as a replacement."
+
+    },
+
+    es: {
+
+      title:
+        "Datos temporalmente no disponibles",
+
+      description:
+        "El Radar no recibió una recopilación válida de noticias en este momento. No se utilizaron cifras demostrativas como sustitución."
+
+    }
+
+  };
+
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+
+  const message = `
+
+    <article
+      class="news-item"
+    >
+
+      <div
+        class="source"
+      >
+
         <span>
           Radar 2026
         </span>
 
-        <span class="tag">
+        <span
+          class="tag"
+        >
           API
         </span>
+
       </div>
 
       <h4>
-        Dados temporariamente indisponíveis
+
+        ${escapeHTML(
+          current.title
+        )}
+
       </h4>
 
       <p>
-        O Radar não recebeu uma coleta válida de notícias neste momento.
-        Nenhum número demonstrativo foi utilizado como substituição.
+
+        ${escapeHTML(
+          current.description
+        )}
+
       </p>
 
     </article>
+
   `;
 
 
   const newsFeed =
-    getEl("newsFeed");
+    getEl(
+      "newsFeed"
+    );
+
 
   const mentionsList =
-    getEl("mentionsList");
-
-
-  if (newsFeed) {
-    newsFeed.innerHTML = message;
-  }
-
-
-  if (mentionsList) {
-    mentionsList.innerHTML = message;
-  }
-
-
-  [
-    "metricMentions",
-    "metricTopics",
-    "metricSources",
-    "metricPeak"
-  ]
-    .forEach(
-      id => {
-
-        const element =
-          getEl(id);
-
-
-        if (element) {
-          element.textContent = "—";
-        }
-
-      }
+    getEl(
+      "mentionsList"
     );
-
-
-  const hotTopics =
-    getEl("hotTopics");
-
-
-  if (hotTopics) {
-
-    hotTopics.innerHTML = `
-      <div class="rank-row">
-        <div>
-          <div class="rank-name">
-            Aguardando coleta
-          </div>
-          <div class="rank-meta">
-            Os veículos aparecerão aqui quando /api/news estiver disponível.
-          </div>
-        </div>
-      </div>
-    `;
-
-  }
-
-
-  drawChart();
-
-}
-
-
-// ============================================================
-// VÍDEOS — SEM MOCK
-// ============================================================
-
-function renderVideosPlanned() {
-
-  const grid =
-    getEl("videoGrid");
-
-
-  if (!grid) {
-    return;
-  }
-
-
-  grid.innerHTML = `
-    <article class="video-card">
-
-      <div class="video-thumb">
-        ▶
-      </div>
-
-      <div class="video-info">
-
-        <h4>
-          YouTube Data API
-        </h4>
-
-        <p>
-          Integração planejada. Nenhum vídeo fictício é exibido.
-        </p>
-
-      </div>
-
-    </article>
-  `;
-
-}
-
-
-// ============================================================
-// TEXTOS DO ESTADO REAL
-// ============================================================
-
-function updateRealDataLabels() {
-
-  if (!liveNews) {
-    return;
-  }
-
-
-  const prototype =
-    document.querySelector(
-      '[data-i18n="prototype"]'
-    );
-
-
-  const notice =
-    document.querySelector(
-      '[data-i18n="mock_notice"]'
-    );
-
-
-  const heroDesc =
-    document.querySelector(
-      '[data-i18n="hero_desc"]'
-    );
-
-
-  const chartNote =
-    document.querySelector(
-      '[data-i18n="demo_chart"]'
-    );
-
-
-  const themesDesc =
-    document.querySelector(
-      '[data-i18n="themes_desc"]'
-    );
-
-
-  const cloudNote =
-    document.querySelector(
-      '[data-i18n="cloud_note"]'
-    );
-
-
-  const footer =
-    document.querySelector(
-      '[data-i18n="footer_desc"]'
-    );
-
-
-  if (prototype) {
-
-    prototype.textContent =
-      "RADAR 2026 • DADOS REAIS";
-
-  }
-
-
-  if (notice) {
-
-    notice.textContent =
-      `RSS • ${liveNewsMeta?.windowHours || 48}h`;
-
-  }
-
-
-  if (heroDesc) {
-
-    heroDesc.textContent =
-      "Central de acompanhamento da cobertura pública coletada em fontes RSS monitoradas. Os indicadores desta área são calculados a partir do corpus retornado pela API do Radar.";
-
-  }
-
-
-  if (chartNote) {
-
-    chartNote.textContent =
-      "Evolução calculada a partir dos horários de publicação dos artigos do corpus. As séries representam artigos identificados para cada candidato e podem se sobrepor.";
-
-  }
-
-
-  if (themesDesc) {
-
-    themesDesc.textContent =
-      "Distribuição descritiva das referências identificadas no corpus monitorado. Percentuais representam participação nos artigos coletados, não intenção de voto.";
-
-  }
-
-
-  if (cloudNote) {
-
-    cloudNote.textContent =
-      "O tamanho representa frequência relativa dos termos nos títulos e subtítulos coletados.";
-
-  }
-
-
-  if (footer) {
-
-    footer.textContent =
-      "Radar Eleitoral 2026. Dados de cobertura pública obtidos das fontes indicadas na seção Fontes & APIs.";
-
-  }
-
-}
-
-
-// ============================================================
-// RENDER INICIAL
-// ============================================================
-
-function renderInitialState() {
-
-  const lastUpdate =
-    getEl("lastUpdate");
-
-
-  if (lastUpdate) {
-
-    lastUpdate.textContent =
-      "Aguardando API";
-
-  }
-
-
-  const newsFeed =
-    getEl("newsFeed");
 
 
   if (newsFeed) {
 
-    newsFeed.innerHTML = `
-      <article class="news-item">
-        <h4>
-          Carregando cobertura...
-        </h4>
-        <p>
-          Consultando o cache do Radar.
-        </p>
-      </article>
-    `;
+    newsFeed.innerHTML =
+      message;
 
   }
-
-
-  const mentionsList =
-    getEl("mentionsList");
 
 
   if (mentionsList) {
 
-    mentionsList.innerHTML = `
-      <article class="news-item">
-        <h4>
-          Carregando publicações...
-        </h4>
-      </article>
-    `;
+    mentionsList.innerHTML =
+      message;
 
   }
 
 
-  const hotTopics =
-    getEl("hotTopics");
-
-
-  if (hotTopics) {
-
-    hotTopics.innerHTML = `
-      <div class="rank-row">
-        <div>
-          <div class="rank-name">
-            Carregando fontes...
-          </div>
-        </div>
-      </div>
-    `;
-
-  }
-
-
-  const themeCards =
-    getEl("themeCards");
-
-
-  if (themeCards) {
-
-    themeCards.innerHTML = `
-      <div class="theme-card">
-        <h4>
-          Aguardando dados reais
-        </h4>
-      </div>
-    `;
-
-  }
-
-
-  const keywordBars =
-    getEl("keywordBars");
-
-
-  if (keywordBars) {
-
-    keywordBars.innerHTML = `
-      <p>
-        Aguardando corpus...
-      </p>
-    `;
-
-  }
-
-
-  const wordCloud =
-    getEl("wordCloud");
-
-
-  if (wordCloud) {
-
-    wordCloud.innerHTML = `
-      <span>
-        Aguardando corpus...
-      </span>
-    `;
-
-  }
-
-
-  const spikeTimeline =
-    getEl("spikeTimeline");
-
-
-  if (spikeTimeline) {
-
-    spikeTimeline.innerHTML = `
-      <div class="spike">
-        <strong>
-          Aguardando dados temporais...
-        </strong>
-      </div>
-    `;
-
-  }
-
-
-  renderVideosPlanned();
-
-
-  [
+  const metricIds = [
     "metricMentions",
     "metricTopics",
     "metricSources",
     "metricPeak"
-  ]
-    .forEach(
-      id => {
-
-        const element =
-          getEl(id);
+  ];
 
 
-        if (element) {
-          element.textContent = "—";
-        }
+  metricIds.forEach(
+    id => {
+
+      const element =
+        getEl(id);
+
+
+      if (element) {
+
+        element.textContent =
+          "—";
 
       }
-    );
+
+    }
+  );
 
 
   renderRadar();
@@ -3615,60 +4877,650 @@ function renderInitialState() {
 
 
 // ============================================================
+// CONTEÚDOS RELACIONADOS — YOUTUBE PLANEJADO
+// ============================================================
+
+function renderVideosPlanned() {
+
+  const container =
+    getEl(
+      "videoGrid"
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  const labels = {
+
+    pt: {
+
+      title:
+        "Integração com YouTube prevista",
+
+      description:
+        "O Radar ainda não utiliza dados da API do YouTube. Nenhum vídeo ou métrica demonstrativa é exibido como dado real.",
+
+      status:
+        "Planejado"
+
+    },
+
+    en: {
+
+      title:
+        "YouTube integration planned",
+
+      description:
+        "The Radar does not yet use data from the YouTube API. No demonstration videos or metrics are displayed as real data.",
+
+      status:
+        "Planned"
+
+    },
+
+    es: {
+
+      title:
+        "Integración con YouTube prevista",
+
+      description:
+        "El Radar todavía no utiliza datos de la API de YouTube. No se muestran videos ni métricas demostrativas como datos reales.",
+
+      status:
+        "Planeado"
+
+    }
+
+  };
+
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+
+  container.innerHTML = `
+
+    <article
+      class="video-card planned-card"
+    >
+
+      <div
+        class="video-placeholder"
+        aria-hidden="true"
+      >
+
+        <span>
+          ▶
+        </span>
+
+      </div>
+
+      <div
+        class="video-content"
+      >
+
+        <span
+          class="tag"
+        >
+
+          ${escapeHTML(
+            current.status
+          )}
+
+        </span>
+
+        <h4>
+
+          ${escapeHTML(
+            current.title
+          )}
+
+        </h4>
+
+        <p>
+
+          ${escapeHTML(
+            current.description
+          )}
+
+        </p>
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+// ============================================================
+// RÓTULOS DOS DADOS REAIS
+// ============================================================
+
+function updateRealDataLabels() {
+
+  const periodHours =
+    getSelectedPeriodHours();
+
+
+  const labels = {
+
+    pt: {
+
+      now:
+        `Últimas ${periodHours} horas`,
+
+      methodology:
+        `Dados obtidos das fontes monitoradas e processados pelo Radar. Período selecionado: ${periodHours} horas.`,
+
+      stale:
+        "A coleta exibida pode estar temporariamente em cache."
+
+    },
+
+    en: {
+
+      now:
+        `Last ${periodHours} hours`,
+
+      methodology:
+        `Data obtained from monitored sources and processed by the Radar. Selected period: ${periodHours} hours.`,
+
+      stale:
+        "The displayed collection may temporarily be cached."
+
+    },
+
+    es: {
+
+      now:
+        `Últimas ${periodHours} horas`,
+
+      methodology:
+        `Datos obtenidos de las fuentes monitoreadas y procesados por el Radar. Período seleccionado: ${periodHours} horas.`,
+
+      stale:
+        "La recopilación mostrada puede estar temporalmente almacenada en caché."
+
+    }
+
+  };
+
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+
+  const nowLabel =
+    getEl(
+      "nowLabel"
+    );
+
+
+  if (nowLabel) {
+
+    nowLabel.textContent =
+      current.now;
+
+  }
+
+
+  const methodology =
+    getEl(
+      "methodologyNote"
+    );
+
+
+  if (methodology) {
+
+    methodology.textContent =
+      current.methodology;
+
+  }
+
+
+  const stale =
+    getEl(
+      "staleNotice"
+    );
+
+
+  if (stale) {
+
+    stale.hidden =
+      !liveNewsMeta?.stale;
+
+
+    stale.textContent =
+      current.stale;
+
+  }
+
+}
+
+
+// ============================================================
+// FILTRO DA COBERTURA
+// ============================================================
+
+function updateCoverageFilterLanguage() {
+
+  const select =
+    getEl(
+      "coverageFilter"
+    );
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const labels = {
+
+    pt: {
+      flavio:
+        "Flávio",
+      lula:
+        "Lula",
+      both:
+        "Ambos",
+      aria:
+        "Filtrar cobertura por candidato"
+    },
+
+    en: {
+      flavio:
+        "Flávio",
+      lula:
+        "Lula",
+      both:
+        "Both",
+      aria:
+        "Filter coverage by candidate"
+    },
+
+    es: {
+      flavio:
+        "Flávio",
+      lula:
+        "Lula",
+      both:
+        "Ambos",
+      aria:
+        "Filtrar cobertura por candidato"
+    }
+
+  };
+
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+
+  const flavio =
+    select.querySelector(
+      'option[value="flavio"]'
+    );
+
+
+  const lula =
+    select.querySelector(
+      'option[value="lula"]'
+    );
+
+
+  const both =
+    select.querySelector(
+      'option[value="both"]'
+    );
+
+
+  if (flavio) {
+
+    flavio.textContent =
+      current.flavio;
+
+  }
+
+
+  if (lula) {
+
+    lula.textContent =
+      current.lula;
+
+  }
+
+
+  if (both) {
+
+    both.textContent =
+      current.both;
+
+  }
+
+
+  select.setAttribute(
+    "aria-label",
+    current.aria
+  );
+
+
+  const label =
+    document.querySelector(
+      'label[for="coverageFilter"] .sr-only'
+    );
+
+
+  if (label) {
+
+    label.textContent =
+      current.aria;
+
+  }
+
+}
+
+
+// ============================================================
+// TRADUÇÃO DOS FILTROS PRINCIPAIS
+// ============================================================
+
+function updateFilterLanguage() {
+
+  const period =
+    getEl(
+      "period"
+    );
+
+
+  const scope =
+    getEl(
+      "scope"
+    );
+
+
+  const source =
+    getEl(
+      "source"
+    );
+
+
+  const search =
+    getEl(
+      "searchTerm"
+    );
+
+
+  const labels = {
+
+    pt: {
+
+      period24:
+        "Últimas 24 horas",
+
+      period48:
+        "Últimas 48 horas",
+
+      all:
+        "Todos",
+
+      flavio:
+        "Flávio Bolsonaro",
+
+      lula:
+        "Lula",
+
+      both:
+        "Ambos na mesma matéria",
+
+      allSources:
+        "Todos os veículos",
+
+      placeholder:
+        "Ex.: economia, segurança..."
+
+    },
+
+    en: {
+
+      period24:
+        "Last 24 hours",
+
+      period48:
+        "Last 48 hours",
+
+      all:
+        "All",
+
+      flavio:
+        "Flávio Bolsonaro",
+
+      lula:
+        "Lula",
+
+      both:
+        "Both in the same article",
+
+      allSources:
+        "All publishers",
+
+      placeholder:
+        "E.g.: economy, security..."
+
+    },
+
+    es: {
+
+      period24:
+        "Últimas 24 horas",
+
+      period48:
+        "Últimas 48 horas",
+
+      all:
+        "Todos",
+
+      flavio:
+        "Flávio Bolsonaro",
+
+      lula:
+        "Lula",
+
+      both:
+        "Ambos en el mismo artículo",
+
+      allSources:
+        "Todos los medios",
+
+      placeholder:
+        "Ej.: economía, seguridad..."
+
+    }
+
+  };
+
+
+  const current =
+    labels[lang] ||
+    labels.pt;
+
+
+  if (period) {
+
+    const option24 =
+      period.querySelector(
+        'option[value="24h"]'
+      );
+
+
+    const option48 =
+      period.querySelector(
+        'option[value="48h"]'
+      );
+
+
+    if (option24) {
+
+      option24.textContent =
+        current.period24;
+
+    }
+
+
+    if (option48) {
+
+      option48.textContent =
+        current.period48;
+
+    }
+
+  }
+
+
+  if (scope) {
+
+    const all =
+      scope.querySelector(
+        'option[value="all"]'
+      );
+
+
+    const flavio =
+      scope.querySelector(
+        'option[value="flavio"]'
+      );
+
+
+    const lula =
+      scope.querySelector(
+        'option[value="lula"]'
+      );
+
+
+    const both =
+      scope.querySelector(
+        'option[value="both"]'
+      );
+
+
+    if (all) {
+
+      all.textContent =
+        current.all;
+
+    }
+
+
+    if (flavio) {
+
+      flavio.textContent =
+        current.flavio;
+
+    }
+
+
+    if (lula) {
+
+      lula.textContent =
+        current.lula;
+
+    }
+
+
+    if (both) {
+
+      both.textContent =
+        current.both;
+
+    }
+
+  }
+
+
+  if (source) {
+
+    const allSources =
+      source.querySelector(
+        'option[value="all"]'
+      );
+
+
+    if (allSources) {
+
+      allSources.textContent =
+        current.allSources;
+
+    }
+
+  }
+
+
+  if (search) {
+
+    search.placeholder =
+      current.placeholder;
+
+  }
+
+}
+// ============================================================
 // TRADUÇÕES
 // ============================================================
 
 const translations = {
+
+  // ==========================================================
+  // PORTUGUÊS
+  // ==========================================================
 
   pt: {
 
     accessibility:
       "Acessibilidade:",
 
-    high_contrast:
-      "Alto Contraste",
+    increase_font:
+      "Aumentar fonte",
 
-    light_mode:
-      "Modo Claro",
+    decrease_font:
+      "Diminuir fonte",
+
+    contrast:
+      "Alto contraste",
+
+    theme:
+      "Alternar tema",
 
     header_subtitle:
       "Radar Eleitoral 2026",
 
+    nav_home:
+      "Início",
+
     nav_map:
       "Mapa de Votos",
 
-    nav_plan:
+    nav_gov:
       "Plano de Governo",
 
     nav_axes:
       "Eixos Temáticos",
 
-    nav_kit:
-      "Kit Mídia & Rede",
+    nav_candidates:
+      "Candidatos",
+
+    nav_materials:
+      "Materiais",
 
     nav_guide:
       "Guia de Diálogo",
-
-    nav_radar:
-      "Radar 2026",
-
-    campaign_2026:
-      "Campanha 2026",
-
-    prototype:
-      "RADAR 2026 • CONECTANDO DADOS",
-
-    hero_title:
-      "Radar Eleitoral 2026",
-
-    hero_desc:
-      "Central para acompanhar cobertura pública, fontes e sinais descritivos do corpus monitorado.",
-
-    last_update:
-      "Última atualização",
-
-    mock_notice:
-      "Dados monitorados",
 
     monitoring:
       "MONITORAMENTO",
@@ -3683,13 +5535,10 @@ const translations = {
       "Período",
 
     scope:
-      "Escopo",
+      "Candidato",
 
     source:
-      "Fonte",
-
-    region:
-      "Região",
+      "Veículo",
 
     search:
       "Buscar termo",
@@ -3697,95 +5546,77 @@ const translations = {
     apply:
       "Aplicar filtros",
 
-    tab_overview:
-      "Visão geral",
+    period_24h:
+      "Últimas 24 horas",
 
-    tab_themes:
-      "Temas",
+    period_48h:
+      "Últimas 48 horas",
 
-    tab_mentions:
-      "Menções",
+    candidate_all:
+      "Todos",
 
-    tab_trends:
-      "Tendências",
-
-    tab_videos:
-      "Vídeos",
-
-    tab_sources:
-      "Fontes & APIs",
-
-    metric_mentions:
-      "Matérias coletadas",
-
-    metric_topics:
-      "Matérias com candidatos",
-
-    metric_sources:
-      "Veículos no corpus",
-
-    metric_peak:
-      "Maior volume/hora",
-
-    vs_period:
-      "no corpus monitorado",
-
-    high_attention:
-      "referências identificadas",
-
-    source_types:
-      "veículos distintos",
-
-    peak_desc:
-      "publicações na hora de maior volume",
-
-    volume_title:
-      "Evolução da cobertura",
-
-    demo_chart:
-      "Série temporal calculada a partir dos artigos coletados.",
-
-    hot_title:
-      "Veículos com mais publicações",
-
-    radar_title:
-      "Panorama de Monitoramento",
-
-    panorama_flavio:
+    candidate_flavio:
       "Flávio Bolsonaro",
 
-    panorama_lula:
+    candidate_lula:
       "Lula",
 
-    panorama_both:
-      "Ambos",
+    candidate_both_same:
+      "Ambos na mesma matéria",
 
-    panorama_publishers:
-      "Veículos",
+    all_publishers:
+      "Todos os veículos",
 
-    panorama_articles:
-      "Matérias",
+    overview:
+      "Visão geral",
 
-    panorama_period:
-      "Período",
+    mentions:
+      "Menções",
 
-    panorama_reference:
-      "matérias com referência identificada",
+    themes:
+      "Temas",
 
-    panorama_both_desc:
-      "matérias que mencionam os dois",
+    videos:
+      "Vídeos",
 
-    panorama_publishers_desc:
-      "veículos distintos no conjunto",
+    apis:
+      "APIs e fontes",
 
-    panorama_articles_desc:
-      "itens no monitoramento atual",
+    metric_mentions:
+      "Publicações encontradas",
 
-    panorama_period_desc:
-      "janela de coleta considerada",
+    metric_topics:
+      "Referências aos candidatos",
+
+    metric_sources:
+      "Veículos monitorados",
+
+    metric_peak:
+      "Pico por hora",
+
+    evolution:
+      "Evolução da cobertura",
+
+    evolution_desc:
+      "Distribuição das publicações ao longo do período selecionado.",
+
+    ranking_title:
+      "Veículos com mais publicações",
+
+    ranking_desc:
+      "Quantidade de artigos encontrados por veículo no período selecionado.",
+
+    panorama:
+      "PANORAMA",
+
+    panorama_title:
+      "Distribuição da cobertura encontrada",
+
+    panorama_desc:
+      "Visão descritiva das referências identificadas nas publicações monitoradas.",
 
     panorama_note:
-      "Indicadores calculados a partir das matérias disponíveis no período monitorado.",
+      "Indicadores calculados a partir dos artigos disponíveis durante o período monitorado.",
 
     panorama_waiting:
       "Aguardando dados",
@@ -3800,10 +5631,10 @@ const translations = {
       "Ver todas",
 
     themes_title:
-      "Distribuição das referências",
+      "Distribuição de referências",
 
     themes_desc:
-      "Participação descritiva no corpus monitorado.",
+      "Participação descritiva no período monitorado.",
 
     add_theme:
       "Adicionar tema",
@@ -3818,16 +5649,16 @@ const translations = {
       "Nuvem de termos",
 
     cloud_note:
-      "O tamanho representa frequência no corpus.",
+      "O tamanho representa a frequência no período monitorado.",
 
     spikes_title:
-      "Horas com maior volume",
+      "Horários com maior volume",
 
     videos_title:
       "Conteúdos relacionados",
 
     videos_desc:
-      "Integração com YouTube planejada.",
+      "Integração com YouTube prevista.",
 
     apis_title:
       "Fontes e serviços",
@@ -3835,60 +5666,173 @@ const translations = {
     config_title:
       "Parâmetros do radar",
 
+    publication:
+      "publicação",
+
+    publications:
+      "publicações",
+
+    ranking_publications:
+      "{count} publicações nas últimas {hours}h",
+
+    in_last_hours:
+      "nas últimas {hours}h",
+
+    no_data:
+      "Sem dados",
+
+    no_publishers:
+      "Nenhum veículo encontrado para os filtros atuais.",
+
+    no_publication:
+      "Nenhuma publicação encontrada",
+
+    no_filter_results:
+      "Não há resultados para os filtros selecionados.",
+
+    adjust_filters:
+      "Ajuste os filtros para ampliar a consulta.",
+
+    no_keywords:
+      "Sem termos suficientes no período selecionado.",
+
+    no_spikes:
+      "Nenhum pico de publicação identificado no período selecionado.",
+
+    chart_no_data:
+      "Sem dados suficientes para gerar o gráfico.",
+
+    total_monitored:
+      "Total monitorado",
+
+    both_candidates:
+      "Ambos",
+
+    coverage_filter_label:
+      "Filtrar cobertura por candidato",
+
+    coverage_flavio:
+      "Flávio",
+
+    coverage_lula:
+      "Lula",
+
+    coverage_both:
+      "Ambos",
+
+    coverage_card_flavio:
+      "Artigos das últimas {hours}h em que o monitor identificou referência a Flávio Bolsonaro.",
+
+    coverage_card_lula:
+      "Artigos das últimas {hours}h em que o monitor identificou referência a Lula.",
+
+    coverage_card_both:
+      "Artigos das últimas {hours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.",
+
+    coverage_card_total:
+      "Total de artigos retornados pelas fontes monitoradas nas últimas {hours}h.",
+
+    hours_label:
+      "{hours} horas",
+
+    data_unavailable:
+      "Dados temporariamente indisponíveis",
+
+    data_unavailable_desc:
+      "O Radar não recebeu uma coleta válida de notícias neste momento. Nenhum número demonstrativo foi utilizado como substituição.",
+
+    youtube_planned:
+      "Integração com YouTube prevista",
+
+    youtube_planned_desc:
+      "O Radar ainda não utiliza dados da API do YouTube. Nenhum vídeo ou métrica demonstrativa é exibido como dado real.",
+
+    planned:
+      "Planejado",
+
+    sources_label:
+      "Fontes",
+
+    sources_none:
+      "Nenhuma informação disponível neste momento.",
+
+    unavailable:
+      "Indisponível",
+
+    active:
+      "Ativo",
+
+    connected:
+      "Conectado",
+
+    paused:
+      "Pausado",
+
+    pending:
+      "Aguardando",
+
+    original_publication:
+      "Abrir publicação original",
+
+    other_publications:
+      "Outras publicações",
+
+    both_same_publication:
+      "Ambos na mesma publicação",
+
+    articles:
+      "artigos",
+
     footer_desc:
       "Radar Eleitoral 2026."
 
   },
+
+
+  // ==========================================================
+  // ENGLISH
+  // ==========================================================
 
   en: {
 
     accessibility:
       "Accessibility:",
 
-    high_contrast:
-      "High Contrast",
+    increase_font:
+      "Increase font size",
 
-    light_mode:
-      "Light Mode",
+    decrease_font:
+      "Decrease font size",
+
+    contrast:
+      "High contrast",
+
+    theme:
+      "Toggle theme",
 
     header_subtitle:
       "2026 Election Radar",
 
+    nav_home:
+      "Home",
+
     nav_map:
       "Vote Map",
 
-    nav_plan:
+    nav_gov:
       "Government Plan",
 
     nav_axes:
-      "Topics",
+      "Policy Areas",
 
-    nav_kit:
-      "Media Kit",
+    nav_candidates:
+      "Candidates",
+
+    nav_materials:
+      "Materials",
 
     nav_guide:
       "Dialogue Guide",
-
-    nav_radar:
-      "Radar 2026",
-
-    campaign_2026:
-      "Campaign 2026",
-
-    prototype:
-      "RADAR 2026 • CONNECTING DATA",
-
-    hero_title:
-      "2026 Election Radar",
-
-    hero_desc:
-      "A hub for monitoring public coverage, sources and descriptive signals from the monitored corpus.",
-
-    last_update:
-      "Last update",
-
-    mock_notice:
-      "Monitored data",
 
     monitoring:
       "MONITORING",
@@ -3897,19 +5841,16 @@ const translations = {
       "Radar filters",
 
     reset:
-      "Reset filters",
+      "Clear filters",
 
     period:
       "Period",
 
     scope:
-      "Scope",
+      "Candidate",
 
     source:
-      "Source",
-
-    region:
-      "Region",
+      "Publisher",
 
     search:
       "Search term",
@@ -3917,95 +5858,77 @@ const translations = {
     apply:
       "Apply filters",
 
-    tab_overview:
-      "Overview",
+    period_24h:
+      "Last 24 hours",
 
-    tab_themes:
-      "Topics",
+    period_48h:
+      "Last 48 hours",
 
-    tab_mentions:
-      "Mentions",
+    candidate_all:
+      "All",
 
-    tab_trends:
-      "Trends",
-
-    tab_videos:
-      "Videos",
-
-    tab_sources:
-      "Sources & APIs",
-
-    metric_mentions:
-      "Collected articles",
-
-    metric_topics:
-      "Articles with candidates",
-
-    metric_sources:
-      "Publishers in corpus",
-
-    metric_peak:
-      "Highest hourly volume",
-
-    vs_period:
-      "in monitored corpus",
-
-    high_attention:
-      "identified references",
-
-    source_types:
-      "distinct publishers",
-
-    peak_desc:
-      "publications in highest-volume hour",
-
-    volume_title:
-      "Coverage over time",
-
-    demo_chart:
-      "Timeline calculated from collected articles.",
-
-    hot_title:
-      "Publishers with most articles",
-
-    radar_title:
-      "Monitoring Overview",
-
-    panorama_flavio:
+    candidate_flavio:
       "Flávio Bolsonaro",
 
-    panorama_lula:
+    candidate_lula:
       "Lula",
 
-    panorama_both:
-      "Both",
+    candidate_both_same:
+      "Both in the same article",
 
-    panorama_publishers:
-      "Publishers",
+    all_publishers:
+      "All publishers",
 
-    panorama_articles:
-      "Articles",
+    overview:
+      "Overview",
 
-    panorama_period:
-      "Period",
+    mentions:
+      "Mentions",
 
-    panorama_reference:
-      "articles with an identified reference",
+    themes:
+      "Topics",
 
-    panorama_both_desc:
-      "articles mentioning both candidates",
+    videos:
+      "Videos",
 
-    panorama_publishers_desc:
-      "distinct publishers in the dataset",
+    apis:
+      "APIs and sources",
 
-    panorama_articles_desc:
-      "items in the current monitoring dataset",
+    metric_mentions:
+      "Publications found",
 
-    panorama_period_desc:
-      "collection window considered",
+    metric_topics:
+      "Candidate references",
+
+    metric_sources:
+      "Monitored publishers",
+
+    metric_peak:
+      "Hourly peak",
+
+    evolution:
+      "Coverage evolution",
+
+    evolution_desc:
+      "Distribution of publications throughout the selected period.",
+
+    ranking_title:
+      "Publishers with the most publications",
+
+    ranking_desc:
+      "Number of articles found per publisher during the selected period.",
+
+    panorama:
+      "OVERVIEW",
+
+    panorama_title:
+      "Distribution of coverage found",
+
+    panorama_desc:
+      "Descriptive view of references identified in monitored publications.",
 
     panorama_note:
-      "Indicators calculated from the articles available during the monitored period.",
+      "Indicators calculated from articles available during the monitored period.",
 
     panorama_waiting:
       "Waiting for data",
@@ -4023,7 +5946,7 @@ const translations = {
       "Reference distribution",
 
     themes_desc:
-      "Descriptive share in the monitored corpus.",
+      "Descriptive share during the monitored period.",
 
     add_theme:
       "Add topic",
@@ -4035,13 +5958,13 @@ const translations = {
       "Most frequent terms",
 
     cloud_title:
-      "Word cloud",
+      "Term cloud",
 
     cloud_note:
-      "Size represents frequency in the corpus.",
+      "Size represents frequency during the monitored period.",
 
     spikes_title:
-      "Highest-volume hours",
+      "Hours with the highest volume",
 
     videos_title:
       "Related content",
@@ -4055,60 +5978,173 @@ const translations = {
     config_title:
       "Radar parameters",
 
+    publication:
+      "publication",
+
+    publications:
+      "publications",
+
+    ranking_publications:
+      "{count} publications in the last {hours}h",
+
+    in_last_hours:
+      "in the last {hours}h",
+
+    no_data:
+      "No data",
+
+    no_publishers:
+      "No publishers found for the current filters.",
+
+    no_publication:
+      "No publications found",
+
+    no_filter_results:
+      "There are no results for the selected filters.",
+
+    adjust_filters:
+      "Adjust the filters to broaden the search.",
+
+    no_keywords:
+      "Not enough terms in the selected period.",
+
+    no_spikes:
+      "No publication peak was identified in the selected period.",
+
+    chart_no_data:
+      "Not enough data to generate the chart.",
+
+    total_monitored:
+      "Total monitored",
+
+    both_candidates:
+      "Both",
+
+    coverage_filter_label:
+      "Filter coverage by candidate",
+
+    coverage_flavio:
+      "Flávio",
+
+    coverage_lula:
+      "Lula",
+
+    coverage_both:
+      "Both",
+
+    coverage_card_flavio:
+      "Articles from the last {hours}h in which the monitor identified a reference to Flávio Bolsonaro.",
+
+    coverage_card_lula:
+      "Articles from the last {hours}h in which the monitor identified a reference to Lula.",
+
+    coverage_card_both:
+      "Articles from the last {hours}h in which references to Flávio Bolsonaro and Lula were identified in the same publication.",
+
+    coverage_card_total:
+      "Total articles returned by the monitored sources in the last {hours}h.",
+
+    hours_label:
+      "{hours} hours",
+
+    data_unavailable:
+      "Data temporarily unavailable",
+
+    data_unavailable_desc:
+      "The Radar did not receive a valid news collection at this time. No demonstration figures were used as a replacement.",
+
+    youtube_planned:
+      "YouTube integration planned",
+
+    youtube_planned_desc:
+      "The Radar does not yet use data from the YouTube API. No demonstration videos or metrics are displayed as real data.",
+
+    planned:
+      "Planned",
+
+    sources_label:
+      "Sources",
+
+    sources_none:
+      "No information is available at this time.",
+
+    unavailable:
+      "Unavailable",
+
+    active:
+      "Active",
+
+    connected:
+      "Connected",
+
+    paused:
+      "Paused",
+
+    pending:
+      "Pending",
+
+    original_publication:
+      "Open original publication",
+
+    other_publications:
+      "Other publications",
+
+    both_same_publication:
+      "Both in the same publication",
+
+    articles:
+      "articles",
+
     footer_desc:
       "2026 Election Radar."
 
   },
+
+
+  // ==========================================================
+  // ESPAÑOL
+  // ==========================================================
 
   es: {
 
     accessibility:
       "Accesibilidad:",
 
-    high_contrast:
-      "Alto Contraste",
+    increase_font:
+      "Aumentar fuente",
 
-    light_mode:
-      "Modo Claro",
+    decrease_font:
+      "Disminuir fuente",
+
+    contrast:
+      "Alto contraste",
+
+    theme:
+      "Cambiar tema",
 
     header_subtitle:
       "Radar Electoral 2026",
 
+    nav_home:
+      "Inicio",
+
     nav_map:
       "Mapa de Votos",
 
-    nav_plan:
+    nav_gov:
       "Plan de Gobierno",
 
     nav_axes:
       "Ejes Temáticos",
 
-    nav_kit:
-      "Kit de Medios",
+    nav_candidates:
+      "Candidatos",
+
+    nav_materials:
+      "Materiales",
 
     nav_guide:
       "Guía de Diálogo",
-
-    nav_radar:
-      "Radar 2026",
-
-    campaign_2026:
-      "Campaña 2026",
-
-    prototype:
-      "RADAR 2026 • CONECTANDO DATOS",
-
-    hero_title:
-      "Radar Electoral 2026",
-
-    hero_desc:
-      "Una central para seguir cobertura pública, fuentes y señales descriptivas del corpus monitoreado.",
-
-    last_update:
-      "Última actualización",
-
-    mock_notice:
-      "Datos monitoreados",
 
     monitoring:
       "MONITOREO",
@@ -4123,13 +6159,10 @@ const translations = {
       "Período",
 
     scope:
-      "Alcance",
+      "Candidato",
 
     source:
-      "Fuente",
-
-    region:
-      "Región",
+      "Medio",
 
     search:
       "Buscar término",
@@ -4137,92 +6170,74 @@ const translations = {
     apply:
       "Aplicar filtros",
 
-    tab_overview:
-      "Visión general",
+    period_24h:
+      "Últimas 24 horas",
 
-    tab_themes:
-      "Temas",
+    period_48h:
+      "Últimas 48 horas",
 
-    tab_mentions:
-      "Menciones",
+    candidate_all:
+      "Todos",
 
-    tab_trends:
-      "Tendencias",
-
-    tab_videos:
-      "Videos",
-
-    tab_sources:
-      "Fuentes y APIs",
-
-    metric_mentions:
-      "Artículos recopilados",
-
-    metric_topics:
-      "Artículos con candidatos",
-
-    metric_sources:
-      "Medios en el corpus",
-
-    metric_peak:
-      "Mayor volumen/hora",
-
-    vs_period:
-      "en el corpus monitoreado",
-
-    high_attention:
-      "referencias identificadas",
-
-    source_types:
-      "medios distintos",
-
-    peak_desc:
-      "publicaciones en la hora de mayor volumen",
-
-    volume_title:
-      "Evolución de la cobertura",
-
-    demo_chart:
-      "Serie temporal calculada a partir de los artículos recopilados.",
-
-    hot_title:
-      "Medios con más publicaciones",
-
-    radar_title:
-      "Panorama de Monitoreo",
-
-    panorama_flavio:
+    candidate_flavio:
       "Flávio Bolsonaro",
 
-    panorama_lula:
+    candidate_lula:
       "Lula",
 
-    panorama_both:
-      "Ambos",
+    candidate_both_same:
+      "Ambos en el mismo artículo",
 
-    panorama_publishers:
-      "Medios",
+    all_publishers:
+      "Todos los medios",
 
-    panorama_articles:
-      "Artículos",
+    overview:
+      "Visión general",
 
-    panorama_period:
-      "Período",
+    mentions:
+      "Menciones",
 
-    panorama_reference:
-      "artículos con una referencia identificada",
+    themes:
+      "Temas",
 
-    panorama_both_desc:
-      "artículos que mencionan a ambos candidatos",
+    videos:
+      "Videos",
 
-    panorama_publishers_desc:
-      "medios distintos en el conjunto",
+    apis:
+      "APIs y fuentes",
 
-    panorama_articles_desc:
-      "elementos en el monitoreo actual",
+    metric_mentions:
+      "Publicaciones encontradas",
 
-    panorama_period_desc:
-      "ventana de recopilación considerada",
+    metric_topics:
+      "Referencias a los candidatos",
+
+    metric_sources:
+      "Medios monitoreados",
+
+    metric_peak:
+      "Pico por hora",
+
+    evolution:
+      "Evolución de la cobertura",
+
+    evolution_desc:
+      "Distribución de las publicaciones durante el período seleccionado.",
+
+    ranking_title:
+      "Medios con más publicaciones",
+
+    ranking_desc:
+      "Cantidad de artículos encontrados por medio durante el período seleccionado.",
+
+    panorama:
+      "PANORAMA",
+
+    panorama_title:
+      "Distribución de la cobertura encontrada",
+
+    panorama_desc:
+      "Vista descriptiva de las referencias identificadas en las publicaciones monitoreadas.",
 
     panorama_note:
       "Indicadores calculados a partir de los artículos disponibles durante el período monitoreado.",
@@ -4243,7 +6258,7 @@ const translations = {
       "Distribución de referencias",
 
     themes_desc:
-      "Participación descriptiva en el corpus monitoreado.",
+      "Participación descriptiva durante el período monitoreado.",
 
     add_theme:
       "Agregar tema",
@@ -4258,7 +6273,7 @@ const translations = {
       "Nube de términos",
 
     cloud_note:
-      "El tamaño representa frecuencia en el corpus.",
+      "El tamaño representa la frecuencia durante el período monitoreado.",
 
     spikes_title:
       "Horas con mayor volumen",
@@ -4275,64 +6290,200 @@ const translations = {
     config_title:
       "Parámetros del radar",
 
+    publication:
+      "publicación",
+
+    publications:
+      "publicaciones",
+
+    ranking_publications:
+      "{count} publicaciones en las últimas {hours}h",
+
+    in_last_hours:
+      "en las últimas {hours}h",
+
+    no_data:
+      "Sin datos",
+
+    no_publishers:
+      "No se encontraron medios para los filtros actuales.",
+
+    no_publication:
+      "No se encontraron publicaciones",
+
+    no_filter_results:
+      "No hay resultados para los filtros seleccionados.",
+
+    adjust_filters:
+      "Ajuste los filtros para ampliar la búsqueda.",
+
+    no_keywords:
+      "No hay suficientes términos en el período seleccionado.",
+
+    no_spikes:
+      "No se identificó ningún pico de publicaciones en el período seleccionado.",
+
+    chart_no_data:
+      "No hay datos suficientes para generar el gráfico.",
+
+    total_monitored:
+      "Total monitoreado",
+
+    both_candidates:
+      "Ambos",
+
+    coverage_filter_label:
+      "Filtrar cobertura por candidato",
+
+    coverage_flavio:
+      "Flávio",
+
+    coverage_lula:
+      "Lula",
+
+    coverage_both:
+      "Ambos",
+
+    coverage_card_flavio:
+      "Artículos de las últimas {hours}h en los que el monitor identificó una referencia a Flávio Bolsonaro.",
+
+    coverage_card_lula:
+      "Artículos de las últimas {hours}h en los que el monitor identificó una referencia a Lula.",
+
+    coverage_card_both:
+      "Artículos de las últimas {hours}h en los que se identificaron referencias a Flávio Bolsonaro y Lula en la misma publicación.",
+
+    coverage_card_total:
+      "Total de artículos devueltos por las fuentes monitoreadas en las últimas {hours}h.",
+
+    hours_label:
+      "{hours} horas",
+
+    data_unavailable:
+      "Datos temporalmente no disponibles",
+
+    data_unavailable_desc:
+      "El Radar no recibió una recopilación válida de noticias en este momento. No se utilizaron cifras demostrativas como sustitución.",
+
+    youtube_planned:
+      "Integración con YouTube prevista",
+
+    youtube_planned_desc:
+      "El Radar todavía no utiliza datos de la API de YouTube. No se muestran videos ni métricas demostrativas como datos reales.",
+
+    planned:
+      "Planeado",
+
+    sources_label:
+      "Fuentes",
+
+    sources_none:
+      "No hay información disponible en este momento.",
+
+    unavailable:
+      "No disponible",
+
+    active:
+      "Activo",
+
+    connected:
+      "Conectado",
+
+    paused:
+      "Pausado",
+
+    pending:
+      "Pendiente",
+
+    original_publication:
+      "Abrir publicación original",
+
+    other_publications:
+      "Otras publicaciones",
+
+    both_same_publication:
+      "Ambos en la misma publicación",
+
+    articles:
+      "artículos",
+
     footer_desc:
       "Radar Electoral 2026."
 
   }
+
 };
-
-
 // ============================================================
 // ABERTURA DAS ABAS
 // ============================================================
 
 function openTab(name) {
 
-  document
-    .querySelectorAll(".tab")
-    .forEach(
-      button => {
+  const buttons =
+    document.querySelectorAll(
+      ".tab-btn"
+    );
 
-        const active =
-          button.dataset.tab === name;
-
-
-        button.classList.toggle(
-          "active",
-          active
-        );
-
-
-        button.setAttribute(
-          "aria-selected",
-          String(active)
-        );
-
-      }
+  const panels =
+    document.querySelectorAll(
+      ".tab-panel"
     );
 
 
-  document
-    .querySelectorAll(".tab-panel")
-    .forEach(
-      panel => {
+  buttons.forEach(
+    button => {
 
-        panel.classList.toggle(
-          "active",
-          panel.id ===
-            "panel-" + name
-        );
+      const active =
+        button.dataset.tab ===
+        name;
 
-      }
-    );
+
+      button.classList.toggle(
+        "active",
+        active
+      );
+
+
+      button.setAttribute(
+        "aria-selected",
+        active
+          ? "true"
+          : "false"
+      );
+
+    }
+  );
+
+
+  panels.forEach(
+    panel => {
+
+      const active =
+        panel.id ===
+        `tab-${name}`;
+
+
+      panel.classList.toggle(
+        "active",
+        active
+      );
+
+
+      panel.hidden =
+        !active;
+
+    }
+  );
 
 
   if (
     name === "overview"
   ) {
 
-    requestAnimationFrame(
-      drawChart
+    window.requestAnimationFrame(
+      () => {
+        drawChart();
+      }
     );
 
   }
@@ -4341,24 +6492,42 @@ function openTab(name) {
 
 
 // ============================================================
-// IDIOMAS
+// IDIOMA
 // ============================================================
 
 function setLanguage(
-  language,
-  persist = true
+  language
 ) {
 
+  if (
+    !translations[
+      language
+    ]
+  ) {
+    return;
+  }
+
+
   lang =
-    translations[language]
-      ? language
-      : "pt";
+    language;
+
+
+  localStorage.setItem(
+    "fazdireito-lang",
+    lang
+  );
 
 
   document.documentElement.lang =
     lang === "pt"
       ? "pt-BR"
-      : lang;
+      : lang === "en"
+        ? "en"
+        : "es";
+
+
+  const texts =
+    translations[lang];
 
 
   document
@@ -4373,11 +6542,16 @@ function setLanguage(
 
 
         if (
-          translations[lang][key]
+          Object.prototype
+            .hasOwnProperty
+            .call(
+              texts,
+              key
+            )
         ) {
 
           element.textContent =
-            translations[lang][key];
+            texts[key];
 
         }
 
@@ -4387,14 +6561,14 @@ function setLanguage(
 
   document
     .querySelectorAll(
-      ".lang-btn"
+      "[data-lang]"
     )
     .forEach(
       button => {
 
         const active =
-          button.id ===
-          "lang-" + lang;
+          button.dataset.lang ===
+          lang;
 
 
         button.classList.toggle(
@@ -4405,27 +6579,50 @@ function setLanguage(
 
         button.setAttribute(
           "aria-pressed",
-          String(active)
+          active
+            ? "true"
+            : "false"
         );
 
       }
     );
 
 
-  if (persist) {
+  updateFilterLanguage();
 
-    localStorage.setItem(
-      "fazdireito-lang",
-      lang
-    );
+  updateCoverageFilterLanguage();
+
+
+  if (
+    Array.isArray(
+      liveNews
+    )
+  ) {
+
+    renderSourceFilter();
+
+    renderFilteredData();
+
+    renderLastUpdate();
+
+    renderVideosPlanned();
+
+    updateRealDataLabels();
+
+  } else {
+
+    renderNewsUnavailable();
+
+    renderVideosPlanned();
 
   }
 
 
-  syncThemeLabel();
-
-
-  if (liveSources) {
+  if (
+    Array.isArray(
+      liveSources
+    )
+  ) {
 
     renderApiSources(
       liveSources
@@ -4433,180 +6630,158 @@ function setLanguage(
 
   }
 
-
-  if (liveNews) {
-
-    updateRealDataLabels();
-
-    renderRadar();
-
-  }
-
 }
+
 
 // ============================================================
 // TAMANHO DA FONTE
 // ============================================================
 
-function changeFontSize(delta) {
+function applyFontSize() {
+
+  document.documentElement
+    .style
+    .fontSize =
+      `${fontSize}%`;
+
+
+  localStorage.setItem(
+    "fazdireito-font-size",
+    String(
+      fontSize
+    )
+  );
+
+}
+
+
+function increaseFontSize() {
 
   fontSize =
     Math.min(
-      130,
-      Math.max(
-        85,
-        fontSize +
-        delta *
-        10
-      )
+      125,
+      fontSize + 5
     );
 
 
-  document.documentElement.style.setProperty(
-    "--base-font-size",
-    fontSize + "%"
-  );
-
-
-  localStorage.setItem(
-    "fazdireito-font-size",
-    String(fontSize)
-  );
+  applyFontSize();
 
 }
 
 
-function resetFontSize() {
+function decreaseFontSize() {
 
   fontSize =
-    100;
+    Math.max(
+      85,
+      fontSize - 5
+    );
 
 
-  document.documentElement.style.setProperty(
-    "--base-font-size",
-    "100%"
-  );
-
-
-  localStorage.setItem(
-    "fazdireito-font-size",
-    "100"
-  );
+  applyFontSize();
 
 }
 
 
 // ============================================================
-// CONTRASTE
+// TEMA / CONTRASTE
 // ============================================================
 
-function syncThemeLabel() {
+function setTheme(
+  theme
+) {
 
-  const themeText =
-    getEl("themeText");
-
-
-  if (!themeText) {
-    return;
-  }
-
-
-  const dark =
-    document.documentElement
-      .classList
-      .contains("dark");
+  const normalized =
+    theme === "dark"
+      ? "dark"
+      : "light";
 
 
-  themeText.textContent =
-    translations[lang][
-      dark
-        ? "light_mode"
-        : "high_contrast"
-    ];
+  document.documentElement
+    .dataset
+    .theme =
+      normalized;
+
+
+  document.body
+    ?.classList
+    .toggle(
+      "dark-theme",
+      normalized === "dark"
+    );
+
+
+  localStorage.setItem(
+    "fazdireito-theme",
+    normalized
+  );
+
+
+  window.requestAnimationFrame(
+    () => {
+
+      if (liveNews) {
+
+        drawChart();
+
+      }
+
+    }
+  );
 
 }
 
 
 function toggleTheme() {
 
-  const dark =
-    !document.documentElement
-      .classList
-      .contains("dark");
+  const current =
+    localStorage.getItem(
+      "fazdireito-theme"
+    ) ||
+    document.documentElement
+      .dataset
+      .theme ||
+    "light";
 
 
-  document.documentElement
-    .classList
-    .toggle(
-      "dark",
-      dark
-    );
-
-
-  localStorage.setItem(
-    "fazdireito-theme",
-    dark
-      ? "dark"
-      : "light"
+  setTheme(
+    current === "dark"
+      ? "light"
+      : "dark"
   );
-
-
-  syncThemeLabel();
 
 }
 
 
-// ============================================================
-// MENU MOBILE
-// ============================================================
+function toggleContrast() {
 
-const menuBtn =
-  getEl("mobileMenuBtn");
-
-
-const menu =
-  getEl("mobileMenu");
+  const active =
+    document.body
+      ?.classList
+      .toggle(
+        "high-contrast"
+      );
 
 
-const menuIcon =
-  getEl("mobileMenuIcon");
-
-
-function toggleMenu(force) {
-
-  if (
-    !menu ||
-    !menuBtn
-  ) {
-    return;
-  }
-
-
-  const open =
-    force ??
-    menu.hidden;
-
-
-  menu.hidden =
-    !open;
-
-
-  menuBtn.setAttribute(
-    "aria-expanded",
-    String(open)
+  localStorage.setItem(
+    "fazdireito-contrast",
+    active
+      ? "1"
+      : "0"
   );
 
 
-  if (menuIcon) {
+  window.requestAnimationFrame(
+    () => {
 
-    menuIcon.setAttribute(
-      "href",
-      open
-        ? "#i-x"
-        : "#i-bars"
-    );
+      if (liveNews) {
 
-  }
+        drawChart();
+
+      }
+
+    }
+  );
 
 }
 
@@ -4617,316 +6792,484 @@ function toggleMenu(force) {
 
 function bindEvents() {
 
+  // ----------------------------------------------------------
+  // ABAS
+  // ----------------------------------------------------------
+
   document
-    .querySelectorAll(".tab")
+    .querySelectorAll(
+      ".tab-btn"
+    )
     .forEach(
       button => {
 
         button.addEventListener(
           "click",
-          () =>
-            openTab(
-              button.dataset.tab
-            )
+          () => {
+
+            const tab =
+              button.dataset.tab;
+
+
+            if (tab) {
+
+              openTab(
+                tab
+              );
+
+            }
+
+          }
         );
 
       }
     );
 
 
+  // ----------------------------------------------------------
+  // IDIOMAS
+  // ----------------------------------------------------------
+
   document
     .querySelectorAll(
-      "[data-open-tab]"
+      "[data-lang]"
     )
     .forEach(
       button => {
 
-        button.onclick =
-          () =>
-            openTab(
-              button.dataset.openTab
-            );
+        button.addEventListener(
+          "click",
+          () => {
+
+            const language =
+              button.dataset.lang;
+
+
+            if (language) {
+
+              setLanguage(
+                language
+              );
+
+            }
+
+          }
+        );
 
       }
     );
 
 
+  // ----------------------------------------------------------
+  // ACESSIBILIDADE
+  // ----------------------------------------------------------
+
+  const increase =
+    getEl(
+      "increaseFont"
+    );
+
+
+  const decrease =
+    getEl(
+      "decreaseFont"
+    );
+
+
+  const contrast =
+    getEl(
+      "contrastToggle"
+    );
+
+
+  const theme =
+    getEl(
+      "themeToggle"
+    );
+
+
+  if (increase) {
+
+    increase.addEventListener(
+      "click",
+      increaseFontSize
+    );
+
+  }
+
+
+  if (decrease) {
+
+    decrease.addEventListener(
+      "click",
+      decreaseFontSize
+    );
+
+  }
+
+
+  if (contrast) {
+
+    contrast.addEventListener(
+      "click",
+      toggleContrast
+    );
+
+  }
+
+
+  if (theme) {
+
+    theme.addEventListener(
+      "click",
+      toggleTheme
+    );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // FILTROS PRINCIPAIS
+  // ----------------------------------------------------------
+
   const applyFilters =
-    getEl("applyFilters");
+    getEl(
+      "applyFilters"
+    );
+
+
+  const resetFilters =
+    getEl(
+      "resetFilters"
+    );
 
 
   if (applyFilters) {
 
-    applyFilters.onclick =
-      applyRadarFilters;
+    applyFilters.addEventListener(
+      "click",
+      applyRadarFilters
+    );
 
   }
-
-
-  const resetFilters =
-    getEl("resetFilters");
 
 
   if (resetFilters) {
 
-    resetFilters.onclick =
-      resetRadarFilters;
+    resetFilters.addEventListener(
+      "click",
+      resetRadarFilters
+    );
 
   }
 
 
+  const searchTerm =
+    getEl(
+      "searchTerm"
+    );
+
+
+  if (searchTerm) {
+
+    searchTerm.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
+          event.preventDefault();
+
+          applyRadarFilters();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // COBERTURA
+  // ----------------------------------------------------------
+
   const coverageFilter =
-    getEl("coverageFilter");
+    getEl(
+      "coverageFilter"
+    );
 
 
   if (coverageFilter) {
 
-    coverageFilter.onchange =
+    coverageFilter.addEventListener(
+      "change",
       () => {
 
         renderNewsFeed();
 
-      };
+      }
+    );
 
   }
 
 
-  const mentionFilter =
-    getEl("mentionFilter");
+  // ----------------------------------------------------------
+  // BUSCA INTERNA EM MENÇÕES
+  // ----------------------------------------------------------
+
+  const mentionsSearch =
+    getEl(
+      "mentionsSearch"
+    );
 
 
-  if (mentionFilter) {
+  if (mentionsSearch) {
 
-    mentionFilter.oninput =
-      event =>
+    mentionsSearch.addEventListener(
+      "input",
+      event => {
+
         filterMentionsList(
           event.target.value
         );
 
-  }
-
-
-  const addTheme =
-    getEl("addTheme");
-
-
-  if (addTheme) {
-
-    addTheme.onclick =
-      () =>
-        alert(
-          "A gestão personalizada de temas será habilitada quando houver persistência específica para essa funcionalidade."
-        );
+      }
+    );
 
   }
 
 
-  document.addEventListener(
-    "click",
-    event => {
+  // ----------------------------------------------------------
+  // REDESENHO DO GRÁFICO
+  // ----------------------------------------------------------
 
-      const word =
-        event.target.closest(
-          ".word"
-        );
-
-
-      if (word) {
-
-        const searchTerm =
-          getEl("searchTerm");
-
-
-        if (searchTerm) {
-
-          searchTerm.value =
-            word.dataset.theme ||
-            word.textContent.trim();
-
-        }
-
-
-        openTab(
-          "overview"
-        );
-
-
-        applyRadarFilters();
-
-      }
-
-    }
-  );
-
-
-  if (menuBtn) {
-
-    menuBtn.onclick =
-      () =>
-        toggleMenu();
-
-  }
-
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Escape"
-      ) {
-
-        toggleMenu(false);
-
-      }
-
-    }
-  );
-
-
-  document.addEventListener(
-    "click",
-    event => {
-
-      if (
-        menu &&
-        menuBtn &&
-        !menu.hidden &&
-        !menu.contains(
-          event.target
-        ) &&
-        !menuBtn.contains(
-          event.target
-        )
-      ) {
-
-        toggleMenu(false);
-
-      }
-
-    }
-  );
+  let resizeTimer =
+    null;
 
 
   window.addEventListener(
     "resize",
     () => {
 
-      if (
-        window.innerWidth >=
-        768
-      ) {
-
-        toggleMenu(false);
-
-      }
+      window.clearTimeout(
+        resizeTimer
+      );
 
 
-      drawChart();
+      resizeTimer =
+        window.setTimeout(
+          () => {
+
+            if (liveNews) {
+
+              drawChart();
+
+            }
+
+          },
+          120
+        );
 
     }
   );
 
 }
+
+
 // ============================================================
-// INICIALIZAÇÃO
+// RESTAURAÇÃO DAS PREFERÊNCIAS
 // ============================================================
 
-async function initializeRadar() {
+function restorePreferences() {
 
-  const storedLanguage =
+  const savedLanguage =
     localStorage.getItem(
       "fazdireito-lang"
-    ) ||
-    "pt";
-
-
-  const storedFontSize =
-    Number(
-      localStorage.getItem(
-        "fazdireito-font-size"
-      ) ||
-      100
     );
 
 
-  const storedTheme =
+  if (
+    savedLanguage &&
+    translations[
+      savedLanguage
+    ]
+  ) {
+
+    lang =
+      savedLanguage;
+
+  }
+
+
+  const savedFontSize =
+    Number(
+      localStorage.getItem(
+        "fazdireito-font-size"
+      )
+    );
+
+
+  if (
+    Number.isFinite(
+      savedFontSize
+    ) &&
+    savedFontSize >= 85 &&
+    savedFontSize <= 125
+  ) {
+
+    fontSize =
+      savedFontSize;
+
+  }
+
+
+  applyFontSize();
+
+
+  const savedTheme =
     localStorage.getItem(
       "fazdireito-theme"
     );
 
 
-  fontSize =
-    Number.isFinite(
-      storedFontSize
-    )
-      ? storedFontSize
-      : 100;
-
-
-  document.documentElement.style.setProperty(
-    "--base-font-size",
-    fontSize + "%"
-  );
-
-
   if (
-    storedTheme === "dark"
+    savedTheme === "dark" ||
+    savedTheme === "light"
   ) {
 
-    document.documentElement
-      .classList
-      .add("dark");
+    setTheme(
+      savedTheme
+    );
 
   }
 
 
-  setLanguage(
-    storedLanguage,
-    false
-  );
-
-
-  bindEvents();
-
-
-  renderInitialState();
-
-
-  const [
-    statusResult,
-    sourcesResult,
-    newsResult
-  ] =
-    await Promise.allSettled(
-      [
-        checkRadarApi(),
-        loadRadarSources(),
-        loadRadarNews()
-      ]
+  const savedContrast =
+    localStorage.getItem(
+      "fazdireito-contrast"
     );
 
 
-  console.info(
-    "[Radar] Inicialização concluída:",
-    {
-      status:
-        statusResult.status,
+  if (
+    savedContrast === "1"
+  ) {
 
-      sources:
-        sourcesResult.status,
+    document.body
+      ?.classList
+      .add(
+        "high-contrast"
+      );
 
-      news:
-        newsResult.status,
+  }
 
-      apiVersion:
-        liveNewsMeta?.version ||
-        liveStatus?.version ||
-        "desconhecida"
-    }
+}
+
+
+// ============================================================
+// INICIALIZAÇÃO DA INTERFACE
+// ============================================================
+
+function initializeInterface() {
+
+  restorePreferences();
+
+  bindEvents();
+
+  setLanguage(
+    lang
+  );
+
+
+  const firstActiveTab =
+    document.querySelector(
+      ".tab-btn.active"
+    );
+
+
+  const initialTab =
+    firstActiveTab
+      ?.dataset
+      ?.tab ||
+    "overview";
+
+
+  openTab(
+    initialTab
   );
 
 }
 
 
-initializeRadar();
+// ============================================================
+// INICIALIZAÇÃO DOS DADOS
+// ============================================================
+
+async function initializeRadarData() {
+
+  await checkRadarApi();
+
+
+  await Promise.allSettled(
+    [
+      loadRadarSources(),
+      loadRadarNews()
+    ]
+  );
+
+}
+
+
+// ============================================================
+// INICIALIZAÇÃO DO RADAR
+// ============================================================
+
+async function initializeRadar() {
+
+  initializeInterface();
+
+
+  try {
+
+    await initializeRadarData();
+
+  } catch (error) {
+
+    console.error(
+      "[Radar] Falha durante a inicialização:",
+      error
+    );
+
+
+    renderNewsUnavailable();
+
+  }
+
+}
+
+
+// ============================================================
+// DOM READY
+// ============================================================
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeRadar,
+    {
+      once: true
+    }
+  );
+
+} else {
+
+  initializeRadar();
+
+}
