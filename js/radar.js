@@ -1383,16 +1383,25 @@ function calculatePeak(
   }
 
 
-  return timeline.reduce(
-    (best, current) =>
-      current.total > best.total
-        ? current
-        : best,
-    timeline[0]
-  );
+  const peak =
+    timeline.reduce(
+      (best, current) =>
+        current.total > best.total
+          ? current
+          : best,
+      timeline[0]
+    );
+
+
+  return {
+    count:
+      peak.total,
+
+    start:
+      peak.start
+  };
 
 }
-
 
 // ============================================================
 // RENDERIZAÇÃO DOS INDICADORES
