@@ -14,20 +14,8 @@ const RADAR_API = {
   endpoints: {
     status: "/api/status",
     news: "/api/news",
-    sources: "/api/sources",
-
-    // Contratos reservados para evoluções do Worker.
-    // O front-end atual NÃO depende destes endpoints.
-    topics: "/api/topics",
-    topicTrends: "/api/topics/trends",
-    entities: "/api/entities"
+    sources: "/api/sources"
   }
-};
-
-const RADAR_SERVICE_CAPABILITIES = {
-  topics: "client-derived",
-  topicTrends: "client-derived",
-  entities: "planned"
 };
 
 
@@ -877,131 +865,6 @@ async function loadRadarNews() {
 
 }
 
-
-// ============================================================
-// MOTOR DE TEMAS — DERIVADO DO CORPUS REAL
-// ============================================================
-
-const RADAR_TOPICS = [
-  { id:"economia", pt:"Economia", en:"Economy", es:"Economía", terms:["economia","economico","econômico","mercado","pib","crescimento"] },
-  { id:"impostos", pt:"Impostos", en:"Taxes", es:"Impuestos", terms:["imposto","impostos","tributo","tributos","tributaria","tributária","taxacao","taxação"] },
-  { id:"seguranca", pt:"Segurança pública", en:"Public safety", es:"Seguridad pública", terms:["seguranca publica","segurança pública","crime","criminalidade","policia","polícia","violencia","violência"] },
-  { id:"stf", pt:"STF e Judiciário", en:"Supreme Court & Judiciary", es:"STF y Poder Judicial", terms:["stf","supremo","judiciario","judiciário","alexandre de moraes","moraes"] },
-  { id:"congresso", pt:"Congresso e política", en:"Congress & politics", es:"Congreso y política", terms:["congresso","senado","camara","câmara","deputado","senador","politica","política"] },
-  { id:"eleicoes", pt:"Eleições 2026", en:"2026 election", es:"Elecciones 2026", terms:["eleicao","eleição","eleicoes","eleições","candidato","candidatura","campanha","urna","voto"] },
-  { id:"apoios", pt:"Apoios e alianças", en:"Endorsements & alliances", es:"Apoyos y alianzas", terms:["apoio","apoia","alianca","aliança","aliado","aliados","coligacao","coligação","endosso"] },
-  { id:"agenda", pt:"Agenda e campanha", en:"Campaign agenda", es:"Agenda y campaña", terms:["agenda","evento","comicio","comício","visita","encontro","campanha","entrevista"] },
-  { id:"propostas", pt:"Propostas", en:"Proposals", es:"Propuestas", terms:["proposta","propostas","plano de governo","programa de governo","promete","defende"] },
-  { id:"internacional", pt:"Relações internacionais", en:"International relations", es:"Relaciones internacionales", terms:["eua","estados unidos","china","argentina","tarifa","tarifas","internacional","trump"] },
-  { id:"saude", pt:"Saúde", en:"Health", es:"Salud", terms:["saude","saúde","sus","hospital","medico","médico","vacina"] },
-  { id:"educacao", pt:"Educação", en:"Education", es:"Educación", terms:["educacao","educação","escola","ensino","universidade","professor"] },
-  { id:"emprego", pt:"Emprego e renda", en:"Jobs & income", es:"Empleo e ingresos", terms:["emprego","desemprego","renda","salario","salário","trabalho","trabalhador"] },
-  { id:"corrupcao", pt:"Investigações e integridade", en:"Investigations & integrity", es:"Investigaciones e integridad", terms:["investigacao","investigação","inquerito","inquérito","corrupcao","corrupção","fraude","escandalo","escândalo"] },
-  { id:"redes", pt:"Redes e comunicação", en:"Media & communication", es:"Redes y comunicación", terms:["rede social","redes sociais","instagram","youtube","tiktok","video","vídeo","comunicacao","comunicação"] }
-];
-
-let selectedThemeId = null;
-
-function topicLabel(topic){ return topic?.[lang] || topic?.pt || topic?.id || "Tema"; }
-function topicText(article){ return normalizeText(`${article?.title||""} ${article?.subtitle||""} ${article?.category||""}`); }
-function topicMatches(article, topic){
-  const text=topicText(article);
-  return topic.terms.some(term=>text.includes(normalizeText(term)));
-}
-function themeCandidateMatches(article, filter){
-  if(filter==="flavio") return Boolean(article.mentions?.flavio);
-  if(filter==="lula") return Boolean(article.mentions?.lula);
-  if(filter==="both") return Boolean(article.mentions?.flavio && article.mentions?.lula);
-  return true;
-}
-function getThemeBaseArticles(){
-  const base=(filteredNews.length || hasActiveFilters()) ? filteredNews : (liveNews||[]);
-  const candidate=getEl("themeCandidateFilter")?.value || "all";
-  return base.filter(a=>themeCandidateMatches(a,candidate));
-}
-function calculateTopicStats(articles=getThemeBaseArticles()){
-  return RADAR_TOPICS.map(topic=>{
-    const matched=articles.filter(a=>topicMatches(a,topic));
-    const flavio=matched.filter(a=>a.mentions?.flavio).length;
-    const lula=matched.filter(a=>a.mentions?.lula).length;
-    const both=matched.filter(a=>a.mentions?.flavio&&a.mentions?.lula).length;
-    return {...topic,count:matched.length,flavio,lula,both,articles:matched};
-  }).filter(x=>x.count>0).sort((a,b)=>b.count-a.count || topicLabel(a).localeCompare(topicLabel(b),lang));
-}
-function themeUiText(key){
-  const t={
-    pt:{articles:"matérias",noData:"Sem dados suficientes para este recorte.",topics:"assuntos identificados",publishers:"veículos",top:"assunto líder",emerging:"em crescimento",stable:"estável",comparison:"24h atuais × 24h anteriores",related:"matérias relacionadas"},
-    en:{articles:"articles",noData:"Not enough data for this selection.",topics:"topics identified",publishers:"publishers",top:"leading topic",emerging:"rising",stable:"stable",comparison:"current 24h × previous 24h",related:"related articles"},
-    es:{articles:"artículos",noData:"No hay datos suficientes para este recorte.",topics:"temas identificados",publishers:"medios",top:"tema principal",emerging:"en crecimiento",stable:"estable",comparison:"24h actuales × 24h anteriores",related:"artículos relacionados"}
-  }; return (t[lang]||t.pt)[key]||key;
-}
-function selectTheme(id){ selectedThemeId=id; renderThemesDashboard(); }
-function renderThemesDashboard(){
-  if(!liveNews) return;
-  const articles=getThemeBaseArticles();
-  let stats=calculateTopicStats(articles);
-  const q=normalizeText(getEl("themeSearch")?.value||"");
-  if(q) stats=stats.filter(s=>normalizeText(topicLabel(s)+" "+s.terms.join(" ")).includes(q));
-  if(!selectedThemeId || !stats.some(s=>s.id===selectedThemeId)) selectedThemeId=stats[0]?.id || null;
-  const selected=stats.find(s=>s.id===selectedThemeId) || null;
-  renderThemeSummary(articles,stats); renderThemeRanking(stats); renderThemeCloud(stats); renderEmergingTopics(articles,stats); renderThemeDetail(selected);
-}
-function renderThemeSummary(articles,stats){
-  const box=getEl("themeSummary"); if(!box)return;
-  const pubs=new Set(articles.map(a=>a.publisher).filter(Boolean)).size;
-  const top=stats[0];
-  const cards=[
-    [formatNumber(articles.length),themeUiText("articles"),"Corpus após filtros"],
-    [formatNumber(stats.length),themeUiText("topics"),"Taxonomia editorial"],
-    [formatNumber(pubs),themeUiText("publishers"),"Fontes no recorte"],
-    [top?escapeHTML(topicLabel(top)):"—",themeUiText("top"),top?`${top.count} ${themeUiText("articles")}`:"—"]
-  ];
-  box.innerHTML=cards.map(c=>`<div class="theme-summary-card"><span>${c[1]}</span><strong>${c[0]}</strong><small>${c[2]}</small></div>`).join("");
-}
-function renderThemeRanking(stats){
-  const box=getEl("themeRanking"); if(!box)return;
-  if(!stats.length){box.innerHTML=`<div class="empty-topic">${themeUiText("noData")}</div>`;return;}
-  const max=stats[0].count||1;
-  box.innerHTML=stats.slice(0,10).map(s=>`<button type="button" class="topic-row ${s.id===selectedThemeId?"active":""}" data-topic-id="${s.id}"><span><span class="topic-name">${escapeHTML(topicLabel(s))}</span><span class="topic-meta">Flávio ${s.flavio} • Lula ${s.lula} • Ambos ${s.both}</span></span><span class="topic-bar"><i style="width:${s.count/max*100}%"></i></span><span class="topic-count">${s.count}</span></button>`).join("");
-}
-function renderThemeCloud(stats){
-  const box=getEl("themeCloud"); if(!box)return;
-  if(!stats.length){box.innerHTML=`<span>${themeUiText("noData")}</span>`;return;}
-  const max=stats[0].count||1;
-  box.innerHTML=stats.slice(0,12).map(s=>`<button type="button" class="word ${s.id===selectedThemeId?"active":""}" data-topic-id="${s.id}" style="font-size:${.8+(s.count/max)*.9}rem">${escapeHTML(topicLabel(s))}</button>`).join("");
-}
-function topicPeriodCounts(topic,articles){
-  const now=Date.now(), day=86400000;
-  let current=0,previous=0;
-  articles.forEach(a=>{if(!topicMatches(a,topic))return;const d=validDate(a.publishedAt);if(!d)return;const age=now-d.getTime();if(age>=0&&age<day)current++;else if(age>=day&&age<2*day)previous++;});
-  return {current,previous};
-}
-function renderEmergingTopics(articles,stats){
-  const box=getEl("emergingTopics");if(!box)return;
-  const enriched=stats.map(s=>({...s,...topicPeriodCounts(s,articles)})).filter(s=>s.current||s.previous).map(s=>({...s,delta:s.previous?((s.current-s.previous)/s.previous)*100:(s.current?100:null)})).sort((a,b)=>(b.delta??-999)-(a.delta??-999)).slice(0,4);
-  if(!enriched.length){box.innerHTML=`<div class="empty-topic">${themeUiText("noData")}</div>`;return;}
-  box.innerHTML=enriched.map(s=>{const cls=s.delta>0?"up":s.delta<0?"down":"stable";const sign=s.delta>0?"+":"";const movement=s.delta===null?"—":`${sign}${Math.round(s.delta)}%`;return `<button type="button" class="emerging-card" data-topic-id="${s.id}"><strong>${escapeHTML(topicLabel(s))}</strong><span class="movement ${cls}">${movement}</span><small>${s.current} × ${s.previous} ${themeUiText("articles")}<br>${themeUiText("comparison")}</small></button>`;}).join("");
-}
-function buildTopicTimeline(topic,articles,bucketHours=4){
-  const relevant=articles.filter(a=>topicMatches(a,topic));
-  const buckets=buildTimeline(relevant,bucketHours);
-  return buckets.map(b=>({...b,count:b.total}));
-}
-function drawThemeChart(topic,articles){
-  const canvas=getEl("themeTrendChart");if(!canvas)return;const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
-  const dpr=window.devicePixelRatio||1;canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);const w=rect.width,h=rect.height,pad=28;ctx.clearRect(0,0,w,h);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;for(let i=0;i<5;i++){const y=pad+(h-pad*2)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
-  if(!topic){ctx.fillStyle="#64748b";ctx.font="13px sans-serif";ctx.textAlign="center";ctx.fillText(themeUiText("noData"),w/2,h/2);return;}
-  const timeline=buildTopicTimeline(topic,articles,4), values=timeline.map(x=>x.count), max=Math.max(1,...values);ctx.strokeStyle="#154b8b";ctx.lineWidth=3;ctx.beginPath();values.forEach((v,i)=>{const x=pad+(w-pad*2)*i/Math.max(1,values.length-1),y=h-pad-(h-pad*2)*v/max;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();ctx.fillStyle="#fdb813";values.forEach((v,i)=>{const x=pad+(w-pad*2)*i/Math.max(1,values.length-1),y=h-pad-(h-pad*2)*v/max;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();});
-}
-function renderThemeDetail(topic){
-  const badge=getEl("selectedThemeBadge"), sources=getEl("themeSources"), news=getEl("themeNews"), count=getEl("themeNewsCount");
-  if(badge)badge.textContent=topic?topicLabel(topic):"—";
-  if(!topic){if(sources)sources.innerHTML=`<div class="empty-topic">${themeUiText("noData")}</div>`;if(news)news.innerHTML=`<div class="empty-topic">${themeUiText("noData")}</div>`;if(count)count.textContent="0";drawThemeChart(null,[]);return;}
-  const articles=topic.articles||[];drawThemeChart(topic,articles);
-  const ranking=publisherRanking(articles).slice(0,5);if(sources)sources.innerHTML=ranking.map((r,i)=>`<div class="rank-row"><span class="rank-no">${i+1}</span><div><div class="rank-name">${escapeHTML(r.name)}</div><div class="rank-meta">${r.count} ${themeUiText("articles")}</div></div><span class="rank-score">${articles.length?(r.count/articles.length*100).toFixed(0):0}%</span></div>`).join("")||`<div class="empty-topic">${themeUiText("noData")}</div>`;
-  if(count)count.textContent=`${articles.length} ${themeUiText("related")}`;
-  if(news)news.innerHTML=articles.slice(0,12).map(newsHTML).join("")||`<div class="empty-topic">${themeUiText("noData")}</div>`;
-}
 
 // ============================================================
 // MÉTRICAS DERIVADAS
@@ -2116,8 +1979,6 @@ function renderKeywords() {
 
 function renderCoverageCards() {
 
-  renderThemesDashboard();
-
   const container =
     getEl("themeCards");
 
@@ -2290,6 +2151,102 @@ function renderCoverageCards() {
       )
       .join("");
 
+}
+
+
+
+// ============================================================
+// ASSUNTOS EMERGENTES — 24H ATUAIS × 24H ANTERIORES
+// ============================================================
+
+function renderEmergingTopics() {
+
+  const container =
+    getEl("emergingTopics");
+
+  if (!container || !liveNews) {
+    return;
+  }
+
+  const articles =
+    filteredNews.length || hasActiveFilters()
+      ? filteredNews
+      : liveNews;
+
+  const now = Date.now();
+  const hour = 60 * 60 * 1000;
+  const currentStart = now - (24 * hour);
+  const previousStart = now - (48 * hour);
+
+  const current = [];
+  const previous = [];
+
+  articles.forEach(article => {
+    const date = validDate(article.publishedAt);
+    if (!date) return;
+    const time = date.getTime();
+    if (time >= currentStart && time <= now) current.push(article);
+    else if (time >= previousStart && time < currentStart) previous.push(article);
+  });
+
+  if (!current.length || !previous.length) {
+    container.innerHTML = `
+      <div class="emerging-empty">
+        <strong>Dados insuficientes para comparação</strong>
+        <span>São necessárias publicações nas duas janelas de 24 horas para calcular assuntos emergentes.</span>
+      </div>
+    `;
+    return;
+  }
+
+  const currentTerms = extractKeywords(current, 40);
+  const previousTerms = new Map(
+    extractKeywords(previous, 80).map(item => [item.word, item.count])
+  );
+
+  const emerging = currentTerms
+    .map(item => {
+      const before = previousTerms.get(item.word) || 0;
+      const delta = item.count - before;
+      const growth = before > 0 ? (delta / before) * 100 : null;
+      return { ...item, before, delta, growth };
+    })
+    .filter(item => item.count >= 2 && item.delta > 0)
+    .sort((a, b) => b.delta - a.delta || b.count - a.count)
+    .slice(0, 8);
+
+  if (!emerging.length) {
+    container.innerHTML = `
+      <div class="emerging-empty">
+        <strong>Nenhum assunto em aceleração neste recorte</strong>
+        <span>Não foram encontrados termos com crescimento suficiente entre as duas janelas analisadas.</span>
+      </div>
+    `;
+    return;
+  }
+
+  const maxDelta = Math.max(...emerging.map(item => item.delta), 1);
+
+  container.innerHTML = emerging.map((item, index) => {
+    const width = Math.max(12, (item.delta / maxDelta) * 100);
+    const variation = item.before === 0
+      ? "novo no período"
+      : `+${item.growth.toFixed(0)}%`;
+
+    return `
+      <article class="emerging-item">
+        <span class="emerging-rank">${index + 1}</span>
+        <div class="emerging-content">
+          <div class="emerging-heading">
+            <strong>${escapeHTML(item.word)}</strong>
+            <span class="emerging-growth">${escapeHTML(variation)}</span>
+          </div>
+          <div class="emerging-track"><i style="width:${width}%"></i></div>
+          <small>${formatNumber(item.count)} ocorrências nas últimas 24h · ${formatNumber(item.before)} nas 24h anteriores</small>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 // ============================================================
@@ -3137,7 +3094,7 @@ function renderFilteredData() {
 
   renderCoverageCards();
 
-  renderThemesDashboard();
+  renderEmergingTopics();
 
   renderKeywords();
 
@@ -3172,7 +3129,7 @@ function resetRadarFilters() {
 
 
   if (period) {
-    period.value = "48h";
+    period.value = "7d";
   }
 
 
@@ -3264,7 +3221,7 @@ function renderRealData() {
 
   renderCoverageCards();
 
-  renderThemesDashboard();
+  renderEmergingTopics();
 
   renderKeywords();
 
@@ -3988,16 +3945,14 @@ const translations = {
     view_all:
       "Ver todas",
 
-    themes_eyebrow:"TEMAS",
-    themes_title:"Assuntos da cobertura monitorada",
-    themes_desc:"Explore os assuntos identificados nas matérias, sua frequência, evolução, veículos e relação com os candidatos monitorados.",
-    themes_candidate_filter:"Candidato", themes_search_label:"Buscar assunto", themes_search_placeholder:"Ex.: economia, STF, impostos",
-    themes_ranking_eyebrow:"ASSUNTOS", themes_ranking_title:"Assuntos mais presentes", themes_ranking_desc:"Ranking por quantidade de matérias em que o assunto foi identificado.",
-    themes_cloud_eyebrow:"EXPLORAR", themes_cloud_title:"Nuvem de assuntos", themes_cloud_note:"O tamanho representa a quantidade de matérias relacionadas ao assunto no recorte atual.",
-    themes_emerging_eyebrow:"MOVIMENTO", themes_emerging_title:"Assuntos emergentes", themes_emerging_desc:"Compara as últimas 24 horas com as 24 horas anteriores dentro da janela disponível.",
-    themes_detail_eyebrow:"DETALHE", themes_detail_title:"Evolução do assunto", themes_chart_note:"Cada ponto representa a quantidade de matérias relacionadas ao assunto em blocos de 4 horas.",
-    themes_sources_eyebrow:"FONTES", themes_sources_title:"Veículos que abordaram o assunto", themes_news_eyebrow:"AUDITABILIDADE", themes_news_title:"Matérias relacionadas", themes_news_desc:"Consulte as publicações que sustentam os números apresentados para o assunto selecionado.",
-    themes_methodology_title:"Como ler estes dados:", themes_methodology:"frequência de cobertura não representa popularidade, aprovação, intenção de voto ou avaliação positiva/negativa de candidatos.",
+    themes_title:
+      "Distribuição das referências",
+
+    themes_desc:
+      "Participação descritiva no corpus monitorado.",
+
+    add_theme:
+      "Adicionar tema",
 
     mentions_title:
       "Cobertura e publicações",
@@ -4233,8 +4188,14 @@ const translations = {
     view_all:
       "View all",
 
-    themes_eyebrow:"TOPICS", themes_title:"Topics in monitored coverage", themes_desc:"Explore topics identified in articles, their frequency, evolution, publishers and relationship with monitored candidates.",
-    themes_candidate_filter:"Candidate", themes_search_label:"Search topic", themes_search_placeholder:"E.g. economy, Supreme Court, taxes", themes_ranking_eyebrow:"TOPICS", themes_ranking_title:"Most frequent topics", themes_ranking_desc:"Ranking by number of articles in which each topic was identified.", themes_cloud_eyebrow:"EXPLORE", themes_cloud_title:"Topic cloud", themes_cloud_note:"Size represents the number of related articles in the current selection.", themes_emerging_eyebrow:"MOVEMENT", themes_emerging_title:"Emerging topics", themes_emerging_desc:"Compares the latest 24 hours with the previous 24 hours within the available window.", themes_detail_eyebrow:"DETAIL", themes_detail_title:"Topic evolution", themes_chart_note:"Each point represents related articles in 4-hour blocks.", themes_sources_eyebrow:"SOURCES", themes_sources_title:"Publishers covering the topic", themes_news_eyebrow:"AUDITABILITY", themes_news_title:"Related articles", themes_news_desc:"Review the publications supporting the figures shown for the selected topic.", themes_methodology_title:"How to read this data:", themes_methodology:"coverage frequency does not represent popularity, approval, voting intention or positive/negative assessment of candidates.",
+    themes_title:
+      "Reference distribution",
+
+    themes_desc:
+      "Descriptive share in the monitored corpus.",
+
+    add_theme:
+      "Add topic",
 
     mentions_title:
       "Coverage and publications",
@@ -4447,7 +4408,14 @@ const translations = {
     view_all:
       "Ver todas",
 
-    themes_eyebrow:"TEMAS", themes_title:"Temas de la cobertura monitoreada", themes_desc:"Explore los temas identificados en los artículos, su frecuencia, evolución, medios y relación con los candidatos monitoreados.", themes_candidate_filter:"Candidato", themes_search_label:"Buscar tema", themes_search_placeholder:"Ej.: economía, STF, impuestos", themes_ranking_eyebrow:"TEMAS", themes_ranking_title:"Temas más presentes", themes_ranking_desc:"Ranking por cantidad de artículos en los que se identificó el tema.", themes_cloud_eyebrow:"EXPLORAR", themes_cloud_title:"Nube de temas", themes_cloud_note:"El tamaño representa la cantidad de artículos relacionados con el tema en el recorte actual.", themes_emerging_eyebrow:"MOVIMIENTO", themes_emerging_title:"Temas emergentes", themes_emerging_desc:"Compara las últimas 24 horas con las 24 horas anteriores dentro de la ventana disponible.", themes_detail_eyebrow:"DETALLE", themes_detail_title:"Evolución del tema", themes_chart_note:"Cada punto representa la cantidad de artículos relacionados en bloques de 4 horas.", themes_sources_eyebrow:"FUENTES", themes_sources_title:"Medios que abordaron el tema", themes_news_eyebrow:"AUDITABILIDAD", themes_news_title:"Artículos relacionados", themes_news_desc:"Consulte las publicaciones que respaldan los números del tema seleccionado.", themes_methodology_title:"Cómo leer estos datos:", themes_methodology:"la frecuencia de cobertura no representa popularidad, aprobación, intención de voto ni evaluación positiva/negativa de candidatos.",
+    themes_title:
+      "Distribución de referencias",
+
+    themes_desc:
+      "Participación descriptiva en el corpus monitoreado.",
+
+    add_theme:
+      "Agregar tema",
 
     mentions_title:
       "Cobertura y publicaciones",
@@ -4907,21 +4875,24 @@ function bindEvents() {
   }
 
 
-  const themeCandidateFilter = getEl("themeCandidateFilter");
-  if (themeCandidateFilter) themeCandidateFilter.onchange = () => renderThemesDashboard();
+  const addTheme =
+    getEl("addTheme");
 
-  const themeSearch = getEl("themeSearch");
-  if (themeSearch) themeSearch.oninput = () => renderThemesDashboard();
+
+  if (addTheme) {
+
+    addTheme.onclick =
+      () =>
+        alert(
+          "A gestão personalizada de temas será habilitada quando houver persistência específica para essa funcionalidade."
+        );
+
+  }
+
 
   document.addEventListener(
     "click",
     event => {
-
-      const topicButton = event.target.closest("[data-topic-id]");
-      if (topicButton) {
-        selectTheme(topicButton.dataset.topicId);
-        return;
-      }
 
       const word =
         event.target.closest(
@@ -5021,8 +4992,6 @@ function bindEvents() {
 
 
       drawChart();
-      const selectedTopic = calculateTopicStats(getThemeBaseArticles()).find(item => item.id === selectedThemeId);
-      drawThemeChart(selectedTopic || null, selectedTopic?.articles || []);
 
     }
   );
