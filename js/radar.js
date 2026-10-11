@@ -2064,23 +2064,7 @@ function renderCoverageCards() {
         `Artigos das últimas ${periodHours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.`
     },
 
-    {
-      name:
-        "Total monitorado",
-
-      count:
-        metrics.total,
-
-      share:
-        metrics.total
-          ? 100
-          : 0,
-
-      description:
-        `Total de artigos retornados pelas fontes monitoradas nas últimas ${periodHours}h.`
-    }
-
-  ];
+  ];;
 
 
   container.innerHTML =
@@ -4870,21 +4854,6 @@ function bindEvents() {
       event =>
         filterMentionsList(
           event.target.value
-        );
-
-  }
-
-
-  const addTheme =
-    getEl("addTheme");
-
-
-  if (addTheme) {
-
-    addTheme.onclick =
-      () =>
-        alert(
-          "A gestão personalizada de temas será habilitada quando houver persistência específica para essa funcionalidade."
         );
 
   }
