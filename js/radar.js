@@ -3508,6 +3508,9 @@ const translations = {
     nav_map:
       "Mapa de Votos",
 
+    nav_plan:
+      "Plano de Governo",
+
     nav_axes:
       "Eixos Temáticos",
 
@@ -3684,6 +3687,9 @@ const translations = {
     nav_map:
       "Vote Map",
 
+    nav_plan:
+      "Government Plan",
+
     nav_axes:
       "Topics",
 
@@ -3859,6 +3865,9 @@ const translations = {
 
     nav_map:
       "Mapa de Votos",
+
+    nav_plan:
+      "Plan de Gobierno",
 
     nav_axes:
       "Ejes Temáticos",
