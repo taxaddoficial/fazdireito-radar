@@ -283,8 +283,60 @@
   </section>
 
   <section id="panel-themes" class="tab-panel">
-    <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Cards demonstrativos com volume, variação e nível de atenção. Clique para filtrar o restante do painel.</p></div><button id="addTheme" class="btn-primary">+ <span data-i18n="add_theme">Adicionar tema</span></button></div>
-    <div id="themeCards" class="theme-grid"></div>
+    <div class="section-intro themes-intro">
+      <div>
+        <span class="eyebrow" data-i18n="themes_eyebrow">TEMAS</span>
+        <h3 data-i18n="themes_title">Assuntos da cobertura monitorada</h3>
+        <p data-i18n="themes_desc">Explore os assuntos identificados nas matérias, sua frequência, evolução, veículos e relação com os candidatos monitorados.</p>
+      </div>
+      <div class="themes-controls">
+        <label>
+          <span data-i18n="themes_candidate_filter">Candidato</span>
+          <select id="themeCandidateFilter">
+            <option value="all" data-i18n="candidate_all">Todos</option>
+            <option value="flavio" data-i18n="candidate_flavio">Flávio Bolsonaro</option>
+            <option value="lula" data-i18n="candidate_lula">Lula</option>
+            <option value="both" data-i18n="candidate_both_same">Ambos na mesma matéria</option>
+          </select>
+        </label>
+        <label class="themes-search">
+          <span data-i18n="themes_search_label">Buscar assunto</span>
+          <input id="themeSearch" type="search" data-i18n-placeholder="themes_search_placeholder" placeholder="Ex.: economia, STF, impostos">
+        </label>
+      </div>
+    </div>
+
+    <div id="themeSummary" class="theme-summary" aria-live="polite"></div>
+
+    <div class="dashboard-grid themes-dashboard">
+      <article class="panel span-7">
+        <div class="panel-head wrap"><div><span class="eyebrow" data-i18n="themes_ranking_eyebrow">ASSUNTOS</span><h3 data-i18n="themes_ranking_title">Assuntos mais presentes</h3><p class="panel-subtitle" data-i18n="themes_ranking_desc">Ranking por quantidade de matérias em que o assunto foi identificado.</p></div></div>
+        <div id="themeRanking" class="topic-ranking"></div>
+      </article>
+      <article class="panel span-5">
+        <div class="panel-head"><div><span class="eyebrow" data-i18n="themes_cloud_eyebrow">EXPLORAR</span><h3 data-i18n="themes_cloud_title">Nuvem de assuntos</h3></div></div>
+        <div id="themeCloud" class="word-cloud theme-cloud"></div>
+        <div class="callout" data-i18n="themes_cloud_note">O tamanho representa a quantidade de matérias relacionadas ao assunto no recorte atual.</div>
+      </article>
+      <article class="panel span-12">
+        <div class="panel-head wrap"><div><span class="eyebrow" data-i18n="themes_emerging_eyebrow">MOVIMENTO</span><h3 data-i18n="themes_emerging_title">Assuntos emergentes</h3><p class="panel-subtitle" data-i18n="themes_emerging_desc">Compara as últimas 24 horas com as 24 horas anteriores dentro da janela disponível.</p></div></div>
+        <div id="emergingTopics" class="emerging-grid"></div>
+      </article>
+      <article class="panel span-7">
+        <div class="panel-head wrap"><div><span class="eyebrow" data-i18n="themes_detail_eyebrow">DETALHE</span><h3 id="selectedThemeTitle" data-i18n="themes_detail_title">Evolução do assunto</h3></div><span id="selectedThemeBadge" class="topic-selected-badge">—</span></div>
+        <div class="canvas-wrap theme-chart-wrap"><canvas id="themeTrendChart" aria-label="Evolução temporal do assunto selecionado"></canvas></div>
+        <p class="chart-caption" data-i18n="themes_chart_note">Cada ponto representa a quantidade de matérias relacionadas ao assunto em blocos de 4 horas.</p>
+      </article>
+      <article class="panel span-5">
+        <div class="panel-head"><div><span class="eyebrow" data-i18n="themes_sources_eyebrow">FONTES</span><h3 data-i18n="themes_sources_title">Veículos que abordaram o assunto</h3></div></div>
+        <div id="themeSources" class="ranking"></div>
+      </article>
+      <article class="panel span-12">
+        <div class="panel-head wrap"><div><span class="eyebrow" data-i18n="themes_news_eyebrow">AUDITABILIDADE</span><h3 data-i18n="themes_news_title">Matérias relacionadas</h3><p class="panel-subtitle" data-i18n="themes_news_desc">Consulte as publicações que sustentam os números apresentados para o assunto selecionado.</p></div><span id="themeNewsCount" class="topic-selected-badge">0</span></div>
+        <div id="themeNews" class="mentions-list"></div>
+      </article>
+    </div>
+    <div class="methodology-note"><strong data-i18n="themes_methodology_title">Como ler estes dados:</strong> <span data-i18n="themes_methodology">frequência de cobertura não representa popularidade, aprovação, intenção de voto ou avaliação positiva/negativa de candidatos.</span></div>
   </section>
 
   <section id="panel-mentions" class="tab-panel">
