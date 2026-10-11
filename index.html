@@ -41,27 +41,33 @@
   </div>
 </aside>
 
-<header class="bg-brand-navy text-white sticky top-0 z-50 shadow-md">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-    <a href="https://fazdireito.neocities.org/" class="flex items-center space-x-3 group">
-      <div class="w-10 h-10 rounded-full bg-brand-yellow flex items-center justify-center text-brand-navy shadow-inner"><svg class="ui-icon text-xl text-brand-blue"><use href="#i-flag"></use></svg></div>
-      <div><h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">A Direita faz Direito | O Brasil Vai Vencer</h1><p class="text-xs text-yellow-400 font-medium hidden sm:block" data-i18n="header_subtitle">Radar Eleitoral 2026</p></div>
+<header class="radar-site-header bg-brand-navy text-white sticky top-0 z-50 shadow-md">
+  <div class="radar-header-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <a href="https://fazdireito.neocities.org/" class="radar-brand group" aria-label="A Direita faz Direito — voltar ao portal">
+      <span class="radar-brand-mark bg-brand-yellow text-brand-navy" aria-hidden="true"><svg class="ui-icon"><use href="#i-flag"></use></svg></span>
+      <span class="radar-brand-copy"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span>Rumo à Vitória no 2º Turno • Portal de Mobilização</span></span>
     </a>
-    <nav class="hidden md:flex items-center space-x-5 text-sm font-medium">
+    <nav class="radar-desktop-nav" aria-label="Navegação principal">
       <a href="https://fazdireito.neocities.org/" class="nav-link" data-i18n="nav_map">Mapa de Votos</a>
+      <a href="https://fazdireito.neocities.org/" class="nav-link" target="_blank" rel="noopener noreferrer" aria-label="Plano de Governo (abre o portal em nova aba)">Plano de Governo <svg class="ui-icon radar-external-icon" aria-hidden="true"><use href="#i-external"></use></svg></a>
       <a href="https://fazdireito.neocities.org/assuntos.html" class="nav-link" data-i18n="nav_axes">Eixos Temáticos</a>
-      <a href="https://fazdireito.neocities.org/materiais.html" class="nav-link" data-i18n="nav_kit">Kit Mídia & Rede</a>
+      <a href="https://fazdireito.neocities.org/materiais.html" class="nav-link" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
       <a href="https://fazdireito.neocities.org/guia.html" class="nav-link" data-i18n="nav_guide">Guia de Diálogo</a>
       <a href="/" aria-current="page" class="nav-link active" data-i18n="nav_radar">Radar 2026</a>
     </nav>
-    <div class="flex items-center space-x-3">
-      <span class="bg-brand-yellow text-brand-navy font-bold px-3 py-1.5 rounded-lg text-xs shadow" data-i18n="campaign_2026">Campanha 2026</span>
-      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileMenu" class="md:hidden p-2 rounded-md hover:bg-slate-800"><svg class="ui-icon text-xl"><use id="mobileMenuIcon" href="#i-bars"></use></svg></button>
+    <div class="radar-header-actions">
+      <span class="radar-campaign-badge bg-brand-yellow text-brand-navy" data-i18n="campaign_2026">Campanha 2026</span>
+      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileMenu" class="radar-mobile-trigger"><svg class="ui-icon"><use id="mobileMenuIcon" href="#i-bars"></use></svg></button>
     </div>
   </div>
-  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="md:hidden border-t border-slate-700">
+  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="radar-mobile-nav">
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-medium">
-      <a href="https://fazdireito.neocities.org/" class="mobile-link" data-i18n="nav_map">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html" class="mobile-link" data-i18n="nav_axes">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html" class="mobile-link" data-i18n="nav_kit">Kit Mídia & Rede</a><a href="https://fazdireito.neocities.org/guia.html" class="mobile-link" data-i18n="nav_guide">Guia de Diálogo</a><a href="/" class="mobile-link active" data-i18n="nav_radar">Radar 2026</a>
+      <a href="https://fazdireito.neocities.org/" class="mobile-link" data-i18n="nav_map">Mapa de Votos</a>
+      <a href="https://fazdireito.neocities.org/" class="mobile-link" target="_blank" rel="noopener noreferrer">Plano de Governo ↗</a>
+      <a href="https://fazdireito.neocities.org/assuntos.html" class="mobile-link" data-i18n="nav_axes">Eixos Temáticos</a>
+      <a href="https://fazdireito.neocities.org/materiais.html" class="mobile-link" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+      <a href="https://fazdireito.neocities.org/guia.html" class="mobile-link" data-i18n="nav_guide">Guia de Diálogo</a>
+      <a href="/" class="mobile-link active" aria-current="page" data-i18n="nav_radar">Radar 2026</a>
     </div>
   </nav>
 </header>
