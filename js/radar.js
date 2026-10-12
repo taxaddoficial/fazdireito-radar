@@ -4882,6 +4882,8 @@ function openTab(name) {
 
 
   if (name === "disinfo") renderDisinfo();
+  if (name === "polls") loadPolls();
+  if (name === "vote") loadVotes();
 
   if (
     name === "overview"
@@ -5519,4 +5521,49 @@ async function initializeRadar() {
 }
 
 
+
+// Election modules — the data comes exclusively from the Worker / D1.
+const ELECTION_I18N={
+ pt:{tab_polls:'Pesquisas',tab_vote:'Voto agora',polls_label:'LEVANTAMENTOS PUBLICADOS',polls_title:'Pesquisas eleitorais',polls_intro:'Resultados publicados e documentados, sem estimativas.',polls_institute:'Instituto',all_institutes:'Todos os institutos',polls_from:'De',polls_to:'Até',refresh:'Atualizar',poll_accuracy_low:'Menores diferenças observadas',poll_accuracy_high:'Maiores diferenças observadas',poll_method:'Diferenças só serão calculadas quando houver pesquisas comparáveis e resultados oficiais validados. Margem de erro não equivale à diferença na votação.',poll_tse_link:'Consultar registros de pesquisas no TSE ↗',vote_official:'RESULTADOS OFICIAIS',vote_title:'Voto agora',vote_intro:'Apuração presidencial publicada pelo TSE, sem projeções.',first_round:'Primeiro turno',second_round:'Segundo turno · 25/10/2026',vote_refresh:'Atualização automática durante a apuração, conforme disponibilidade de dados oficiais.',vote_method:'Números apenas após ingestão e validação de arquivos oficiais. Ausência de dados não significa zero votos.',vote_tse_link:'Consultar resultados oficiais do TSE ↗',empty_poll:'Ainda não há percentuais de pesquisas documentados na base histórica. Não serão exibidos valores estimados.',empty_vote:'Aguardando resultados oficiais validados. Consulte o TSE pelo link abaixo.',vote_not_started:'Votação não iniciada. A divulgação da apuração está prevista a partir das 17h (Brasília) de 25/10.',poll_accuracy_pending:'Aguardando dados comparáveis e resultados oficiais para calcular diferenças.',loading_data:'Consultando dados...',error_data:'Não foi possível consultar os dados agora.'},
+ en:{tab_polls:'Polls',tab_vote:'Vote now',polls_label:'PUBLISHED SURVEYS',polls_title:'Election polls',polls_intro:'Documented published results; no estimates.',polls_institute:'Polling organization',all_institutes:'All organizations',polls_from:'From',polls_to:'To',refresh:'Refresh',poll_accuracy_low:'Smallest observed differences',poll_accuracy_high:'Largest observed differences',poll_method:'Differences require comparable polls and validated official results. Sampling margin of error is not the difference from the election result.',poll_tse_link:'View registered polls at TSE ↗',vote_official:'OFFICIAL RESULTS',vote_title:'Vote now',vote_intro:'Official presidential vote count; no projections.',first_round:'First round',second_round:'Second round · Oct 25, 2026',vote_refresh:'Automatic refresh during vote counting, subject to official availability.',vote_method:'Figures are displayed only after official source validation. Missing data does not mean zero votes.',vote_tse_link:'Official TSE results ↗',empty_poll:'No documented polling percentages are available yet. No estimated figures will be shown.',empty_vote:'Awaiting validated official results. See the TSE link below.',vote_not_started:'Voting not started. Official results may be published from 5 pm Brasília time on Oct 25.',poll_accuracy_pending:'Comparable polls and official results are required to calculate differences.',loading_data:'Loading data...',error_data:'Data could not be loaded.'},
+ es:{tab_polls:'Encuestas',tab_vote:'Voto ahora',polls_label:'ENCUESTAS PUBLICADAS',polls_title:'Encuestas electorales',polls_intro:'Resultados publicados y documentados, sin estimaciones.',polls_institute:'Instituto',all_institutes:'Todos los institutos',polls_from:'Desde',polls_to:'Hasta',refresh:'Actualizar',poll_accuracy_low:'Menores diferencias observadas',poll_accuracy_high:'Mayores diferencias observadas',poll_method:'Las diferencias requieren encuestas comparables y resultados oficiales validados. El margen de error no equivale a la diferencia electoral.',poll_tse_link:'Consultar encuestas registradas en TSE ↗',vote_official:'RESULTADOS OFICIALES',vote_title:'Voto ahora',vote_intro:'Escrutinio presidencial oficial, sin proyecciones.',first_round:'Primera vuelta',second_round:'Segunda vuelta · 25/10/2026',vote_refresh:'Actualización automática durante el escrutinio, según disponibilidad oficial.',vote_method:'Cifras solo después de validar archivos oficiales. La ausencia de datos no significa cero votos.',vote_tse_link:'Resultados oficiales del TSE ↗',empty_poll:'Aún no hay porcentajes documentados en la base histórica. No se mostrarán estimaciones.',empty_vote:'Esperando resultados oficiales validados. Consulte el TSE.',vote_not_started:'Votación no iniciada. Publicación prevista desde las 17 h de Brasilia del 25/10.',poll_accuracy_pending:'Se requieren encuestas comparables y resultados oficiales para calcular diferencias.',loading_data:'Consultando datos...',error_data:'No fue posible consultar los datos.'}
+};
+for(const code of ['pt','en','es'])Object.assign(translations[code]||{},ELECTION_I18N[code]);
+const electT=k=>(ELECTION_I18N[lang]||ELECTION_I18N.pt)[k]||k;
+let pollData=[],votesLoadedAt=0,voteTimer=null;
+function electionText(id,text){const el=getEl(id);if(el)el.textContent=text;}
+async function loadPolls(){
+ electionText('pollStatus',electT('loading_data'));
+ const q=new URLSearchParams();for(const [id,key] of [['pollInstitute','institute'],['pollFrom','from'],['pollTo','to']]){const v=getEl(id)?.value;if(v)q.set(key,v);}
+ try{const r=await fetch(`${RADAR_API.baseUrl}/api/polls?${q}`,{cache:'no-store'});if(!r.ok)throw Error(r.status);const data=await r.json();if(data.status!=='ok')throw Error(data.status);
+ pollData=data.polls||[];const institutes=[...new Set(pollData.map(x=>x.instituto).filter(Boolean))].sort((a,b)=>a.localeCompare(b));const select=getEl('pollInstitute'),current=select.value;
+ if(!current){select.innerHTML=`<option value="">${escapeHTML(electT('all_institutes'))}</option>`+institutes.map(x=>`<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`).join('');}
+ const valid=pollData.filter(x=>x.candidato&&Number.isFinite(Number(x.percentual))&&x.percentual!==null);
+ electionText('pollStatus',valid.length?`${valid.length} registros com percentuais publicados.`:electT('empty_poll'));
+ const chart=getEl('pollChart'),list=getEl('pollList');chart.innerHTML='';list.innerHTML='';
+ for(const row of valid.slice(0,60)){
+ const pct=Math.max(0,Math.min(100,Number(row.percentual)));const label=`${row.instituto||''} · ${row.data_divulgacao||''} · ${row.candidato}`;
+ const bar=document.createElement('div');bar.className='election-bar-row';bar.innerHTML=`<div class="election-bar-head"><span>${escapeHTML(label)}</span><strong>${pct.toLocaleString(lang==='en'?'en-US':'pt-BR')}%</strong></div><div class="election-bar-track"><div class="election-bar-fill" style="width:${pct}%"></div></div>`;chart.appendChild(bar);
+ const item=document.createElement('div');item.className='election-result';item.innerHTML=`<strong>${escapeHTML(row.candidato)} — ${pct}%</strong><small>${escapeHTML(row.instituto||'')} · ${escapeHTML(row.data_divulgacao||'')} · ${escapeHTML(row.cenario||'')} · ±${escapeHTML(row.margem_erro??'—')} pp</small>${/^https:\/\//.test(row.fonte_url||'')?`<a href="${escapeHTML(row.fonte_url)}" target="_blank" rel="noopener noreferrer">Fonte ↗</a>`:''}`;list.appendChild(item);
+ }
+ electionText('pollAccuracyLow',electT('poll_accuracy_pending'));electionText('pollAccuracyHigh',electT('poll_accuracy_pending'));
+ }catch(e){electionText('pollStatus',electT('error_data'));electionText('pollAccuracyLow',electT('poll_accuracy_pending'));electionText('pollAccuracyHigh',electT('poll_accuracy_pending'));}
+}
+function voteRow(row){const item=document.createElement('div');item.className='election-result';const pct=Number(row.percentual);const valid=Number.isFinite(pct)&&pct>=0&&pct<=100;item.innerHTML=`<div class="election-candidate">${/^https:\/\//.test(row.foto_url||'')?`<img loading="lazy" alt="" src="${escapeHTML(row.foto_url)}">`:''}<div><strong>${escapeHTML(row.candidato||'')}</strong><small>${escapeHTML(row.partido||'')} · ${Number(row.votos||0).toLocaleString('pt-BR')} votos ${valid?'· '+pct.toLocaleString('pt-BR')+'%':''}</small></div></div>${valid?`<div class="election-bar-track"><div class="election-bar-fill" style="width:${pct}%"></div></div>`:''}`;return item;}
+async function loadVotes(){
+ if(!getEl('voteFirst'))return;
+ for(const round of [1,2]){
+ const id=round===1?'voteFirst':'voteSecond';electionText(id,electT('loading_data'));
+ try{const r=await fetch(`${RADAR_API.baseUrl}/api/vote-now?round=${round}`,{cache:'no-store'});const data=await r.json();const el=getEl(id);el.replaceChildren();
+ if(data.status==='not_started'){el.textContent=electT('vote_not_started');continue;}
+ if(!Array.isArray(data.items)||!data.items.length){el.textContent=electT('empty_vote');continue;}
+ data.items.forEach(x=>el.appendChild(voteRow(x)));
+ }catch(e){electionText(id,electT('error_data'));}
+ }
+ votesLoadedAt=Date.now();
+ if(!voteTimer)voteTimer=setInterval(()=>{if(document.visibilityState==='visible'&&getEl('panel-vote')?.classList.contains('active'))loadVotes();},60000);
+}
+function bindElectionControls(){for(const id of ['pollInstitute','pollFrom','pollTo'])getEl(id)?.addEventListener('change',loadPolls);getEl('pollRefresh')?.addEventListener('click',loadPolls);}
+
+bindElectionControls();
 initializeRadar();
