@@ -297,3 +297,24 @@ html{font-size:var(--base-font-size)}
 #panel-mentions .inline-filters input{min-width:0;width:100%}
 #panel-mentions .inline-filters select{min-width:0;width:100%}
 @media(max-width:640px){#panel-mentions .inline-filters{grid-template-columns:1fr;width:100%}}
+
+/* ============================================================
+   VÍDEOS — YOUTUBE DATA API V3
+   ============================================================ */
+.video-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.video-actions{display:grid;grid-template-columns:minmax(220px,1fr) 180px;gap:.55rem;min-width:min(100%,460px)}
+.video-actions input,.video-actions select{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.75rem;padding:.7rem .8rem;font:inherit;font-size:.75rem}
+.video-summary{margin:.8rem 0;color:#64748b;font-size:.7rem;font-weight:700}
+.video-thumb-link{position:relative;display:block;aspect-ratio:16/9;background:#0b2341;overflow:hidden}
+.video-thumb-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+.video-thumb-link:hover .video-thumb-img{transform:scale(1.025)}
+.video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;padding-left:3px}
+.video-meta,.video-footer{display:flex;align-items:center;justify-content:space-between;gap:.6rem;color:#64748b;font-size:.65rem}
+.video-info h4{margin:.5rem 0 .7rem;line-height:1.35}
+.video-info h4 a{color:inherit;text-decoration:none}.video-info h4 a:hover{text-decoration:underline}
+.video-footer a{font-weight:800;color:var(--navy);text-decoration:none}
+.video-state{grid-column:1/-1;padding:1.2rem;border:1px dashed var(--line);border-radius:1rem;text-align:center;color:#64748b;font-size:.75rem}
+.video-methodology{margin-top:1rem}
+.dark .video-actions input,.dark .video-actions select{background:#0f172a;border-color:#334155;color:#e2e8f0}
+.dark .video-footer a{color:#93c5fd}
+@media(max-width:700px){.video-actions{grid-template-columns:1fr;width:100%;min-width:0}}
