@@ -1884,8 +1884,20 @@ function renderKeywords() {
     );
 
 
+  const cloudKeywords =
+    extractKeywords(
+      articles,
+      20
+    );
+
+
   const max =
     keywords[0]?.count ||
+    1;
+
+
+  const cloudMax =
+    cloudKeywords[0]?.count ||
     1;
 
 
@@ -1926,7 +1938,7 @@ function renderKeywords() {
           .join("")
         : `
           <p>
-            Não há termos suficientes para esta seleção.
+            ${escapeHTML((translations[lang] || translations.pt).keywords_empty)}
           </p>
         `;
 
@@ -1936,14 +1948,14 @@ function renderKeywords() {
   if (wordCloud) {
 
     wordCloud.innerHTML =
-      keywords.length
-        ? keywords
+      cloudKeywords.length
+        ? cloudKeywords
           .map(
             item => {
 
               const weight =
                 item.count /
-                max;
+                cloudMax;
 
 
               const size =
@@ -1968,7 +1980,7 @@ function renderKeywords() {
           .join("")
         : `
           <span>
-            Sem dados suficientes.
+            ${escapeHTML((translations[lang] || translations.pt).cloud_empty)}
           </span>
         `;
 
@@ -2020,8 +2032,11 @@ function renderCoverageCards() {
       : 48;
 
 
+  const texts = translations[lang] || translations.pt;
+
+
   const periodLabel =
-    `${periodHours} horas`;
+    `${periodHours} ${texts.hours_label}`;
 
 
   const cards = [
@@ -2037,7 +2052,7 @@ function renderCoverageCards() {
         metrics.flavioShare,
 
       description:
-        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Flávio Bolsonaro.`
+        texts.theme_flavio_desc.replace("{hours}", periodHours)
     },
 
     {
@@ -2051,12 +2066,12 @@ function renderCoverageCards() {
         metrics.lulaShare,
 
       description:
-        `Artigos das últimas ${periodHours}h em que o monitor identificou referência a Lula.`
+        texts.theme_lula_desc.replace("{hours}", periodHours)
     },
 
     {
       name:
-        "Ambos",
+        texts.theme_both_name,
 
       count:
         metrics.both,
@@ -2065,7 +2080,7 @@ function renderCoverageCards() {
         metrics.bothShare,
 
       description:
-        `Artigos das últimas ${periodHours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.`
+        texts.theme_both_desc.replace("{hours}", periodHours)
     },
 
   ];;
@@ -2161,6 +2176,8 @@ function renderEmergingTopics() {
       ? filteredNews
       : liveNews;
 
+  const texts = translations[lang] || translations.pt;
+
   const now = Date.now();
   const hour = 60 * 60 * 1000;
   const currentStart = now - (24 * hour);
@@ -2180,8 +2197,8 @@ function renderEmergingTopics() {
   if (!current.length || !previous.length) {
     container.innerHTML = `
       <div class="emerging-empty">
-        <strong>Dados insuficientes para comparação</strong>
-        <span>São necessárias publicações nas duas janelas de 24 horas para calcular assuntos emergentes.</span>
+        <strong>${escapeHTML(texts.emerging_insufficient_title)}</strong>
+        <span>${escapeHTML(texts.emerging_insufficient_desc)}</span>
       </div>
     `;
     return;
@@ -2206,8 +2223,8 @@ function renderEmergingTopics() {
   if (!emerging.length) {
     container.innerHTML = `
       <div class="emerging-empty">
-        <strong>Nenhum assunto em aceleração neste recorte</strong>
-        <span>Não foram encontrados termos com crescimento suficiente entre as duas janelas analisadas.</span>
+        <strong>${escapeHTML(texts.emerging_none_title)}</strong>
+        <span>${escapeHTML(texts.emerging_none_desc)}</span>
       </div>
     `;
     return;
@@ -2218,7 +2235,7 @@ function renderEmergingTopics() {
   container.innerHTML = emerging.map((item, index) => {
     const width = Math.max(12, (item.delta / maxDelta) * 100);
     const variation = item.before === 0
-      ? "novo no período"
+      ? texts.emerging_new
       : `+${item.growth.toFixed(0)}%`;
 
     return `
@@ -2230,7 +2247,7 @@ function renderEmergingTopics() {
             <span class="emerging-growth">${escapeHTML(variation)}</span>
           </div>
           <div class="emerging-track"><i style="width:${width}%"></i></div>
-          <small>${formatNumber(item.count)} ocorrências nas últimas 24h · ${formatNumber(item.before)} nas 24h anteriores</small>
+          <small>${escapeHTML(texts.emerging_counts.replace("{current}", formatNumber(item.count)).replace("{previous}", formatNumber(item.before)))}</small>
         </div>
       </article>
     `;
@@ -3117,12 +3134,12 @@ function resetRadarFilters() {
 
 
   if (period) {
-    period.value = "7d";
+    period.value = "48h";
   }
 
 
   if (scope) {
-    scope.value = "all";
+    scope.value = "flavio";
   }
 
 
@@ -4031,11 +4048,42 @@ const translations = {
     themes_desc:
       "Participação descritiva no corpus monitorado.",
 
+    hours_label: "horas",
+    theme_flavio_desc: "Artigos das últimas {hours}h em que o monitor identificou referência a Flávio Bolsonaro.",
+    theme_lula_desc: "Artigos das últimas {hours}h em que o monitor identificou referência a Lula.",
+    theme_both_name: "Ambos",
+    theme_both_desc: "Artigos das últimas {hours}h em que foram identificadas referências a Flávio Bolsonaro e Lula na mesma publicação.",
+    emerging_eyebrow: "MOVIMENTO DA COBERTURA",
+    emerging_title: "Assuntos emergentes",
+    emerging_desc: "Termos que ganharam presença nas últimas 24 horas em comparação com as 24 horas anteriores.",
+    emerging_window: "24h × 24h anteriores",
+    emerging_methodology: "A variação representa frequência na cobertura jornalística monitorada. Não mede popularidade, sentimento, aprovação ou intenção de voto.",
+    emerging_insufficient_title: "Dados insuficientes para comparação",
+    emerging_insufficient_desc: "São necessárias publicações nas duas janelas de 24 horas para calcular assuntos emergentes.",
+    emerging_none_title: "Nenhum assunto em aceleração neste recorte",
+    emerging_none_desc: "Não foram encontrados termos com crescimento suficiente entre as duas janelas analisadas.",
+    emerging_new: "novo no período",
+    emerging_counts: "{current} ocorrências nas últimas 24h · {previous} nas 24h anteriores",
+    keywords_empty: "Não há termos suficientes para esta seleção.",
+    cloud_empty: "Sem dados suficientes.",
+
     add_theme:
       "Adicionar tema",
 
     mentions_title:
       "Cobertura e publicações",
+
+    mentions_filter_placeholder:
+      "Filtrar título ou fonte",
+
+    mentions_sort_recent:
+      "Mais recentes",
+
+    mentions_sort_relevance:
+      "Maior relevância",
+
+    mentions_sort_source:
+      "Por fonte",
 
     keywords_title:
       "Termos com maior presença",
@@ -4274,11 +4322,42 @@ const translations = {
     themes_desc:
       "Descriptive share in the monitored corpus.",
 
+    hours_label: "hours",
+    theme_flavio_desc: "Articles from the last {hours}h in which the monitor identified a reference to Flávio Bolsonaro.",
+    theme_lula_desc: "Articles from the last {hours}h in which the monitor identified a reference to Lula.",
+    theme_both_name: "Both",
+    theme_both_desc: "Articles from the last {hours}h in which references to Flávio Bolsonaro and Lula were identified in the same publication.",
+    emerging_eyebrow: "COVERAGE MOVEMENT",
+    emerging_title: "Emerging topics",
+    emerging_desc: "Terms that gained presence in the last 24 hours compared with the previous 24 hours.",
+    emerging_window: "24h × previous 24h",
+    emerging_methodology: "Variation represents frequency in the monitored news coverage. It does not measure popularity, sentiment, approval or voting intention.",
+    emerging_insufficient_title: "Insufficient data for comparison",
+    emerging_insufficient_desc: "Publications are required in both 24-hour windows to calculate emerging topics.",
+    emerging_none_title: "No accelerating topics in this selection",
+    emerging_none_desc: "No terms with sufficient growth were found between the two analyzed windows.",
+    emerging_new: "new in the period",
+    emerging_counts: "{current} occurrences in the last 24h · {previous} in the previous 24h",
+    keywords_empty: "There are not enough terms for this selection.",
+    cloud_empty: "Insufficient data.",
+
     add_theme:
       "Add topic",
 
     mentions_title:
       "Coverage and publications",
+
+    mentions_filter_placeholder:
+      "Filter title or source",
+
+    mentions_sort_recent:
+      "Most recent",
+
+    mentions_sort_relevance:
+      "Highest relevance",
+
+    mentions_sort_source:
+      "By source",
 
     keywords_title:
       "Most frequent terms",
@@ -4494,11 +4573,42 @@ const translations = {
     themes_desc:
       "Participación descriptiva en el corpus monitoreado.",
 
+    hours_label: "horas",
+    theme_flavio_desc: "Artículos de las últimas {hours}h en los que el monitor identificó una referencia a Flávio Bolsonaro.",
+    theme_lula_desc: "Artículos de las últimas {hours}h en los que el monitor identificó una referencia a Lula.",
+    theme_both_name: "Ambos",
+    theme_both_desc: "Artículos de las últimas {hours}h en los que se identificaron referencias a Flávio Bolsonaro y Lula en la misma publicación.",
+    emerging_eyebrow: "MOVIMIENTO DE LA COBERTURA",
+    emerging_title: "Temas emergentes",
+    emerging_desc: "Términos que ganaron presencia en las últimas 24 horas en comparación con las 24 horas anteriores.",
+    emerging_window: "24h × 24h anteriores",
+    emerging_methodology: "La variación representa frecuencia en la cobertura periodística monitoreada. No mide popularidad, sentimiento, aprobación ni intención de voto.",
+    emerging_insufficient_title: "Datos insuficientes para comparar",
+    emerging_insufficient_desc: "Se necesitan publicaciones en ambas ventanas de 24 horas para calcular temas emergentes.",
+    emerging_none_title: "Ningún tema en aceleración en este recorte",
+    emerging_none_desc: "No se encontraron términos con crecimiento suficiente entre las dos ventanas analizadas.",
+    emerging_new: "nuevo en el período",
+    emerging_counts: "{current} ocurrencias en las últimas 24h · {previous} en las 24h anteriores",
+    keywords_empty: "No hay términos suficientes para esta selección.",
+    cloud_empty: "Datos insuficientes.",
+
     add_theme:
       "Agregar tema",
 
     mentions_title:
       "Cobertura y publicaciones",
+
+    mentions_filter_placeholder:
+      "Filtrar título o fuente",
+
+    mentions_sort_recent:
+      "Más recientes",
+
+    mentions_sort_relevance:
+      "Mayor relevancia",
+
+    mentions_sort_source:
+      "Por fuente",
 
     keywords_title:
       "Términos con mayor presencia",
@@ -4627,6 +4737,35 @@ function setLanguage(
 
           element.textContent =
             translations[lang][key];
+
+        }
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      "[data-i18n-placeholder]"
+    )
+    .forEach(
+      element => {
+
+        const key =
+          element.dataset.i18nPlaceholder;
+
+
+        if (
+          translations[lang][key]
+        ) {
+
+          element.placeholder =
+            translations[lang][key];
+
+          element.setAttribute(
+            "aria-label",
+            translations[lang][key]
+          );
 
         }
 
