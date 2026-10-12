@@ -291,3 +291,9 @@ html{font-size:var(--base-font-size)}
 @media(max-width:640px){
   #panel-themes .theme-card .attention.stable{min-width:68px;height:26px}
 }
+
+/* Menções: campo de busca à esquerda da ordenação, na mesma linha em desktop. */
+#panel-mentions .inline-filters{display:grid;grid-template-columns:minmax(200px,1fr) minmax(150px,190px);align-items:center;gap:.6rem;width:min(100%,540px);flex:none}
+#panel-mentions .inline-filters input{min-width:0;width:100%}
+#panel-mentions .inline-filters select{min-width:0;width:100%}
+@media(max-width:640px){#panel-mentions .inline-filters{grid-template-columns:1fr;width:100%}}
