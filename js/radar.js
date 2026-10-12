@@ -568,7 +568,9 @@ async function loadRadarSources() {
               ? "SBT News"
               : source.id === "rssapp-jih9ngi"
                 ? "Pleno.News (RSS alternativo)"
-                : source.name || "Fonte",
+                : source.id === "rssapp-cnbc-brasil"
+                  ? "CNBC Brasil"
+                  : source.name || "Fonte",
 
           type:
             source.type || "",
@@ -3150,8 +3152,6 @@ function renderFilteredData() {
 
   renderRadar();
 
-  renderDisinfo();
-
   drawChart();
 
   loadYouTubeVideos();
@@ -3159,23 +3159,48 @@ function renderFilteredData() {
 }
 
 
-// DESINFORMAÇÃO — observação de cobertura, não veredito automático.
-const DISINFO_TERMS = /\b(checagem|checar|verifica(?:cao|r)|desmentid[oa]s?|fake news|noticias falsas|boato|desinformacao|fora de contexto|falso|falsa|enganos[oa]s?|fact.check|deepfake)\b/i;
-const DISINFO_CHECK = /\b(checagem|checar|verifica(?:cao|r)|desmentid[oa]s?|fato ou boato|aos fatos|agencia lupa|fato ou fake|estadao verifica|uol confere)\b/i;
+// DESINFORMAÇÃO — detecção exploratória, sem veredito automático.
+// Trabalha com o corpus integral recebido da API; os controles desta aba são independentes.
+const DISINFO_TERMS = /(?:\b(?:checag(?:em|ens)|checar|verific(?:acao|acoes|ar|ado|ada)|desmentid[oa]s?|fake[ -]?news|noticias? falsas?|boatos?|desinformacao|fora de contexto|enganos[oa]s?|deepfake|fact[ -]?check(?:ing)?|manipulad[oa]s?|informacao falsa|conteudo falso|mentira eleitoral|mentiras eleitorais|fraude eleitoral|rumor(?:es)?|alegacao falsa)\b)/i;
+const DISINFO_CHECK = /\b(?:checag(?:em|ens)|checar|verific(?:acao|acoes|ar|ado|ada)|desmentid[oa]s?|fact[ -]?check(?:ing)?|fato ou boato|aos fatos|agencia lupa|fato ou fake|estadao verifica|uol confere)\b/i;
 function renderDisinfo(){
- const stats=getEl('disinfoStats'), list=getEl('disinfoList');if(!stats||!list)return;
- const texts={pt:['Publicações relacionadas','Notícias sobre checagens','Alegações e alertas','Fontes distintas','Nenhum registro relacionado encontrado para os filtros atuais.','Ler publicação ↗'],en:['Related publications','Fact-check coverage','Claims and alerts','Distinct sources','No related items found for current filters.','Read publication ↗'],es:['Publicaciones relacionadas','Noticias sobre verificaciones','Alegaciones y alertas','Fuentes distintas','No se encontraron registros con los filtros actuales.','Leer publicación ↗']}[lang]||[];
- const base=Array.isArray(filteredNews)?filteredNews:[];
- const relevant=base.map(a=>{const body=normalizeText([a.title,a.description,a.subtitle].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
+ const stats=getEl('disinfoStats'), list=getEl('disinfoList'); if(!stats||!list)return;
+ const texts={
+  pt:['Publicações relacionadas','Notícias sobre checagens','Alegações e alertas','Fontes distintas','Nenhuma publicação sobre checagens ou alegações encontrada neste recorte. Isso não significa ausência de desinformação.','Ler publicação ↗','Aguardando notícias da API.','Nenhuma notícia disponível no corpus atual.','O filtro selecionado não encontrou registros. Experimente “Todas as pessoas” ou ampliar o período.','Registros encontrados no corpus de notícias; correspondência por termos, sem verificação automática.'],
+  en:['Related publications','Fact-check coverage','Claims and alerts','Distinct sources','No related coverage found for this selection. This does not imply an absence of misinformation.','Read publication ↗','Waiting for news API.','No news available in the current dataset.','No matching records. Try “All people” or a longer period.','Keyword-based coverage, not automated fact verification.'],
+  es:['Publicaciones relacionadas','Noticias sobre verificaciones','Alegaciones y alertas','Fuentes distintas','No se encontró cobertura relacionada en esta selección. Esto no implica ausencia de desinformación.','Leer publicación ↗','Esperando noticias de la API.','No hay noticias en el conjunto actual.','No hay registros para estos filtros. Pruebe “Todas las personas” o amplíe el período.','Cobertura basada en palabras clave, sin verificación automática.']
+ }[lang]||[];
+ const all=Array.isArray(liveNews)?liveNews:[];
+ const scope=getEl('disinfoScope')?.value||'all';
+ const hours=Number(getEl('disinfoPeriod')?.value||48);
+ const since=Date.now()-hours*3600000;
+ const base=all.filter(a=>{
+  const m=a.mentions||{};
+  const matches=scope==='all'||(scope==='flavio'&&m.flavio)||(scope==='lula'&&m.lula)||(scope==='both'&&m.flavio&&m.lula);
+  const date=validDate(a.publishedAt);
+  return matches&&date&&date.getTime()>=since;
+ });
+ const relevant=base.map(a=>{
+  const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));
+  return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};
+ }).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
  const checks=relevant.filter(a=>a._disinfoType==='checks').length;
- const distinct=new Set(relevant.map(a=>a.source||a.publisher||a.sourceName||'').filter(Boolean)).size;
- stats.innerHTML=[[texts[0],relevant.length],[texts[1],checks],[texts[2],relevant.length-checks],[texts[3],distinct]].map(([name,num])=>`<div class="disinfo-stat"><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong></div>`).join('');
+ const distinct=new Set(relevant.map(a=>a.publisher||a.source||a.sourceName||'').filter(Boolean)).size;
+ stats.innerHTML=[[texts[0],relevant.length,'all'],[texts[1],checks,'checks'],[texts[2],relevant.length-checks,'claims'],[texts[3],distinct,null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}" aria-label="${escapeHTML(name)}: ${num}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong></div>`).join('');
  const q=normalizeText(getEl('disinfoSearch')?.value||'');const type=getEl('disinfoType')?.value||'all';const sort=getEl('disinfoSort')?.value||'recent';
- const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.source,a.publisher,a.sourceName,a.description,a.subtitle].join(' ')).includes(q)));
- selected.sort((a,b)=>sort==='source'?String(a.source||a.publisher||a.sourceName||'').localeCompare(String(b.source||b.publisher||b.sourceName||''),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
- list.innerHTML=selected.length?selected.slice(0,40).map(a=>{const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=a.source||a.publisher||a.sourceName||'Fonte não informada';const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">${escapeHTML(texts[5])}</a>`:''}</article>`}).join(''):`<p class="disinfo-empty">${escapeHTML(texts[4])}</p>`;
+ const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.publisher,a.source,a.sourceName,a.subtitle,a.description].join(' ')).includes(q)));
+ selected.sort((a,b)=>sort==='source'?String(a.publisher||'').localeCompare(String(b.publisher||''),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
+ const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=liveNews===null?texts[6]:!all.length?texts[7]:`${all.length} notícias recebidas · ${base.length} no recorte · ${relevant.length} relacionadas. ${texts[9]}`;
+ const empty=liveNews===null?texts[6]:!all.length?texts[7]:!base.length?texts[8]:texts[4];
+ list.innerHTML=selected.length?selected.slice(0,40).map(a=>{
+  const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=a.publisher||a.source||a.sourceName||'Fonte não informada';const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';
+  const excerpt=String(a.subtitle||a.description||'').trim();
+  return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">${escapeHTML(texts[5])}</a>`:''}</article>`;
+ }).join(''):`<p class="disinfo-empty">${escapeHTML(empty)}</p>`;
 }
-['disinfoSearch','disinfoType','disinfoSort'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
+['disinfoSearch','disinfoType','disinfoSort','disinfoScope','disinfoPeriod'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
+document.addEventListener('click',e=>{const item=e.target.closest('[data-disinfo-type]');if(!item)return;const select=getEl('disinfoType');if(select){select.value=item.dataset.disinfoType;renderDisinfo()}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-disinfo-type]')){e.preventDefault();e.target.click()}});
 
 // ============================================================
 // RESET DOS FILTROS
@@ -3394,13 +3419,9 @@ function renderRealData() {
 
   renderRadar();
 
-  renderDisinfo();
-
   drawChart();
 
   renderLastUpdate();
-
-  renderDisinfo();
 
   renderVideosPlanned();
 
@@ -3948,8 +3969,6 @@ function renderInitialState() {
 
 
   renderRadar();
-
-  renderDisinfo();
 
   drawChart();
 
