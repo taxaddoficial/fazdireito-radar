@@ -14,7 +14,8 @@ const RADAR_API = {
   endpoints: {
     status: "/api/status",
     news: "/api/news",
-    sources: "/api/sources"
+    sources: "/api/sources",
+    youtube: "/api/youtube"
   }
 };
 
@@ -32,6 +33,9 @@ let liveNewsMeta = null;
 let liveStatus = null;
 
 let filteredNews = [];
+let liveVideos = [];
+let videoScopeLoaded = null;
+let videoLoading = false;
 
 
 // ============================================================
@@ -3120,6 +3124,8 @@ function renderFilteredData() {
 
   drawChart();
 
+  loadYouTubeVideos();
+
 }
 
 // ============================================================
@@ -3503,7 +3509,103 @@ function renderNewsUnavailable() {
 
 
 // ============================================================
-// VÍDEOS — SEM MOCK
+// VÍDEOS — YOUTUBE DATA API V3
+// ============================================================
+
+function decodeVideoText(value = "") {
+  const el = document.createElement("textarea");
+  el.innerHTML = String(value);
+  return el.value;
+}
+
+function formatVideoViews(value) {
+  const number = Number(value || 0);
+  return new Intl.NumberFormat(lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en", { notation: "compact", maximumFractionDigits: 1 }).format(number);
+}
+
+function currentVideoScope() {
+  const value = getEl("scope")?.value || "flavio";
+  return value === "lula" ? "lula" : value === "flavio" ? "flavio" : "both";
+}
+
+async function loadYouTubeVideos(force = false) {
+  const grid = getEl("videoGrid");
+  if (!grid || videoLoading) return;
+
+  const scope = currentVideoScope();
+  if (!force && videoScopeLoaded === scope && liveVideos.length) {
+    renderYouTubeVideos();
+    return;
+  }
+
+  videoLoading = true;
+  grid.innerHTML = `<article class="video-state">Carregando vídeos do YouTube…</article>`;
+
+  try {
+    const response = await fetch(`${RADAR_API.baseUrl}${RADAR_API.endpoints.youtube}?scope=${encodeURIComponent(scope)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "YouTube indisponível");
+    liveVideos = Array.isArray(data.videos) ? data.videos : [];
+    videoScopeLoaded = scope;
+    renderYouTubeVideos(data);
+  } catch (error) {
+    console.warn("[Radar API] Não foi possível carregar /api/youtube:", error);
+    liveVideos = [];
+    grid.innerHTML = `<article class="video-state">Não foi possível carregar os vídeos agora.</article>`;
+    const summary = getEl("videoSummary");
+    if (summary) summary.textContent = "YouTube Data API v3 temporariamente indisponível.";
+  } finally {
+    videoLoading = false;
+  }
+}
+
+function renderYouTubeVideos(meta = null) {
+  const grid = getEl("videoGrid");
+  if (!grid) return;
+
+  const query = normalizeText(getEl("videoFilter")?.value?.trim() || "");
+  const sort = getEl("videoSort")?.value || "recent";
+  let items = liveVideos.filter(video => !query || normalizeText(`${decodeVideoText(video.title)} ${video.channel || ""}`).includes(query));
+
+  items.sort((a, b) => sort === "views"
+    ? Number(b.views || 0) - Number(a.views || 0)
+    : new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+
+  const summary = getEl("videoSummary");
+  if (summary) {
+    const channels = new Set(items.map(item => item.channel).filter(Boolean)).size;
+    summary.textContent = `${items.length} vídeo${items.length === 1 ? "" : "s"} • ${channels} canal${channels === 1 ? "" : "is"} • últimos 7 dias`;
+  }
+
+  if (!items.length) {
+    grid.innerHTML = `<article class="video-state">Nenhum vídeo encontrado para os filtros atuais.</article>`;
+    return;
+  }
+
+  grid.innerHTML = items.map(video => {
+    const title = decodeVideoText(video.title || "Vídeo no YouTube");
+    const channel = decodeVideoText(video.channel || "YouTube");
+    const date = validDate(video.publishedAt);
+    const dateText = date ? date.toLocaleString(lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+    return `<article class="video-card">
+      <a class="video-thumb-link" href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer" aria-label="Assistir: ${escapeHTML(title)}">
+        <img class="video-thumb-img" src="${escapeHTML(video.thumbnail || "")}" alt="" loading="lazy">
+        <span class="video-play" aria-hidden="true">▶</span>
+      </a>
+      <div class="video-info">
+        <div class="video-meta"><span>${escapeHTML(channel)}</span><span>${escapeHTML(dateText)}</span></div>
+        <h4><a href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer">${escapeHTML(title)}</a></h4>
+        <div class="video-footer"><span>${formatVideoViews(video.views)} visualizações</span><a href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer">Assistir no YouTube ↗</a></div>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function renderVideosPlanned() {
+  loadYouTubeVideos();
+}
+
 // ============================================================
 
 function renderVideosPlanned() {
@@ -5101,6 +5203,12 @@ function bindEvents() {
 
   }
 
+
+  const videoFilter = getEl("videoFilter");
+  if (videoFilter) videoFilter.oninput = () => renderYouTubeVideos();
+
+  const videoSort = getEl("videoSort");
+  if (videoSort) videoSort.onchange = () => renderYouTubeVideos();
 
   const mentionSort =
     getEl("mentionSort");
