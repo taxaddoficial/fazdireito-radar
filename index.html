@@ -123,7 +123,7 @@
     <span data-i18n="scope">Candidato</span>
     <select id="scope">
       <option value="all" data-i18n="candidate_all">Todos</option>
-      <option value="flavio" data-i18n="candidate_flavio">Flávio Bolsonaro</option>
+      <option value="flavio" data-i18n="candidate_flavio" selected>Flávio Bolsonaro</option>
       <option value="lula" data-i18n="candidate_lula">Lula</option>
       <option value="both" data-i18n="candidate_both_same">Ambos na mesma matéria</option>
     </select>
@@ -289,19 +289,19 @@
     <article class="panel emerging-panel">
       <div class="panel-head wrap">
         <div>
-          <span class="eyebrow">MOVIMENTO DA COBERTURA</span>
-          <h3>Assuntos emergentes</h3>
-          <p class="emerging-description">Termos que ganharam presença nas últimas 24 horas em comparação com as 24 horas anteriores.</p>
+          <span class="eyebrow" data-i18n="emerging_eyebrow">MOVIMENTO DA COBERTURA</span>
+          <h3 data-i18n="emerging_title">Assuntos emergentes</h3>
+          <p class="emerging-description" data-i18n="emerging_desc">Termos que ganharam presença nas últimas 24 horas em comparação com as 24 horas anteriores.</p>
         </div>
-        <span class="emerging-window">24h × 24h anteriores</span>
+        <span class="emerging-window" data-i18n="emerging_window">24h × 24h anteriores</span>
       </div>
       <div id="emergingTopics" class="emerging-topics" aria-live="polite"></div>
-      <p class="emerging-methodology">A variação representa frequência na cobertura jornalística monitorada. Não mede popularidade, sentimento, aprovação ou intenção de voto.</p>
+      <p class="emerging-methodology" data-i18n="emerging_methodology">A variação representa frequência na cobertura jornalística monitorada. Não mede popularidade, sentimento, aprovação ou intenção de voto.</p>
     </article>
   </section>
 
   <section id="panel-mentions" class="tab-panel">
-    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte"><select id="mentionSort"><option value="recent">Mais recentes</option><option value="impact">Maior relevância</option><option value="source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
+    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte" data-i18n-placeholder="mentions_filter_placeholder" aria-label="Filtrar título ou fonte"><select id="mentionSort" aria-label="Ordenar menções"><option value="recent" data-i18n="mentions_sort_recent">Mais recentes</option><option value="impact" data-i18n="mentions_sort_relevance">Maior relevância</option><option value="source" data-i18n="mentions_sort_source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
   </section>
 
   <section id="panel-trends" class="tab-panel">
