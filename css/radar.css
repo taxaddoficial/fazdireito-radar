@@ -411,3 +411,45 @@ html{font-size:var(--base-font-size)}
 #panel-polls .poll-provenance{display:grid;gap:.4rem;margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--line);font-size:.73rem;line-height:1.45}
 #panel-polls .poll-provenance a{color:var(--blue);overflow-wrap:anywhere;text-decoration:underline}
 .dark #panel-polls .poll-provenance a{color:#b8d8ff}
+
+/* Radar v1.6.4 — controles legíveis e cards de mercado */
+#panel-polls .election-controls{grid-template-columns:minmax(185px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,1.2fr) auto;gap:12px;align-items:end}
+#panel-polls .election-controls label{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;min-width:0;font:700 12px/1.35 inherit;color:var(--muted)}
+#panel-polls .election-controls label>span{display:block;font-size:12px;line-height:1.35;font-weight:750;white-space:nowrap}
+#panel-polls .election-controls input,#panel-polls .election-controls select{display:block;width:100%;min-height:44px;font-family:inherit;font-size:13px;line-height:1.3;padding:10px 12px}
+#panel-polls .election-controls .election-action{min-height:44px;font-family:inherit;white-space:nowrap}
+#panel-polls .poll-stage{gap:10px;margin:20px 0 12px}
+#panel-polls .poll-stage button{font-family:inherit;font-size:13px;line-height:1.4}
+#panel-polls .poly-panel{padding:22px;margin:24px 0;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+#panel-polls .poly-header{display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap}
+#panel-polls .poly-header h3{font-size:19px;line-height:1.35;margin:5px 0 8px}
+#panel-polls .poly-header p,#panel-polls .poly-disclaimer{font-size:12px;line-height:1.65;color:var(--muted);max-width:75ch}
+#panel-polls .poly-header a{font-size:12px;font-weight:750;color:var(--blue);text-decoration:underline}
+#panel-polls #polyStatus{margin:12px 0;font-size:12px;color:var(--muted)}
+#panel-polls .poly-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+#panel-polls .poly-price{display:flex;flex-direction:column;gap:7px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+#panel-polls .poly-price span{font-size:13px;font-weight:750}#panel-polls .poly-price strong{font-size:26px;line-height:1.15;font-weight:850}#panel-polls .poly-price small{font-size:11px;line-height:1.5;color:var(--muted)}
+#panel-polls .poly-history svg{width:100%;height:auto;display:block;max-height:270px}#panel-polls .poly-history text{font:12px sans-serif;fill:var(--muted)}
+#panel-polls .poly-grid{stroke:var(--line);stroke-width:1}#panel-polls .poly-line{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+#panel-polls .poly-flavio{stroke:#2476b9}#panel-polls .poly-lula{stroke:#e6b92b}#panel-polls .poly-legend{font-size:11px;color:var(--muted);margin:8px 0}
+#panel-vote .vote-round-grid{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:20px}
+#panel-vote .vote-first-panel,#panel-vote .vote-second-panel{padding:20px;border-radius:14px}
+#panel-vote .vote-first-panel h3,#panel-vote .vote-second-panel h3{font-family:inherit;font-size:18px;line-height:1.35}
+#panel-vote .vote-map-static,#panel-vote .election-note{font-family:inherit;font-size:12px;line-height:1.65}
+#panel-vote .vote-second-panel{position:sticky;top:16px;min-height:320px}
+#panel-vote .vote-live-status{padding:14px 16px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:13px;line-height:1.6}
+#panel-vote .vote-live-meta{font-size:12px;line-height:1.5}
+@media(max-width:1050px){#panel-polls .election-controls{grid-template-columns:repeat(2,minmax(0,1fr))}#panel-polls .election-controls .election-action{width:100%}#panel-vote .vote-round-grid{grid-template-columns:1fr}#panel-vote .vote-second-panel{position:static}}
+@media(max-width:600px){#panel-polls .election-controls{grid-template-columns:1fr}#panel-polls .poly-values{grid-template-columns:1fr}#panel-polls .poly-panel{padding:14px}}
+
+/* v1.6.5: source cards and indicator archive */
+#panel-polls .indicator-sources{padding:20px;margin:20px 0;border-radius:14px}
+#panel-polls .indicator-sources h3{font:800 19px/1.35 inherit;margin:8px 0}
+#panel-polls .indicator-sources>p{font-size:13px;line-height:1.6;color:var(--muted)}
+#panel-polls .indicator-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+#panel-polls .indicator-source-grid article{min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--soft);border:1px solid var(--line);border-radius:12px}
+#panel-polls .indicator-source-grid strong{font-size:15px;line-height:1.3}
+#panel-polls .indicator-source-grid small{font-size:12px;line-height:1.6;color:var(--muted)}
+#panel-polls .indicator-source-grid a{font-size:12px;font-weight:750;color:var(--blue);text-decoration:underline;text-underline-offset:3px;margin-top:auto}
+#panel-polls .indicator-archive-status{padding:12px 0 0;font-size:12px}
+@media(max-width:750px){#panel-polls .indicator-source-grid{grid-template-columns:1fr}}
