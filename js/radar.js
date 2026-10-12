@@ -521,6 +521,18 @@ function renderApiSources(items) {
 }
 
 
+function renderTSEPanel(data) {
+  const box = document.getElementById("tseOfficialPanel");
+  if (!box) return;
+  const ok = data && data.status === "ok";
+  const available = ok && data.resultStatus === "available";
+  const text = available ? "Arquivo oficial de resultados disponível" : ok ? "Configuração oficial conectada; resultado indisponível nesta consulta" : "Consulta oficial temporariamente indisponível";
+  const href = available && data.resultURL ? data.resultURL : "https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados";
+  box.innerHTML = `<div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div>
+    <p>${text}</p><p class="chart-caption">1º turno • Presidente da República • Fonte: TSE. Resultados eleitorais não representam menções na imprensa.</p>
+    <p><a href="${href}" target="_blank" rel="noopener noreferrer">Consultar dados oficiais ↗</a></p>`;
+}
+
 async function loadRadarSources() {
 
   try {
@@ -617,6 +629,20 @@ async function loadRadarSources() {
 
     }
 
+
+    // Verificação real das integrações complementares.
+    try {
+      const tseResponse = await fetch(`${RADAR_API.baseUrl}/api/tse`, { cache:"no-store" });
+      const tse = await tseResponse.json();
+      window.radarTSE = tse;
+      const row = liveSources.find(x => x.id === "electoral-data");
+      if (row) { row.status = tse.status === "ok" ? "active" : "unavailable"; row.description = "TSE 2026 • " + (tse.resultStatus === "available" ? "arquivo oficial disponível" : "verificação oficial de configuração"); }
+      renderTSEPanel(tse);
+    } catch (_) { renderTSEPanel(null); }
+    const yt = liveSources.find(x => x.id === "youtube");
+    if (yt && yt.status === "configured") yt.status = "active";
+    const trends = liveSources.find(x => x.id === "google-trends");
+    if (trends) { trends.status = "pending"; trends.description = "Inscrição no programa Alfa enviada; aguardando aprovação do Google."; }
 
     renderApiSources(
       liveSources
