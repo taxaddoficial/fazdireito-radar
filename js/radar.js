@@ -3528,25 +3528,45 @@ function currentVideoScope() {
   return value === "lula" ? "lula" : value === "flavio" ? "flavio" : "both";
 }
 
+function classifyVideoFrame(video) {
+  const text = normalizeText(`${decodeVideoText(video.title || "")} ${decodeVideoText(video.description || "")}`);
+  const has = words => words.some(word => text.includes(normalizeText(word)));
+  const favorable = ["apoia flavio", "apoio a flavio", "defende flavio", "favor de flavio", "vantagem", "cresce", "avanca", "vitoria", "lidera", "otimas para flavio", "vai vencer", "melhorar ainda mais", "fecha com flavio", "declara apoio", "endossa flavio"];
+  const critical = ["contra flavio", "critica flavio", "ataca flavio", "derrota de flavio", "perde", "mentiroso", "escandalo", "investig", "denuncia", "rejeicao", "fascis", "mussolini", "destrói flavio", "destrói flávio", "acusa flavio"];
+  const right = ["direita", "bolsonaro", "pl ", "jair bolsonaro", "eduardo bolsonaro", "tarcisio", "tarcísio", "nikolas", "cleitinho", "conservador", "campo aliado", "aliado", "apoio no segundo turno"];
+  const favScore = favorable.reduce((n,w)=>n+(text.includes(normalizeText(w))?1:0),0);
+  const critScore = critical.reduce((n,w)=>n+(text.includes(normalizeText(w))?1:0),0);
+  const rightScore = right.reduce((n,w)=>n+(text.includes(normalizeText(w))?1:0),0);
+  let frame = "neutral";
+  if (favScore > critScore && favScore > 0) frame = "favorable";
+  else if (critScore > favScore && critScore > 0) frame = "critical";
+  else if (rightScore > 1 || (rightScore > 0 && !text.includes("lula"))) frame = "right";
+  return { frame, favScore, critScore, rightScore };
+}
+
+function videoFrameLabel(frame) {
+  const labels = {
+    favorable: "Favorável a Flávio",
+    critical: "Crítico a Flávio",
+    right: "Direita / campo aliado",
+    neutral: "Comparativo / neutro"
+  };
+  return labels[frame] || labels.neutral;
+}
+
 async function loadYouTubeVideos(force = false) {
   const grid = getEl("videoGrid");
   if (!grid || videoLoading) return;
-
   const scope = currentVideoScope();
-  if (!force && videoScopeLoaded === scope && liveVideos.length) {
-    renderYouTubeVideos();
-    return;
-  }
-
+  if (!force && videoScopeLoaded === scope && liveVideos.length) { renderYouTubeVideos(); return; }
   videoLoading = true;
   grid.innerHTML = `<article class="video-state">Carregando vídeos do YouTube…</article>`;
-
   try {
     const response = await fetch(`${RADAR_API.baseUrl}${RADAR_API.endpoints.youtube}?scope=${encodeURIComponent(scope)}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (data.status !== "ok") throw new Error(data.message || "YouTube indisponível");
-    liveVideos = Array.isArray(data.videos) ? data.videos : [];
+    liveVideos = (Array.isArray(data.videos) ? data.videos : []).map(video => ({ ...video, _frame: classifyVideoFrame(video) }));
     videoScopeLoaded = scope;
     renderYouTubeVideos(data);
   } catch (error) {
@@ -3555,94 +3575,49 @@ async function loadYouTubeVideos(force = false) {
     grid.innerHTML = `<article class="video-state">Não foi possível carregar os vídeos agora.</article>`;
     const summary = getEl("videoSummary");
     if (summary) summary.textContent = "YouTube Data API v3 temporariamente indisponível.";
-  } finally {
-    videoLoading = false;
-  }
+  } finally { videoLoading = false; }
 }
 
-function renderYouTubeVideos(meta = null) {
+function renderVideoIndicators(items) {
+  const box = getEl("videoIndicators");
+  if (!box) return;
+  const counts = { favorable:0, critical:0, right:0, neutral:0 };
+  items.forEach(v => counts[(v._frame || classifyVideoFrame(v)).frame]++);
+  const total = items.length || 1;
+  const card = (key,label) => `<button type="button" class="video-indicator" data-video-frame="${key}" aria-label="Filtrar: ${label}"><strong>${counts[key]}</strong><span>${label}</span><small>${Math.round(counts[key]*100/total)}%</small></button>`;
+  box.innerHTML = card("favorable","Favorável") + card("critical","Crítico") + card("right","Direita / aliado") + card("neutral","Neutro / comparativo");
+  box.querySelectorAll("[data-video-frame]").forEach(btn => btn.onclick = () => { const select=getEl("videoFrame"); if(select){ select.value=btn.dataset.videoFrame; renderYouTubeVideos(); }});
+}
+
+function renderYouTubeVideos() {
   const grid = getEl("videoGrid");
   if (!grid) return;
-
   const query = normalizeText(getEl("videoFilter")?.value?.trim() || "");
   const sort = getEl("videoSort")?.value || "recent";
-  let items = liveVideos.filter(video => !query || normalizeText(`${decodeVideoText(video.title)} ${video.channel || ""}`).includes(query));
-
-  items.sort((a, b) => sort === "views"
-    ? Number(b.views || 0) - Number(a.views || 0)
-    : new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
-
+  const frame = getEl("videoFrame")?.value || "all";
+  renderVideoIndicators(liveVideos);
+  let items = liveVideos.filter(video => !query || normalizeText(`${decodeVideoText(video.title)} ${decodeVideoText(video.channel || "")}`).includes(query));
+  if (frame !== "all") items = items.filter(video => (video._frame || classifyVideoFrame(video)).frame === frame);
+  items.sort((a,b) => sort === "views" ? Number(b.views||0)-Number(a.views||0) : new Date(b.publishedAt||0)-new Date(a.publishedAt||0));
+  const totalMatches = items.length;
+  items = items.slice(0,15);
   const summary = getEl("videoSummary");
   if (summary) {
-    const channels = new Set(items.map(item => item.channel).filter(Boolean)).size;
-    summary.textContent = `${items.length} vídeo${items.length === 1 ? "" : "s"} • ${channels} canal${channels === 1 ? "" : "is"} • últimos 7 dias`;
+    const channels = new Set(items.map(item=>item.channel).filter(Boolean)).size;
+    summary.textContent = `${items.length} de ${totalMatches} vídeo${totalMatches===1?"":"s"} compatíveis • ${channels} canal${channels===1?"":"is"} • últimos 7 dias`;
   }
-
-  if (!items.length) {
-    grid.innerHTML = `<article class="video-state">Nenhum vídeo encontrado para os filtros atuais.</article>`;
-    return;
-  }
-
+  if (!items.length) { grid.innerHTML=`<article class="video-state">Nenhum vídeo encontrado para os filtros atuais.</article>`; return; }
   grid.innerHTML = items.map(video => {
-    const title = decodeVideoText(video.title || "Vídeo no YouTube");
-    const channel = decodeVideoText(video.channel || "YouTube");
-    const date = validDate(video.publishedAt);
-    const dateText = date ? date.toLocaleString(lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
-    return `<article class="video-card">
-      <a class="video-thumb-link" href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer" aria-label="Assistir: ${escapeHTML(title)}">
-        <img class="video-thumb-img" src="${escapeHTML(video.thumbnail || "")}" alt="" loading="lazy">
-        <span class="video-play" aria-hidden="true">▶</span>
-      </a>
-      <div class="video-info">
-        <div class="video-meta"><span>${escapeHTML(channel)}</span><span>${escapeHTML(dateText)}</span></div>
-        <h4><a href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer">${escapeHTML(title)}</a></h4>
-        <div class="video-footer"><span>${formatVideoViews(video.views)} visualizações</span><a href="${escapeHTML(video.url || "#")}" target="_blank" rel="noopener noreferrer">Assistir no YouTube ↗</a></div>
-      </div>
-    </article>`;
+    const title=decodeVideoText(video.title||"Vídeo no YouTube");
+    const channel=decodeVideoText(video.channel||"YouTube");
+    const date=validDate(video.publishedAt);
+    const dateText=date?date.toLocaleString(lang==="pt"?"pt-BR":lang==="es"?"es":"en",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+    const vf=(video._frame||classifyVideoFrame(video)).frame;
+    return `<article class="video-card"><a class="video-thumb-link" href="${escapeHTML(video.url||"#")}" target="_blank" rel="noopener noreferrer" aria-label="Assistir: ${escapeHTML(title)}"><img class="video-thumb-img" src="${escapeHTML(video.thumbnail||"")}" alt="" loading="lazy"><span class="video-play" aria-hidden="true">▶</span></a><div class="video-info"><div class="video-meta"><span>${escapeHTML(channel)}</span><span>${escapeHTML(dateText)}</span></div><span class="video-frame-badge video-frame-${vf}">${escapeHTML(videoFrameLabel(vf))}</span><h4><a href="${escapeHTML(video.url||"#")}" target="_blank" rel="noopener noreferrer">${escapeHTML(title)}</a></h4><div class="video-footer"><span>${formatVideoViews(video.views)} visualizações</span><a href="${escapeHTML(video.url||"#")}" target="_blank" rel="noopener noreferrer">Assistir no YouTube ↗</a></div></div></article>`;
   }).join("");
 }
 
-function renderVideosPlanned() {
-  loadYouTubeVideos();
-}
-
-// ============================================================
-
-function renderVideosPlanned() {
-
-  const grid =
-    getEl("videoGrid");
-
-
-  if (!grid) {
-    return;
-  }
-
-
-  grid.innerHTML = `
-    <article class="video-card">
-
-      <div class="video-thumb">
-        ▶
-      </div>
-
-      <div class="video-info">
-
-        <h4>
-          YouTube Data API
-        </h4>
-
-        <p>
-          Integração planejada. Nenhum vídeo fictício é exibido.
-        </p>
-
-      </div>
-
-    </article>
-  `;
-
-}
-
+function renderVideosPlanned() { loadYouTubeVideos(); }
 
 // ============================================================
 // TEXTOS DO ESTADO REAL
@@ -4214,7 +4189,7 @@ const translations = {
       "Conteúdos relacionados",
 
     videos_desc:
-      "Integração com YouTube planejada.",
+      "Vídeos públicos relacionados ao candidato selecionado, coletados pela YouTube Data API v3.",
 
     apis_title:
       "Fontes e serviços",
@@ -4488,7 +4463,7 @@ const translations = {
       "Related content",
 
     videos_desc:
-      "YouTube integration planned.",
+      "Public videos related to the selected candidate, collected through YouTube Data API v3.",
 
     apis_title:
       "Sources and services",
@@ -4739,7 +4714,7 @@ const translations = {
       "Contenidos relacionados",
 
     videos_desc:
-      "Integración con YouTube prevista.",
+      "Videos públicos relacionados con el candidato seleccionado, recopilados mediante YouTube Data API v3.",
 
     apis_title:
       "Fuentes y servicios",
@@ -5209,6 +5184,9 @@ function bindEvents() {
 
   const videoSort = getEl("videoSort");
   if (videoSort) videoSort.onchange = () => renderYouTubeVideos();
+
+  const videoFrame = getEl("videoFrame");
+  if (videoFrame) videoFrame.onchange = () => renderYouTubeVideos();
 
   const mentionSort =
     getEl("mentionSort");
