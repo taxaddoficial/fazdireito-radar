@@ -344,3 +344,28 @@ html{font-size:var(--base-font-size)}
 
 /* Desinformação: filtros próprios e diagnóstico do corpus */
 .disinfo-scope{display:flex;gap:1rem;flex-wrap:wrap;margin:.7rem 0}.disinfo-scope label{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:700;color:var(--muted)}.disinfo-scope select{border:1px solid var(--line);border-radius:.6rem;padding:.55rem;background:var(--panel);color:var(--ink)}.disinfo-diagnostics{font-size:.76rem;color:var(--muted);margin:.3rem 0}.disinfo-stat[role="button"]{cursor:pointer}.disinfo-stat[role="button"]:focus-visible{outline:3px solid var(--blue);outline-offset:2px}.disinfo-item p{font-size:.78rem;color:var(--muted);margin:.4rem 0}.dark .disinfo-scope select{background:#111c31;color:#e2e8f0;border-color:#334155}
+
+/* v1.5.2 — controles da aba Desinformação com escala tipográfica consistente */
+#panel-disinfo .disinfo-controls input,
+#panel-disinfo .disinfo-controls select,
+#panel-disinfo .disinfo-scope select {
+  font-family:inherit;font-size:.78rem;font-weight:500;line-height:1.4;
+  min-height:2.7rem;box-sizing:border-box;
+}
+#panel-disinfo .disinfo-scope label {font-size:.78rem;gap:.45rem}
+#panel-disinfo .disinfo-scope label>span {white-space:nowrap}
+#panel-disinfo .disinfo-stat {font:inherit;text-align:left;color:var(--ink)}
+#panel-disinfo button.disinfo-stat {cursor:pointer}
+#panel-disinfo button.disinfo-stat[aria-pressed="true"] {border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+#panel-disinfo button.disinfo-stat:focus-visible,
+#panel-disinfo .disinfo-controls :focus-visible,
+#panel-disinfo .disinfo-scope select:focus-visible {outline:3px solid var(--blue);outline-offset:2px}
+#tseOfficialPanel {font-family:inherit}
+#tseOfficialPanel .tse-state {font-size:.83rem;line-height:1.5;font-weight:600;color:var(--ink);margin:.75rem 0}
+#tseOfficialPanel .tse-caption {font-size:.72rem;line-height:1.6;color:var(--muted);margin:.5rem 0 1rem}
+#tseOfficialPanel .tse-link {display:inline-flex;align-items:center;font-size:.78rem;line-height:1.4;font-weight:700;color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+#tseOfficialPanel .tse-link:focus-visible {outline:3px solid var(--blue);outline-offset:3px}
+.dark #tseOfficialPanel .tse-state {color:#e2e8f0}
+.dark #tseOfficialPanel .tse-link {color:#93c5fd}
+@media(max-width:650px){#panel-disinfo .disinfo-scope{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}#panel-disinfo .disinfo-scope label{display:grid;gap:.25rem}#panel-disinfo .disinfo-scope select{width:100%;min-width:0}}
+@media(max-width:380px){#panel-disinfo .disinfo-scope{grid-template-columns:1fr}}
