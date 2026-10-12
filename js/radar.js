@@ -548,7 +548,11 @@ async function loadRadarSources() {
             source.id || "",
 
           name:
-            source.name || "Fonte",
+            source.id === "rssapp-wh1otab"
+              ? "SBT News"
+              : source.id === "rssapp-jih9ngi"
+                ? "Pleno.News (RSS alternativo)"
+                : source.name || "Fonte",
 
           type:
             source.type || "",
@@ -834,6 +838,7 @@ async function loadRadarNews() {
 
 
     renderRealData();
+    applyRadarFilters();
 
 
     return liveNews;
@@ -1710,8 +1715,14 @@ function renderNewsFeed() {
 
   if (mentionsList) {
 
+    const scopeValue = getEl("scope")?.value || "flavio";
+    const mentionScopeItems = items.filter(article =>
+      scopeValue === "flavio" ? Boolean(article.mentions?.flavio) :
+      scopeValue === "lula" ? Boolean(article.mentions?.lula) :
+      scopeValue === "both" ? Boolean(article.mentions?.flavio && article.mentions?.lula) : true
+    );
     const mentionItems =
-      getMentionItems(items);
+      getMentionItems(mentionScopeItems);
 
 
     if (!mentionItems.length) {
@@ -3164,7 +3175,7 @@ function resetRadarFilters() {
       : [];
 
 
-  renderFilteredData();
+  applyRadarFilters();
 
 }
 
