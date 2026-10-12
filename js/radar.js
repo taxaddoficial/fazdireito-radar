@@ -3134,6 +3134,8 @@ function renderFilteredData() {
 
   renderMetrics();
 
+  renderDisinfo();
+
   renderNewsFeed();
 
   renderPublisherRanking();
@@ -3148,11 +3150,32 @@ function renderFilteredData() {
 
   renderRadar();
 
+  renderDisinfo();
+
   drawChart();
 
   loadYouTubeVideos();
 
 }
+
+
+// DESINFORMAÇÃO — observação de cobertura, não veredito automático.
+const DISINFO_TERMS = /\b(checagem|checar|verifica(?:cao|r)|desmentid[oa]s?|fake news|noticias falsas|boato|desinformacao|fora de contexto|falso|falsa|enganos[oa]s?|fact.check|deepfake)\b/i;
+const DISINFO_CHECK = /\b(checagem|checar|verifica(?:cao|r)|desmentid[oa]s?|fato ou boato|aos fatos|agencia lupa|fato ou fake|estadao verifica|uol confere)\b/i;
+function renderDisinfo(){
+ const stats=getEl('disinfoStats'), list=getEl('disinfoList');if(!stats||!list)return;
+ const texts={pt:['Publicações relacionadas','Notícias sobre checagens','Alegações e alertas','Fontes distintas','Nenhum registro relacionado encontrado para os filtros atuais.','Ler publicação ↗'],en:['Related publications','Fact-check coverage','Claims and alerts','Distinct sources','No related items found for current filters.','Read publication ↗'],es:['Publicaciones relacionadas','Noticias sobre verificaciones','Alegaciones y alertas','Fuentes distintas','No se encontraron registros con los filtros actuales.','Leer publicación ↗']}[lang]||[];
+ const base=Array.isArray(filteredNews)?filteredNews:[];
+ const relevant=base.map(a=>{const body=normalizeText([a.title,a.description,a.subtitle].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
+ const checks=relevant.filter(a=>a._disinfoType==='checks').length;
+ const distinct=new Set(relevant.map(a=>a.source||a.publisher||a.sourceName||'').filter(Boolean)).size;
+ stats.innerHTML=[[texts[0],relevant.length],[texts[1],checks],[texts[2],relevant.length-checks],[texts[3],distinct]].map(([name,num])=>`<div class="disinfo-stat"><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong></div>`).join('');
+ const q=normalizeText(getEl('disinfoSearch')?.value||'');const type=getEl('disinfoType')?.value||'all';const sort=getEl('disinfoSort')?.value||'recent';
+ const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.source,a.publisher,a.sourceName,a.description,a.subtitle].join(' ')).includes(q)));
+ selected.sort((a,b)=>sort==='source'?String(a.source||a.publisher||a.sourceName||'').localeCompare(String(b.source||b.publisher||b.sourceName||''),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
+ list.innerHTML=selected.length?selected.slice(0,40).map(a=>{const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=a.source||a.publisher||a.sourceName||'Fonte não informada';const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">${escapeHTML(texts[5])}</a>`:''}</article>`}).join(''):`<p class="disinfo-empty">${escapeHTML(texts[4])}</p>`;
+}
+['disinfoSearch','disinfoType','disinfoSort'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
 
 // ============================================================
 // RESET DOS FILTROS
@@ -3355,6 +3378,8 @@ function renderRealData() {
 
   renderMetrics();
 
+  renderDisinfo();
+
   renderNewsFeed();
 
   renderPublisherRanking();
@@ -3369,9 +3394,13 @@ function renderRealData() {
 
   renderRadar();
 
+  renderDisinfo();
+
   drawChart();
 
   renderLastUpdate();
+
+  renderDisinfo();
 
   renderVideosPlanned();
 
@@ -3920,6 +3949,8 @@ function renderInitialState() {
 
   renderRadar();
 
+  renderDisinfo();
+
   drawChart();
 
 }
@@ -3932,6 +3963,7 @@ function renderInitialState() {
 const translations = {
 
   pt: {
+    tab_disinfo: "Desinformação",
 
     accessibility:
       "Acessibilidade:",
@@ -4229,6 +4261,7 @@ const translations = {
   },
 
   en: {
+    tab_disinfo: "Misinformation",
 
     accessibility:
       "Accessibility:",
@@ -4503,6 +4536,7 @@ const translations = {
   },
 
   es: {
+    tab_disinfo: "Desinformación",
 
     accessibility:
       "Accesibilidad:",
@@ -4799,6 +4833,8 @@ function openTab(name) {
       }
     );
 
+
+  if (name === "disinfo") renderDisinfo();
 
   if (
     name === "overview"
