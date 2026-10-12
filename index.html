@@ -313,7 +313,19 @@
   </section>
 
   <section id="panel-videos" class="tab-panel">
-    <div class="section-intro"><div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Slots preparados para YouTube Data API e outras fontes permitidas.</p></div></div><div id="videoGrid" class="video-grid"></div>
+    <div class="section-intro video-intro">
+      <div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Vídeos públicos relacionados ao candidato selecionado, coletados pela YouTube Data API v3.</p></div>
+      <div class="video-actions">
+        <input id="videoFilter" type="search" placeholder="Filtrar título ou canal" aria-label="Filtrar vídeos por título ou canal">
+        <select id="videoSort" aria-label="Ordenar vídeos">
+          <option value="recent">Mais recentes</option>
+          <option value="views">Mais visualizados</option>
+        </select>
+      </div>
+    </div>
+    <div id="videoSummary" class="video-summary" aria-live="polite"></div>
+    <div id="videoGrid" class="video-grid"></div>
+    <div class="callout video-methodology" data-i18n="videos_methodology">Resultados de busca do YouTube. A presença ou o número de visualizações de um vídeo não mede apoio, popularidade eleitoral, sentimento ou intenção de voto.</div>
   </section>
 
   <section id="panel-sources" class="tab-panel">
