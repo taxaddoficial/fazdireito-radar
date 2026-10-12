@@ -158,6 +158,7 @@
     <button role="tab" aria-selected="false" class="tab" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
     <button role="tab" aria-selected="false" class="tab" data-tab="trends" data-i18n="tab_trends">Tendências</button>
     <button role="tab" aria-selected="false" class="tab" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
+    <button role="tab" aria-selected="false" class="tab" data-tab="disinfo" data-i18n="tab_disinfo">Desinformação</button>
     <button role="tab" aria-selected="false" class="tab" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
   </div>
 
@@ -337,6 +338,13 @@
     <div class="callout video-methodology" data-i18n="videos_methodology">Resultados de busca do YouTube. A presença ou o número de visualizações de um vídeo não mede apoio, popularidade eleitoral, sentimento ou intenção de voto.</div>
   </section>
 
+  <section id="panel-disinfo" class="tab-panel" aria-label="Monitoramento de desinformação">
+    <div class="section-intro"><div><span class="eyebrow" data-i18n="disinfo_eyebrow">VERIFICAÇÃO DE INFORMAÇÕES</span><h3 data-i18n="disinfo_title">Radar de Desinformação</h3><p data-i18n="disinfo_desc">Monitoramento exploratório de publicações sobre checagens e alegações. A presença de uma palavra-chave não comprova falsidade.</p></div></div>
+    <div class="disinfo-stats" id="disinfoStats" aria-live="polite"></div>
+    <div class="disinfo-controls"><input id="disinfoSearch" type="search" placeholder="Pesquisar título, fonte ou assunto" aria-label="Pesquisar publicações sobre desinformação"><select id="disinfoType" aria-label="Tipo de registro"><option value="all">Todos os registros</option><option value="checks">Notícias sobre checagens</option><option value="claims">Alegações e alertas</option></select><select id="disinfoSort" aria-label="Ordenar registros"><option value="recent">Mais recentes</option><option value="source">Por fonte</option></select></div>
+    <div class="disinfo-grid"><article class="panel"><div class="panel-head"><div><span class="eyebrow">COBERTURA MONITORADA</span><h3>Publicações relacionadas</h3></div></div><div id="disinfoList" class="disinfo-list" aria-live="polite"></div></article><aside class="panel disinfo-aside"><div class="panel-head"><div><span class="eyebrow">FONTES DE EVIDÊNCIA</span><h3>Consultar verificações</h3></div></div><p>Confira a checagem original antes de atribuir qualquer classificação a uma publicação.</p><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026" target="_blank" rel="noopener noreferrer">TSE — Eleições 2026 ↗</a><a href="https://www.tse.jus.br/comunicacao/noticias/2026/Agosto/fato-ou-boato-pagina-e-reformulada-para-as-eleicoes-2026-e-amplia-ferramentas-de-combate-a-desinformacao" target="_blank" rel="noopener noreferrer">TSE — Fato ou Boato ↗</a><a href="https://www.aosfatos.org/" target="_blank" rel="noopener noreferrer">Aos Fatos ↗</a><a href="https://lupa.uol.com.br/" target="_blank" rel="noopener noreferrer">Agência Lupa ↗</a><div class="callout">Os números representam somente itens encontrados nas fontes RSS monitoradas e no período selecionado. Não representam o total de desinformação na internet. Nenhum item é rotulado como falso sem checagem documental específica.</div></aside></div>
+  </section>
+
   <section id="panel-sources" class="tab-panel">
     <div class="dashboard-grid">
       <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">INTEGRAÇÕES</span><h3 data-i18n="apis_title">Fontes e serviços planejados</h3></div></div><div id="apiList" class="api-list"></div></article>
@@ -345,12 +353,6 @@
   </section>
 </main>
 
-<footer class="bg-brand-navy text-slate-400 py-8 mt-8 text-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-    <div><strong class="text-white text-sm">A Direita faz Direito | O Brasil Vai Vencer</strong><p class="mt-1" data-i18n="footer_desc">Protótipo do Radar Eleitoral 2026. Dados demonstrativos nesta versão.</p></div>
-    <div class="flex flex-wrap gap-6 text-slate-300 font-medium"><a href="https://fazdireito.neocities.org/" class="hover:text-yellow-400">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html" class="hover:text-yellow-400">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html" class="hover:text-yellow-400">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html" class="hover:text-yellow-400">Guia de Diálogo</a></div>
-    <div class="text-[11px] text-right">Campanha 2026 • Rascunho funcional</div>
-  </div>
-</footer>
+<footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 <script src="/js/radar.js" defer></script>
 </body></html>
