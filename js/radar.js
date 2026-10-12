@@ -521,16 +521,23 @@ function renderApiSources(items) {
 }
 
 
+let lastTSEData = null;
 function renderTSEPanel(data) {
-  const box = document.getElementById("tseOfficialPanel");
+  lastTSEData = data;
+  const box = getEl("tseOfficialPanel");
   if (!box) return;
+  const copy = {
+    pt: ["TSE • 2026", "Resultados eleitorais oficiais", "Arquivo oficial de resultados disponível", "Configuração oficial conectada; resultado indisponível nesta consulta", "Consulta oficial temporariamente indisponível", "1º turno • Presidente da República • Fonte: TSE. Resultados eleitorais não representam menções na imprensa.", "Consultar dados oficiais ↗"],
+    en: ["TSE • 2026", "Official election results", "Official results file available", "Official source connected; results unavailable for this query", "Official source temporarily unavailable", "First round • President of Brazil • Source: TSE. Election results are not media mentions.", "View official data ↗"],
+    es: ["TSE • 2026", "Resultados electorales oficiales", "Archivo oficial de resultados disponible", "Fuente oficial conectada; resultados no disponibles en esta consulta", "Fuente oficial temporalmente no disponible", "Primera vuelta • Presidencia de Brasil • Fuente: TSE. Los resultados no representan menciones en prensa.", "Consultar datos oficiales ↗"]
+  }[lang] || [];
   const ok = data && data.status === "ok";
   const available = ok && data.resultStatus === "available";
-  const text = available ? "Arquivo oficial de resultados disponível" : ok ? "Configuração oficial conectada; resultado indisponível nesta consulta" : "Consulta oficial temporariamente indisponível";
-  const href = available && data.resultURL ? data.resultURL : "https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados";
-  box.innerHTML = `<div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div>
-    <p>${text}</p><p class="chart-caption">1º turno • Presidente da República • Fonte: TSE. Resultados eleitorais não representam menções na imprensa.</p>
-    <p><a href="${href}" target="_blank" rel="noopener noreferrer">Consultar dados oficiais ↗</a></p>`;
+  const message = copy[available ? 2 : ok ? 3 : 4];
+  const official = "https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados";
+  const candidate = available ? String(data.resultURL || "") : "";
+  const href = /^https:\/\//i.test(candidate) ? candidate : official;
+  box.innerHTML = `<div class="panel-head"><div><span class="eyebrow">${escapeHTML(copy[0])}</span><h3>${escapeHTML(copy[1])}</h3></div></div><p class="tse-state">${escapeHTML(message)}</p><p class="tse-caption">${escapeHTML(copy[5])}</p><a class="tse-link" href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer">${escapeHTML(copy[6])}</a>`;
 }
 
 async function loadRadarSources() {
@@ -3163,6 +3170,20 @@ function renderFilteredData() {
 // Trabalha com o corpus integral recebido da API; os controles desta aba são independentes.
 const DISINFO_TERMS = /(?:\b(?:checag(?:em|ens)|checar|verific(?:acao|acoes|ar|ado|ada)|desmentid[oa]s?|fake[ -]?news|noticias? falsas?|boatos?|desinformacao|fora de contexto|enganos[oa]s?|deepfake|fact[ -]?check(?:ing)?|manipulad[oa]s?|informacao falsa|conteudo falso|mentira eleitoral|mentiras eleitorais|fraude eleitoral|rumor(?:es)?|alegacao falsa)\b)/i;
 const DISINFO_CHECK = /\b(?:checag(?:em|ens)|checar|verific(?:acao|acoes|ar|ado|ada)|desmentid[oa]s?|fact[ -]?check(?:ing)?|fato ou boato|aos fatos|agencia lupa|fato ou fake|estadao verifica|uol confere)\b/i;
+function disinfoPublisher(article) {
+  const id = String(article.feedSourceId || "").toLowerCase();
+  const names = {"rssapp-wh1otab":"SBT News", "rssapp-jih9ngi":"Pleno.News", "rssapp-cnbc-brasil":"CNBC Brasil", "infomoney":"InfoMoney"};
+  if (names[id]) return names[id];
+  const publisher = String(article.publisher || article.source || article.sourceName || "").trim();
+  if (/^rss\.app(?:\s*\(.*\))?$/i.test(publisher)) {
+    const feed = String(article.feedSource || "").toLowerCase();
+    if (feed.includes("wh1otab")) return "SBT News";
+    if (feed.includes("jih9ngi")) return "Pleno.News";
+    if (feed.includes("h5s7xd")) return "CNBC Brasil";
+    return "Fonte agregada (origem não identificada)";
+  }
+  return publisher || "Fonte não informada";
+}
 function renderDisinfo(){
  const stats=getEl('disinfoStats'), list=getEl('disinfoList'); if(!stats||!list)return;
  const texts={
@@ -3170,6 +3191,13 @@ function renderDisinfo(){
   en:['Related publications','Fact-check coverage','Claims and alerts','Distinct sources','No related coverage found for this selection. This does not imply an absence of misinformation.','Read publication ↗','Waiting for news API.','No news available in the current dataset.','No matching records. Try “All people” or a longer period.','Keyword-based coverage, not automated fact verification.'],
   es:['Publicaciones relacionadas','Noticias sobre verificaciones','Alegaciones y alertas','Fuentes distintas','No se encontró cobertura relacionada en esta selección. Esto no implica ausencia de desinformación.','Leer publicación ↗','Esperando noticias de la API.','No hay noticias en el conjunto actual.','No hay registros para estos filtros. Pruebe “Todas las personas” o amplíe el período.','Cobertura basada en palabras clave, sin verificación automática.']
  }[lang]||[];
+ const ui={pt:{scope:["Pessoa mencionada","Todas as pessoas","Flávio Bolsonaro","Lula","Ambos na mesma matéria"],period:["Período","48 horas","7 dias"],type:["Todos os registros","Notícias sobre checagens","Alegações e alertas"],sort:["Mais recentes","Por fonte"],search:"Pesquisar título, fonte ou assunto"},en:{scope:["Person mentioned","All people","Flávio Bolsonaro","Lula","Both in the same article"],period:["Period","48 hours","7 days"],type:["All records","Fact-check coverage","Claims and alerts"],sort:["Most recent","By source"],search:"Search title, source or topic"},es:{scope:["Persona mencionada","Todas las personas","Flávio Bolsonaro","Lula","Ambos en la misma noticia"],period:["Período","48 horas","7 días"],type:["Todos los registros","Noticias sobre verificaciones","Alegaciones y alertas"],sort:["Más recientes","Por fuente"],search:"Buscar título, fuente o tema"}}[lang]||{};
+ const scopeEl=getEl('disinfoScope'), periodEl=getEl('disinfoPeriod'), typeEl=getEl('disinfoType'), sortEl=getEl('disinfoSort'), searchEl=getEl('disinfoSearch');
+ if(scopeEl){scopeEl.previousElementSibling.textContent=ui.scope[0]; [...scopeEl.options].forEach((o,i)=>o.textContent=ui.scope[i+1]);}
+ if(periodEl){periodEl.previousElementSibling.textContent=ui.period[0]; [...periodEl.options].forEach((o,i)=>o.textContent=ui.period[i+1]);}
+ if(typeEl)[...typeEl.options].forEach((o,i)=>o.textContent=ui.type[i]);
+ if(sortEl)[...sortEl.options].forEach((o,i)=>o.textContent=ui.sort[i]);
+ if(searchEl){searchEl.placeholder=ui.search;searchEl.setAttribute('aria-label',ui.search);}
  const all=Array.isArray(liveNews)?liveNews:[];
  const scope=getEl('disinfoScope')?.value||'all';
  const hours=Number(getEl('disinfoPeriod')?.value||48);
@@ -3185,15 +3213,15 @@ function renderDisinfo(){
   return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};
  }).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
  const checks=relevant.filter(a=>a._disinfoType==='checks').length;
- const distinct=new Set(relevant.map(a=>a.publisher||a.source||a.sourceName||'').filter(Boolean)).size;
+ const distinct=new Set(relevant.map(disinfoPublisher).filter(Boolean)).size;
  stats.innerHTML=[[texts[0],relevant.length,'all'],[texts[1],checks,'checks'],[texts[2],relevant.length-checks,'claims'],[texts[3],distinct,null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}" aria-label="${escapeHTML(name)}: ${num}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong></div>`).join('');
  const q=normalizeText(getEl('disinfoSearch')?.value||'');const type=getEl('disinfoType')?.value||'all';const sort=getEl('disinfoSort')?.value||'recent';
- const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.publisher,a.source,a.sourceName,a.subtitle,a.description].join(' ')).includes(q)));
- selected.sort((a,b)=>sort==='source'?String(a.publisher||'').localeCompare(String(b.publisher||''),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
+ const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,disinfoPublisher(a),a.publisher,a.source,a.sourceName,a.subtitle,a.description].join(' ')).includes(q)));
+ selected.sort((a,b)=>sort==='source'?disinfoPublisher(a).localeCompare(disinfoPublisher(b),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
  const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=liveNews===null?texts[6]:!all.length?texts[7]:`${all.length} notícias recebidas · ${base.length} no recorte · ${relevant.length} relacionadas. ${texts[9]}`;
  const empty=liveNews===null?texts[6]:!all.length?texts[7]:!base.length?texts[8]:texts[4];
  list.innerHTML=selected.length?selected.slice(0,40).map(a=>{
-  const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=a.publisher||a.source||a.sourceName||'Fonte não informada';const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';
+  const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=disinfoPublisher(a);const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';
   const excerpt=String(a.subtitle||a.description||'').trim();
   return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">${escapeHTML(texts[5])}</a>`:''}</article>`;
  }).join(''):`<p class="disinfo-empty">${escapeHTML(empty)}</p>`;
@@ -4980,6 +5008,8 @@ function setLanguage(
 
 
   syncThemeLabel();
+  if (lastTSEData) renderTSEPanel(lastTSEData);
+  renderDisinfo();
 
 
   if (liveSources) {
