@@ -320,7 +320,6 @@
 
     <button role="tab" aria-selected="false" class="tab" data-tab="disinfo" data-i18n="tab_disinfo">Desinformação</button>
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="support" data-i18n="tab_support">Apoio</button>
     <button role="tab" aria-selected="false" class="tab" data-tab="polls" data-i18n="tab_polls">Pesquisas</button>
 
     <button role="tab" aria-selected="false" class="tab" data-tab="vote" data-i18n="tab_vote">Voto agora</button>
@@ -697,32 +696,21 @@
 
 
 
-  <section id="panel-support" class="tab-panel" aria-labelledby="supportHeading">
-<div class="section-intro"><div><span class="eyebrow">INDICADORES · FONTE EXTERNA</span><h3 id="supportHeading">Apoio — painel de indicadores</h3><p>Área preparada para integrar os indicadores públicos do Flaviômetro, com histórico, metodologia e identificação da origem.</p></div><a class="election-action" href="https://flaviometro.com/#painel" target="_blank" rel="noopener noreferrer">Consultar fonte original ↗</a></div>
-<div class="preview-banner" role="status">Prévia de interface · Nenhum valor foi simulado. A estrutura será preenchida após inspeção e validação das fontes públicas.</div>
-<div class="support-grid">
-<article class="panel"><span class="eyebrow">PAINEL DE APOIO</span><h4>Indicadores consolidados</h4><p class="empty-state">Aguardando mapeamento das métricas e da metodologia da fonte.</p></article>
-<article class="panel"><span class="eyebrow">EVOLUÇÃO TEMPORAL</span><h4>Histórico de indicadores</h4><div class="chart-placeholder" role="img" aria-label="Gráfico aguardando dados verificados">Série histórica ainda não disponível</div></article>
-<article class="panel"><span class="eyebrow">RECORTES</span><h4>Comparações e segmentações</h4><p class="empty-state">Filtros serão habilitados conforme as dimensões efetivamente disponibilizadas pela fonte.</p></article>
-<article class="panel"><span class="eyebrow">TRANSPARÊNCIA</span><h4>Fonte e atualização</h4><p>Fonte de referência: Flaviômetro. Sem coleta automatizada confirmada nesta versão.</p><p>Atualização: não disponível.</p></article>
-</div></section>
-<section id="panel-polls" class="tab-panel" aria-labelledby="pollsHeading">
+  <section id="panel-polls" class="tab-panel" aria-labelledby="pollsHeading">
 
     <div class="section-intro"><div><span class="eyebrow" data-i18n="polls_label">LEVANTAMENTOS PUBLICADOS</span><h3 id="pollsHeading" data-i18n="polls_title">Pesquisas eleitorais</h3><p data-i18n="polls_intro">Resultados publicados e documentados, sem estimativas.</p></div></div>
 
     <div class="poll-stage" role="group" aria-label="Etapa eleitoral"><button type="button" data-poll-stage="pre" class="selected">Anterior ao 1º turno</button><button type="button" data-poll-stage="first">1º turno</button><button type="button" data-poll-stage="second">2º turno</button></div>
 
-    <div class="election-controls"><label class="poll-institute-field"><span data-i18n="polls_institute">Instituto</span><input id="pollInstitute" type="search" list="pollInstituteList" autocomplete="off" placeholder="Digite ou selecione um instituto"><datalist id="pollInstituteList"></datalist></label><label><span data-i18n="polls_from">De</span><input id="pollFrom" type="date"></label><label><span data-i18n="polls_to">Até</span><input id="pollTo" type="date"></label><label class="poll-results-filter"><span>Percentuais</span><select id="pollHasResults" aria-label="Filtrar pesquisas com ou sem percentuais"><option value="all">Todas as pesquisas</option><option value="yes">Com porcentagem</option><option value="no">Sem porcentagem</option></select></label><label class="poll-leader-filter"><span data-i18n="poll_leader">Liderança</span><select id="pollLeader" aria-label="Filtrar liderança nas pesquisas da página atual"><option value="all" data-i18n="lead_all">Todas</option><option value="flavio" data-i18n="lead_flavio">Flávio lidera</option><option value="lula" data-i18n="lead_lula">Lula lidera</option><option value="other" data-i18n="lead_other">Outro lidera</option><option value="tie" data-i18n="lead_tie">Empate</option></select></label><button type="button" id="pollRefresh" class="election-action" data-i18n="refresh">Atualizar</button></div>
+    <div class="election-controls"><label class="poll-institute-field"><span data-i18n="polls_institute">Instituto</span><input id="pollInstitute" type="search" list="pollInstituteList" autocomplete="off" placeholder="Digite ou selecione um instituto"><datalist id="pollInstituteList"></datalist></label><label><span data-i18n="polls_from">De</span><input id="pollFrom" type="date"></label><label><span data-i18n="polls_to">Até</span><input id="pollTo" type="date"></label><label class="poll-results-filter"><span>Percentuais</span><select id="pollHasResults" aria-label="Filtrar pesquisas com ou sem percentuais"><option value="all">Todas as pesquisas</option><option value="yes">Com porcentagem</option><option value="no">Sem porcentagem</option></select></label><button type="button" id="pollRefresh" class="election-action" data-i18n="refresh">Atualizar</button></div>
 
-    <p class="filter-scope-note" id="pollLeaderScope" role="status">Filtro de liderança: prévia aplicada somente aos registros da página atual. A filtragem global será integrada à API na próxima etapa.</p>
     <div id="pollStatus" class="callout" role="status" aria-live="polite"></div>
 
     <div class="poll-browser"><div class="poll-results-column"><div id="pollList" class="election-list poll-list"></div><nav id="pollPagination" class="poll-pagination" aria-label="Paginação das pesquisas"></nav></div><aside id="pollDetail" class="panel poll-detail" aria-live="polite"><span class="eyebrow">PESQUISA SELECIONADA</span><h3 id="pollDetailTitle">Selecione uma pesquisa</h3><div id="pollChart" class="election-chart poll-selected-chart" role="img" aria-label="Resultados da pesquisa selecionada, agrupados por cenário"></div><div id="pollDetailMeta" class="poll-detail-meta"></div></aside></div>
 
     <section class="panel poly-panel" aria-labelledby="polyHeading"><div class="poly-header"><div><span class="eyebrow">MERCADO DE PREVISÃO · FONTE EXTERNA</span><h3 id="polyHeading">Polymarket — preços de contratos</h3><p>Indicador de mercado separado das pesquisas eleitorais. Não representa intenção de voto nem resultado oficial.</p></div><a href="https://polymarket.com/event/brazil-presidential-election" target="_blank" rel="noopener noreferrer">Ver mercado original ↗</a></div><div id="polyStatus" role="status" aria-live="polite">Consultando dados públicos...</div><div id="polyValues" class="poly-values"></div><div id="polyHistory" class="poly-history" role="img" aria-label="Histórico dos preços de contratos de previsão"></div><p class="poly-disclaimer">Preços de negociação refletem oferta e demanda entre participantes. Não são percentuais de pesquisas nem probabilidades estatísticas certificadas. Séries são exibidas somente quando fornecidas pela API.</p></section>
 
-    <section class="panel poly-panel" aria-labelledby="eurasiaHeading"><div class="poly-header"><div><span class="eyebrow">ANÁLISE DE RISCO · SÉRIE DOCUMENTAL</span><h3 id="eurasiaHeading">Eurasia Group — avaliações publicadas</h3><p>Avaliações de consultoria, distintas de preços negociados no Polymarket e de pesquisas eleitorais.</p></div><a href="https://www.eurasiagroup.net/" target="_blank" rel="noopener noreferrer">Consultar publicações ↗</a></div><div class="chart-placeholder" role="img" aria-label="Sem pontos históricos validados para a Eurasia Group">Gráfico aguardando datas e estimativas documentadas</div><p class="poly-disclaimer">Não há interpolação nem valores fictícios. Os pontos serão exibidos somente quando associados a publicações datadas e verificáveis.</p></section>
-<section class="panel indicator-sources" aria-labelledby="indicatorSourcesHeading">
+    <section class="panel indicator-sources" aria-labelledby="indicatorSourcesHeading">
 
       <span class="eyebrow">OUTRAS FONTES · SÉRIES INDEPENDENTES</span><h3 id="indicatorSourcesHeading">Agregadores e histórico</h3>
 
@@ -756,8 +744,7 @@
 
 
 
-  <section class="panel archive-preview" aria-labelledby="archiveHeading"><div class="panel-head"><div><span class="eyebrow">MEMÓRIA DIGITAL · EM PREPARAÇÃO</span><h3 id="archiveHeading">Arquivo histórico do cenário político</h3></div></div><p>Estrutura de consulta por período, fonte e assunto. A captura de versões e a persistência serão integradas em etapa posterior.</p><div class="archive-grid"><article><strong>Notícias</strong><small>Título, veículo, data, URL e captura</small></article><article><strong>Desinformação</strong><small>Alegação, checagem e evidências</small></article><article><strong>Menções</strong><small>Plataforma, volume e metodologia</small></article><article><strong>Mercados</strong><small>Contrato, preço, horário e fonte</small></article></div><p class="filter-scope-note">Nenhum registro histórico foi criado ou inventado nesta prévia.</p></section>
-<section id="panel-sources" class="tab-panel">
+  <section id="panel-sources" class="tab-panel">
 
     <div class="dashboard-grid">
 
