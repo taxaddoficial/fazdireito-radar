@@ -5576,8 +5576,8 @@ async function loadPollAccuracy(){
  const pending=electT('poll_accuracy_pending');low.textContent=pending;high.textContent=pending;
  try{
   const r=await fetch(`${RADAR_API.baseUrl}/api/poll-comparisons?round=1`,{cache:'no-store'});if(!r.ok)throw Error(r.status);
-  const d=await r.json();if(d.status!=='ok'||!d.count)return;
-  const render=(el,items)=>{el.replaceChildren();for(const x of items||[]){const row=document.createElement('div');row.className='poll-accuracy-row';const name=document.createElement('strong');name.textContent=`${x.instituto} · erro médio ${pctBR(x.erro_medio_pp)} p.p.`;const detail=document.createElement('small');detail.textContent=`Pesquisa ${x.registro_tse} · ${x.data_divulgacao||'data não informada'} · ${x.candidatos_comparados} candidatos comparados`;row.append(name,detail);el.append(row);}};
+  const d=await r.json();if(d.status!=='ok'||Number(d.count)<2){const msg=d.message||'Não há institutos comparáveis suficientes para estabelecer os extremos.';low.textContent=msg;high.textContent=msg;return;}
+  const render=(el,items)=>{el.replaceChildren();for(const x of items||[]){const row=document.createElement('div');row.className='poll-accuracy-row';const name=document.createElement('strong');name.textContent=`${x.instituto} · erro médio normalizado ${pctBR(x.erro_medio_pp)} p.p.`;const detail=document.createElement('small');detail.textContent=`Pesquisa ${x.registro_tse} · ${x.data_divulgacao||'data não informada'} · ${x.candidatos_comparados}/${x.candidatos_no_cenario||'?'} candidatos comparados · base comum normalizada`;row.append(name,detail);el.append(row);}};
   render(low,d.smallest);render(high,d.largest);
  }catch(e){console.warn('[poll accuracy]',String(e));}
 }
