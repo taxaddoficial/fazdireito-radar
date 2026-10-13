@@ -453,3 +453,6 @@ html{font-size:var(--base-font-size)}
 #panel-polls .indicator-source-grid a{font-size:12px;font-weight:750;color:var(--blue);text-decoration:underline;text-underline-offset:3px;margin-top:auto}
 #panel-polls .indicator-archive-status{padding:12px 0 0;font-size:12px}
 @media(max-width:750px){#panel-polls .indicator-source-grid{grid-template-columns:1fr}}
+
+/* Radar 1.7.2 — comparativos documentados */
+.poll-accuracy-row{display:flex;flex-direction:column;gap:.3rem;padding:.8rem 0;border-bottom:1px solid var(--border,rgba(128,128,128,.25))}.poll-accuracy-row:last-child{border-bottom:0}.poll-accuracy-row small{line-height:1.5;opacity:.8}
