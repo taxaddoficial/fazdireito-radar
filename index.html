@@ -1,384 +1,767 @@
 <!doctype html>
+
 <html lang="pt-BR" class="scroll-smooth">
+
 <head>
+
   <meta charset="utf-8">
+
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <title>Radar 2026 | A Direita faz Direito</title>
+
   <meta name="description" content="Painel público para acompanhar cobertura, palavras-chave, fontes e tendências relacionadas ao cenário eleitoral de 2026.">
+
   <meta name="robots" content="noindex,nofollow">
+
   <meta name="theme-color" content="#0b2341">
+
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 504'&gt;&lt;rect width='720' height='504' fill='%23009b3a'/&gt;&lt;polygon points='360,36 684,252 360,468 36,252' fill='%23fedf00'/&gt;&lt;circle cx='360' cy='252' r='126' fill='%23002776'/&gt;&lt;path d='M 235,260 A 130,130 0 0,0 485,240' fill='none' stroke='%23ffffff' stroke-width='14'/&gt;&lt;/svg&gt;">
+
   <link rel="stylesheet" href="/css/tailwind-home.css">
+
   <link rel="stylesheet" href="/css/radar.css">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
+
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional" onload="this.onload=null;this.rel='stylesheet'">
+
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional"></noscript>
+
 </head>
+
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+
 <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
 
+
+
 <svg aria-hidden="true" class="svg-sprite">
+
   <symbol id="i-access" viewBox="0 0 512 512"><path d="M256 112a56 56 0 1 0 0-112 56 56 0 0 0 0 112zM118 136a24 24 0 0 0-12 46l82 21v75l-53 153a24 24 0 1 0 45 16l48-139h56l48 139a24 24 0 1 0 45-16l-53-153v-75l82-21a24 24 0 0 0-12-46l-106 27h-64z"/></symbol>
+
   <symbol id="i-moon" viewBox="0 0 384 512"><path d="M223.5 32C100 32 0 132.3 0 256s100 224 223.5 224c63.6 0 121-26.5 161.5-69-7.5 1-15.2 1.5-23 1.5-105.9 0-191.8-86-191.8-192 0-80.7 49.8-149.7 120.3-178.1A224 224 0 0 0 223.5 32z"/></symbol>
+
   <symbol id="i-flag" viewBox="0 0 448 512"><path d="M32 0C14.3 0 0 14.3 0 32v448c0 17.7 14.3 32 32 32s32-14.3 32-32V352h64l32-64 32 64h160c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H192l-32 64-32-64H64V32C64 14.3 49.7 0 32 0z"/></symbol>
+
   <symbol id="i-bars" viewBox="0 0 448 512"><path d="M0 96c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32A32 32 0 0 1 0 96zm0 160c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32a32 32 0 0 1-32-32zm448 160a32 32 0 0 1-32 32H32a32 32 0 1 1 0-64h384c17.7 0 32 14.3 32 32z"/></symbol>
+
   <symbol id="i-x" viewBox="0 0 384 512"><path d="M342.6 150.6a32 32 0 0 0-45.3-45.3L192 210.7 86.6 105.4a32 32 0 0 0-45.3 45.3L146.7 256 41.4 361.4a32 32 0 0 0 45.3 45.3L192 301.3l105.4 105.3a32 32 0 0 0 45.3-45.3L237.3 256z"/></symbol>
+
   <symbol id="i-external" viewBox="0 0 512 512"><path d="M320 0a32 32 0 1 0 0 64h82.7L201.4 265.4a32 32 0 0 0 45.3 45.3L448 109.3V192a32 32 0 1 0 64 0V32a32 32 0 0 0-32-32zM80 32C35.8 32 0 67.8 0 112v320c0 44.2 35.8 80 80 80h320c44.2 0 80-35.8 80-80V320a32 32 0 1 0-64 0v112c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16h112a32 32 0 1 0 0-64z"/></symbol>
+
 </svg>
 
+
+
 <aside aria-label="Controles de Acessibilidade" class="bg-slate-800 text-white text-xs py-1.5 px-4 border-b border-slate-700">
+
   <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+
     <div class="flex items-center space-x-3">
+
       <div class="flex items-center space-x-2">
+
         <svg class="ui-icon font-bold text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-access"></use></svg>
+
         <span class="font-medium" data-i18n="accessibility">Acessibilidade:</span>
+
       </div>
+
       <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-700" role="group" aria-label="Seleção de idioma">
+
         <button onclick="setLanguage('pt')" id="lang-pt" class="opacity-100 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Português" aria-label="Português">
+
           <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 720 504"><rect width="720" height="504" fill="#009b3a"/><polygon points="360,36 684,252 360,468 36,252" fill="#fedf00"/><circle cx="360" cy="252" r="126" fill="#002776"/><path d="M 235,260 A 130,130 0 0,0 485,240" fill="none" stroke="#ffffff" stroke-width="14"/></svg>
+
         </button>
+
         <button onclick="setLanguage('en')" id="lang-en" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="English" aria-label="English">
+
           <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 508 268"><rect width="508" height="268" fill="#bf0a30"/><g fill="#fff"><rect width="508" height="20.6"/><rect y="41.2" width="508" height="20.6"/><rect y="82.4" width="508" height="20.6"/><rect y="123.6" width="508" height="20.6"/><rect y="164.8" width="508" height="20.6"/><rect y="206" width="508" height="20.6"/><rect y="247.2" width="508" height="20.8"/></g><rect width="203.2" height="144.2" fill="#002868"/></svg>
+
         </button>
+
         <button onclick="setLanguage('es')" id="lang-es" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Español" aria-label="Español">
+
           <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 750 500"><rect width="750" height="500" fill="#aa151b"/><rect width="750" height="250" y="125" fill="#f1bf00"/></svg>
+
         </button>
+
       </div>
+
     </div>
+
     <div class="flex items-center space-x-4">
+
       <div class="flex items-center space-x-1" role="group" aria-label="Controle de tamanho de fonte">
+
         <button onclick="changeFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
+
         <button onclick="resetFontSize()" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 text-xs" title="Redefinir fonte" aria-label="Redefinir fonte">A</button>
+
         <button onclick="changeFontSize(1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
+
       </div>
+
       <button id="themeToggle" type="button" onclick="toggleTheme()" class="flex items-center space-x-1 px-2.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400">
+
         <svg id="themeIcon" class="ui-icon text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-moon"></use></svg>
+
         <span id="themeText" data-i18n="high_contrast">Alto Contraste</span>
+
       </button>
+
     </div>
+
   </div>
+
 </aside>
 
+
+
 <header class="bg-brand-navy text-white sticky top-0 z-50 shadow-md">
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+
     <a href="https://fazdireito.neocities.org/" class="flex items-center space-x-3 group focus:outline-none" aria-label="A Direita faz Direito — voltar ao portal">
+
       <div class="w-10 h-10 rounded-full bg-brand-yellow flex items-center justify-center text-brand-navy shadow-inner group-hover:scale-105 transition-transform">
+
         <svg class="ui-icon text-xl text-brand-blue" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>
+
       </div>
+
       <div>
+
         <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">A Direita faz Direito | O Brasil Vai Vencer</h1>
+
         <p class="text-xs text-yellow-400 font-medium hidden sm:block">Rumo à Vitória no 2º Turno • Portal de Mobilização</p>
+
       </div>
+
     </a>
 
+
+
     <nav class="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Navegação principal">
+
       <a href="https://fazdireito.neocities.org/" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_map">Mapa de Votos</a>
+
       <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow flex items-center gap-1"><span data-i18n="nav_plan">Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
+
       <a href="https://fazdireito.neocities.org/assuntos.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_axes">Eixos Temáticos</a>
+
       <a href="https://fazdireito.neocities.org/materiais.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+
       <a href="https://fazdireito.neocities.org/guia.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_guide">Guia de Diálogo</a>
+
     </nav>
 
+
+
     <div class="flex items-center space-x-3">
+
       <span class="bg-brand-yellow text-brand-navy font-bold px-3 py-1.5 rounded-lg text-xs shadow" data-i18n="campaign_2026">Campanha 2026</span>
+
       <button id="mobileMenuBtn" type="button" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mobileMenu" title="Abrir menu de navegação" class="md:hidden p-2 rounded-md hover:bg-slate-800">
+
         <svg class="ui-icon text-xl" aria-hidden="true" focusable="false"><use id="mobileMenuIcon" href="#i-bars"></use></svg>
+
       </button>
+
     </div>
+
   </div>
+
   <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="md:hidden border-t border-slate-700">
+
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-medium">
+
       <a href="https://fazdireito.neocities.org/" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_map">Mapa de Votos</a>
+
       <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors flex items-center gap-2"><span data-i18n="nav_plan">Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
+
       <a href="https://fazdireito.neocities.org/assuntos.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_axes">Eixos Temáticos</a>
+
       <a href="https://fazdireito.neocities.org/materiais.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+
       <a href="https://fazdireito.neocities.org/guia.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_guide">Guia de Diálogo</a>
+
     </div>
+
   </nav>
+
 </header>
 
+
+
 <main id="conteudo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
   <section class="radar-hero">
+
     <div>
+
       <span class="hero-badge"><span class="live-dot"></span><span data-i18n="prototype">RADAR • DADOS MONITORADOS</span></span>
+
       <h2 data-i18n="hero_title">Radar Eleitoral 2026</h2>
+
       <p data-i18n="hero_desc">Uma central para acompanhar cobertura pública, publicações, palavras-chave, fontes e tendências a partir dos dados coletados pelo Radar.</p>
+
     </div>
+
     <div class="hero-status"><span data-i18n="last_update">Última atualização</span><strong id="lastUpdate">—</strong><small data-i18n="mock_notice">Dados monitorados</small></div>
+
   </section>
+
+
 
   <section class="filter-panel" aria-labelledby="filterTitle">
+
     <div class="filter-heading"><div><span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span><h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3></div></div>
+
 <div class="filter-grid">
+
   <label>
+
     <span data-i18n="period">Período</span>
+
     <select id="period">
+
       <option value="48h" selected data-i18n="period_48h">Últimas 48 horas</option>
+
       <option value="24h" data-i18n="period_24h">Últimas 24 horas</option>
+
     </select>
+
   </label>
 
+
+
   <label>
+
     <span data-i18n="scope">Candidato</span>
+
     <select id="scope">
+
       <option value="all" data-i18n="candidate_all">Todos</option>
+
       <option value="flavio" data-i18n="candidate_flavio" selected>Flávio Bolsonaro</option>
+
       <option value="lula" data-i18n="candidate_lula">Lula</option>
+
       <option value="both" data-i18n="candidate_both_same">Ambos na mesma matéria</option>
+
     </select>
+
   </label>
 
+
+
   <label>
+
     <span data-i18n="source">Veículo</span>
+
     <select id="source">
+
       <option value="all" data-i18n="all_publishers">Todos os veículos</option>
+
     </select>
+
   </label>
+
+
 
   <label class="search-field">
+
     <span data-i18n="search">Buscar termo</span>
+
     <input
+
       id="searchTerm"
+
       type="search"
+
       placeholder="Ex.: economia, segurança..."
+
     >
+
   </label>
 
+
+
   <div class="filter-actions">
+
     <button id="resetFilters" class="btn-secondary" type="button" data-i18n="reset">Limpar filtros</button>
+
     <button id="applyFilters" class="btn-primary" type="button" data-i18n="apply">Aplicar filtros</button>
+
   </div>
+
 </div>
+
   </section>
 
+
+
   <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
+
     <button role="tab" aria-selected="true" class="tab active" data-tab="overview" data-i18n="tab_overview">Visão geral</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="themes" data-i18n="tab_themes">Temas</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="trends" data-i18n="tab_trends">Tendências</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="disinfo" data-i18n="tab_disinfo">Desinformação</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="polls" data-i18n="tab_polls">Pesquisas</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="vote" data-i18n="tab_vote">Voto agora</button>
+
     <button role="tab" aria-selected="false" class="tab" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
+
   </div>
+
+
 
   <section id="panel-overview" class="tab-panel active">
+
 <div class="metrics-grid">
+
   <article class="metric-card">
+
     <span data-i18n="metric_mentions">Matérias coletadas</span>
+
     <strong id="metricMentions">—</strong>
+
     <small>
+
       <span data-i18n="vs_period">no período monitorado</span>
+
     </small>
+
   </article>
 
+
+
   <article class="metric-card">
+
     <span data-i18n="metric_topics">Matérias com candidatos</span>
+
     <strong id="metricTopics">—</strong>
+
     <small>
+
       <span data-i18n="high_attention">referências identificadas</span>
+
     </small>
+
   </article>
 
+
+
   <article class="metric-card">
+
     <span data-i18n="metric_sources">Veículos monitorados</span>
+
     <strong id="metricSources">—</strong>
+
     <small>
+
       <span data-i18n="source_types">veículos distintos</span>
+
     </small>
+
   </article>
 
+
+
   <article class="metric-card">
+
     <span data-i18n="metric_peak">Maior volume/hora</span>
+
     <strong id="metricPeak">—</strong>
+
     <small data-i18n="peak_desc">
+
       publicações na hora de maior volume
+
     </small>
+
   </article>
+
 </div>
+
     <article id="tseOfficialPanel" class="panel" aria-live="polite"><div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div><p>Consultando fonte oficial...</p></article>
+
     <div class="dashboard-grid">
+
       <article class="panel span-8"><div class="panel-head"><div><span class="eyebrow">VOLUME</span><h3 data-i18n="volume_title">Evolução das menções</h3></div><div class="legend">
+
   <span><i class="legend-main"></i>Flávio Bolsonaro</span>
+
   <span><i class="legend-all"></i>Lula</span>
+
 </div></div><div class="canvas-wrap"><canvas id="volumeChart" aria-label="Gráfico demonstrativo de evolução das menções"></canvas></div><p class="chart-caption" data-i18n="demo_chart">Dados ilustrativos para validar o layout. Serão substituídos por dados das APIs.</p></article>
+
       <article class="panel span-4"><div class="panel-head"><div><span class="eyebrow">AGORA</span><h3 data-i18n="hot_title">Assuntos em destaque</h3></div></div><div id="hotTopics" class="ranking"></div></article>
+
       <article class="panel span-5">
+
   <div class="panel-head">
+
     <div>
+
       <span class="eyebrow">RADAR</span>
+
       <h3 data-i18n="radar_title">Panorama de Monitoramento</h3>
+
     </div>
+
   </div>
 
+
+
   <div
+
     class="radar-visual"
+
     id="radarVisual"
+
     role="group"
+
     aria-label="Panorama dos dados coletados pelo Radar 2026"
+
   ></div>
+
 </article>
+
 <article class="panel span-7">
+
+
 
   <div class="panel-head">
 
+
+
     <div>
+
       <span class="eyebrow">
+
         COBERTURA
+
       </span>
 
+
+
       <h3 data-i18n="news_title">
+
         Últimas menções encontradas
+
       </h3>
+
     </div>
+
+
 
     <div class="coverage-actions">
 
+
+
       <label
+
         class="coverage-filter"
+
         for="coverageFilter"
+
       >
+
         <span class="sr-only" data-i18n="coverage_filter_label">
+
           Filtrar cobertura por candidato
+
         </span>
 
+
+
         <select
+
           id="coverageFilter"
+
         >
+
           <option
+
             value="flavio"
+
             selected
+
             data-i18n="coverage_flavio"
+
           >
+
             Flávio
+
           </option>
+
+
 
           <option value="lula" data-i18n="coverage_lula">
+
             Lula
+
           </option>
+
+
 
           <option value="both" data-i18n="coverage_both">
+
             Ambos
+
           </option>
+
         </select>
+
       </label>
 
+
+
       <button
+
         class="text-btn"
+
         data-open-tab="mentions"
+
         data-i18n="view_all"
+
         type="button"
+
       >
+
         Ver todas
+
       </button>
 
+
+
     </div>
+
+
 
   </div>
 
+
+
   <div
+
     id="newsFeed"
+
     class="news-feed"
+
   ></div>
 
+
+
 </article>    </div>
+
   </section>
+
+
 
   <section id="panel-themes" class="tab-panel">
+
     <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Cards demonstrativos com volume, variação e nível de atenção. Clique para filtrar o restante do painel.</p></div></div>
+
     <div id="themeCards" class="theme-grid"></div>
 
+
+
     <article class="panel emerging-panel">
+
       <div class="panel-head wrap">
+
         <div>
+
           <span class="eyebrow" data-i18n="emerging_eyebrow">MOVIMENTO DA COBERTURA</span>
+
           <h3 data-i18n="emerging_title">Assuntos emergentes</h3>
+
           <p class="emerging-description" data-i18n="emerging_desc">Termos que ganharam presença nas últimas 24 horas em comparação com as 24 horas anteriores.</p>
+
         </div>
+
         <span class="emerging-window" data-i18n="emerging_window">24h × 24h anteriores</span>
+
       </div>
+
       <div id="emergingTopics" class="emerging-topics" aria-live="polite"></div>
+
       <p class="emerging-methodology" data-i18n="emerging_methodology">A variação representa frequência na cobertura jornalística monitorada. Não mede popularidade, sentimento, aprovação ou intenção de voto.</p>
+
     </article>
+
   </section>
+
+
 
   <section id="panel-mentions" class="tab-panel">
+
     <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte" data-i18n-placeholder="mentions_filter_placeholder" aria-label="Filtrar título ou fonte"><select id="mentionSort" aria-label="Ordenar menções"><option value="recent" data-i18n="mentions_sort_recent">Mais recentes</option><option value="impact" data-i18n="mentions_sort_relevance">Maior relevância</option><option value="source" data-i18n="mentions_sort_source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
+
   </section>
+
+
 
   <section id="panel-trends" class="tab-panel">
+
     <div class="dashboard-grid">
+
       <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">PALAVRAS-CHAVE</span><h3 data-i18n="keywords_title">Termos com maior presença</h3></div></div><div id="keywordBars" class="keyword-bars"></div></article>
+
       <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">NUVEM</span><h3 data-i18n="cloud_title">Nuvem de termos</h3></div></div><div id="wordCloud" class="word-cloud"></div><div class="callout" data-i18n="cloud_note">O tamanho representa apenas o peso demonstrativo neste protótipo.</div></article>
+
       <article class="panel span-12"><div class="panel-head"><div><span class="eyebrow">PICOS</span><h3 data-i18n="spikes_title">Detecção de picos</h3></div></div><div id="spikeTimeline" class="spike-grid"></div></article>
+
     </div>
+
   </section>
+
+
 
   <section id="panel-videos" class="tab-panel">
+
     <div class="section-intro video-intro">
+
       <div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Vídeos públicos relacionados ao candidato selecionado, coletados pela YouTube Data API v3.</p></div>
+
       <div class="video-actions">
+
         <input id="videoFilter" type="search" placeholder="Filtrar título ou canal" aria-label="Filtrar vídeos por título ou canal">
+
         <select id="videoFrame" aria-label="Filtrar por enquadramento">
+
           <option value="all">Todos os enquadramentos</option>
+
           <option value="favorable">Favorável a Flávio</option>
+
           <option value="critical">Crítico a Flávio</option>
+
           <option value="right">Direita / campo aliado</option>
+
           <option value="neutral">Comparativo / neutro</option>
+
         </select>
+
         <select id="videoSort" aria-label="Ordenar vídeos">
+
           <option value="recent">Mais recentes</option>
+
           <option value="views">Mais visualizados</option>
+
         </select>
+
       </div>
+
     </div>
+
     <div id="videoIndicators" class="video-indicators" aria-live="polite"></div>
+
     <div id="videoSummary" class="video-summary" aria-live="polite"></div>
+
     <div id="videoGrid" class="video-grid"></div>
+
     <div class="callout video-methodology" data-i18n="videos_methodology">Resultados de busca do YouTube. A presença ou o número de visualizações de um vídeo não mede apoio, popularidade eleitoral, sentimento ou intenção de voto.</div>
+
   </section>
+
+
 
   <section id="panel-disinfo" class="tab-panel" aria-label="Monitoramento de desinformação">
+
     <div class="section-intro"><div><span class="eyebrow" data-i18n="disinfo_eyebrow">VERIFICAÇÃO DE INFORMAÇÕES</span><h3 data-i18n="disinfo_title">Radar de Desinformação</h3><p data-i18n="disinfo_desc">Monitoramento exploratório de publicações sobre checagens e alegações. A presença de uma palavra-chave não comprova falsidade.</p></div></div>
+
     <div class="disinfo-stats" id="disinfoStats" aria-live="polite"></div>
+
     <div class="disinfo-scope"><label><span>Pessoa mencionada</span><select id="disinfoScope" aria-label="Pessoa mencionada"><option value="all">Todas as pessoas</option><option value="flavio">Flávio Bolsonaro</option><option value="lula">Lula</option><option value="both">Ambos na mesma matéria</option></select></label><label><span>Período</span><select id="disinfoPeriod" aria-label="Período de monitoramento"><option value="48">48 horas</option><option value="168">7 dias</option></select></label></div><p id="disinfoDiagnostics" class="disinfo-diagnostics" aria-live="polite"></p><div class="disinfo-controls"><input id="disinfoSearch" type="search" placeholder="Pesquisar título, fonte ou assunto" aria-label="Pesquisar publicações sobre desinformação"><select id="disinfoType" aria-label="Tipo de registro"><option value="all">Todos os registros</option><option value="checks">Notícias sobre checagens</option><option value="claims">Alegações e alertas</option></select><select id="disinfoSort" aria-label="Ordenar registros"><option value="recent">Mais recentes</option><option value="source">Por fonte</option></select></div>
+
     <div class="disinfo-grid"><article class="panel"><div class="panel-head"><div><span class="eyebrow">COBERTURA MONITORADA</span><h3>Publicações relacionadas</h3></div></div><div id="disinfoList" class="disinfo-list" aria-live="polite"></div></article><aside class="panel disinfo-aside"><div class="panel-head"><div><span class="eyebrow">FONTES DE EVIDÊNCIA</span><h3>Consultar verificações</h3></div></div><p>Confira a checagem original antes de atribuir qualquer classificação a uma publicação.</p><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026" target="_blank" rel="noopener noreferrer">TSE — Eleições 2026 ↗</a><a href="https://www.tse.jus.br/comunicacao/noticias/2026/Agosto/fato-ou-boato-pagina-e-reformulada-para-as-eleicoes-2026-e-amplia-ferramentas-de-combate-a-desinformacao" target="_blank" rel="noopener noreferrer">TSE — Fato ou Boato ↗</a><a href="https://www.aosfatos.org/" target="_blank" rel="noopener noreferrer">Aos Fatos ↗</a><a href="https://lupa.uol.com.br/" target="_blank" rel="noopener noreferrer">Agência Lupa ↗</a><div class="callout">Os números representam somente itens encontrados nas fontes RSS monitoradas e no período selecionado. Não representam o total de desinformação na internet. Nenhum item é rotulado como falso sem checagem documental específica.</div></aside></div>
+
   </section>
+
+
 
   <section id="panel-polls" class="tab-panel" aria-labelledby="pollsHeading">
+
     <div class="section-intro"><div><span class="eyebrow" data-i18n="polls_label">LEVANTAMENTOS PUBLICADOS</span><h3 id="pollsHeading" data-i18n="polls_title">Pesquisas eleitorais</h3><p data-i18n="polls_intro">Resultados publicados e documentados, sem estimativas.</p></div></div>
+
     <div class="poll-stage" role="group" aria-label="Etapa eleitoral"><button type="button" data-poll-stage="pre" class="selected">Anterior ao 1º turno</button><button type="button" data-poll-stage="first">1º turno</button><button type="button" data-poll-stage="second">2º turno</button></div>
+
     <div class="election-controls"><label class="poll-institute-field"><span data-i18n="polls_institute">Instituto</span><input id="pollInstitute" type="search" list="pollInstituteList" autocomplete="off" placeholder="Digite ou selecione um instituto"><datalist id="pollInstituteList"></datalist></label><label><span data-i18n="polls_from">De</span><input id="pollFrom" type="date"></label><label><span data-i18n="polls_to">Até</span><input id="pollTo" type="date"></label><label class="poll-results-filter"><span>Percentuais</span><select id="pollHasResults" aria-label="Filtrar pesquisas com ou sem percentuais"><option value="all">Todas as pesquisas</option><option value="yes">Com porcentagem</option><option value="no">Sem porcentagem</option></select></label><button type="button" id="pollRefresh" class="election-action" data-i18n="refresh">Atualizar</button></div>
+
     <div id="pollStatus" class="callout" role="status" aria-live="polite"></div>
-    <div class="poll-browser"><div class="poll-results-column"><div id="pollList" class="election-list poll-list"></div><nav id="pollPagination" class="poll-pagination" aria-label="Paginação das pesquisas"></nav></div><aside id="pollDetail" class="panel poll-detail" aria-live="polite"><span class="eyebrow">PESQUISA SELECIONADA</span><h3 id="pollDetailTitle">Selecione uma pesquisa</h3><div id="pollChart" class="election-chart poll-selected-chart" role="img" aria-label="Resultado da pesquisa selecionada"></div><div id="pollDetailMeta" class="poll-detail-meta"></div></aside></div>
+
+    <div class="poll-browser"><div class="poll-results-column"><div id="pollList" class="election-list poll-list"></div><nav id="pollPagination" class="poll-pagination" aria-label="Paginação das pesquisas"></nav></div><aside id="pollDetail" class="panel poll-detail" aria-live="polite"><span class="eyebrow">PESQUISA SELECIONADA</span><h3 id="pollDetailTitle">Selecione uma pesquisa</h3><div id="pollChart" class="election-chart poll-selected-chart" role="img" aria-label="Resultados da pesquisa selecionada, agrupados por cenário"></div><div id="pollDetailMeta" class="poll-detail-meta"></div></aside></div>
+
     <section class="panel poly-panel" aria-labelledby="polyHeading"><div class="poly-header"><div><span class="eyebrow">MERCADO DE PREVISÃO · FONTE EXTERNA</span><h3 id="polyHeading">Polymarket — preços de contratos</h3><p>Indicador de mercado separado das pesquisas eleitorais. Não representa intenção de voto nem resultado oficial.</p></div><a href="https://polymarket.com/event/brazil-presidential-election" target="_blank" rel="noopener noreferrer">Ver mercado original ↗</a></div><div id="polyStatus" role="status" aria-live="polite">Consultando dados públicos...</div><div id="polyValues" class="poly-values"></div><div id="polyHistory" class="poly-history" role="img" aria-label="Histórico dos preços de contratos de previsão"></div><p class="poly-disclaimer">Preços de negociação refletem oferta e demanda entre participantes. Não são percentuais de pesquisas nem probabilidades estatísticas certificadas. Séries são exibidas somente quando fornecidas pela API.</p></section>
+
     <section class="panel indicator-sources" aria-labelledby="indicatorSourcesHeading">
+
       <span class="eyebrow">OUTRAS FONTES · SÉRIES INDEPENDENTES</span><h3 id="indicatorSourcesHeading">Agregadores e histórico</h3>
+
       <p>Pesquisas, médias agregadas e preços de contratos são indicadores diferentes. Nunca são somados ou tratados como equivalentes.</p>
+
       <div class="indicator-source-grid">
+
         <article><strong>ElectioLab</strong><small>API de pesquisas e médias. Importação histórica requer chave de API e validação dos registros.</small><a href="https://electiolab.com/api" target="_blank" rel="noopener noreferrer">Documentação da API ↗</a></article>
+
         <article><strong>PollingData</strong><small>Agregador externo de pesquisas; integração automática depende de acesso autorizado a dados estruturados.</small><a href="https://flex.pollingdata.com.br/home" target="_blank" rel="noopener noreferrer">Consultar agregador ↗</a></article>
+
         <article><strong>Brazil Economy</strong><small>Agregador externo; importação automática pendente de API/exportação documentada.</small><a href="https://brazileconomy.com.br/agregador/" target="_blank" rel="noopener noreferrer">Consultar agregador ↗</a></article>
+
       </div><p id="indicatorArchiveStatus" class="indicator-archive-status" role="status" aria-live="polite">Consultando histórico armazenado...</p>
+
     </section>
+
     <div class="election-two"><article class="panel"><h3 data-i18n="poll_accuracy_low">Menores diferenças observadas</h3><div id="pollAccuracyLow" class="election-empty"></div></article><article class="panel"><h3 data-i18n="poll_accuracy_high">Maiores diferenças observadas</h3><div id="pollAccuracyHigh" class="election-empty"></div></article></div>
+
     <p class="callout" data-i18n="poll_method">Diferenças só serão calculadas quando houver pesquisas comparáveis e resultados oficiais validados. Margem de erro informada pelo instituto não equivale à diferença em relação à votação.</p>
+
   </section>
+
   <section id="panel-vote" class="tab-panel" aria-labelledby="voteHeading"><div class="section-intro"><div><span class="eyebrow" data-i18n="vote_official">RESULTADOS OFICIAIS</span><h3 id="voteHeading" data-i18n="vote_title">Voto agora</h3><p data-i18n="vote_intro">Apuração presidencial publicada pelo TSE, sem projeções.</p></div></div>
+
     <div class="election-two vote-round-grid"><article class="panel vote-first-panel"><h3 data-i18n="first_round">Primeiro turno</h3><h4 id="voteMapHeading">Mapa por UF — 1º turno</h4><p class="election-note" id="voteMapNote">Azul: Flávio Bolsonaro · Amarelo: Lula · Cinza: dados indisponíveis. A cor indica apenas quem recebeu mais votos entre os dois candidatos, não o vencedor geral da UF.</p><div id="voteMap" class="vote-map" role="group" aria-labelledby="voteMapHeading"><p>Carregando mapa...</p><div id="voteMapTooltip" class="vote-map-tooltip" aria-hidden="true"></div></div><div id="voteMapStatic" class="vote-map-static" role="status" aria-live="polite">Passe o mouse, toque ou use o teclado sobre um estado para consultar os votos.</div><h4 class="vote-candidates-heading">Votação nacional — 1º turno</h4><div id="voteFirst" class="election-list" role="status" aria-live="polite"></div></article><article class="panel vote-second-panel"><div class="vote-live-header"><div><span class="eyebrow">APURAÇÃO OFICIAL</span><h3 data-i18n="second_round">Segundo turno · 25/10/2026</h3></div><span id="voteLiveBadge" class="vote-live-badge">Aguardando</span></div><p id="voteLiveStatus" class="vote-live-status" role="status" aria-live="polite">Aguardando publicação de resultados oficiais.</p><div id="voteSecond" class="election-list" role="status" aria-live="polite"></div><div class="vote-live-meta"><span id="voteLastSync">Última consulta: —</span><button type="button" id="voteRefreshNow" class="election-action">Atualizar agora</button></div><p class="election-note" data-i18n="vote_refresh">Atualização automática durante a apuração, conforme disponibilidade de dados oficiais.</p></article></div>
+
     <p class="callout" data-i18n="vote_method">Os números são exibidos somente após ingestão e validação de arquivos oficiais. A ausência de dados não significa zero votos.</p>
+
   </section>
+
+
 
   <section id="panel-sources" class="tab-panel">
+
     <div class="dashboard-grid">
+
       <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">INTEGRAÇÕES</span><h3 data-i18n="apis_title">Fontes e serviços planejados</h3></div></div><div id="apiList" class="api-list"></div></article>
+
       <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">CONFIGURAÇÃO</span><h3 data-i18n="config_title">Parâmetros do radar</h3></div></div><div class="config-list"><label><span>Atualização automática</span><select disabled><option>30 minutos</option></select></label><label><span>Limite por consulta</span><input value="Conforme disponibilidade das fontes" disabled></label><label><span>Idioma da coleta</span><input value="Português (BR)" disabled></label></div><div class="callout"><strong>Informação:</strong> parâmetros exibidos conforme a configuração atual do Radar.</div></article>
+
     </div>
+
   </section>
+
 </main>
 
+
+
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
+
 <script src="/js/radar.js" defer></script>
+
 </body></html>
