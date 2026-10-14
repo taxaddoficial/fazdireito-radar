@@ -11238,7 +11238,7 @@ const APOIO_UI={
  es:{all:'Todos',vote:'Pidió el voto',mention:'Mencionó',silent:'No mencionó',off:'Sin publicaciones',nored:'Sin recolección',norecord:'Sin registro',today:'Hoy',yesterday:'Ayer',dayBefore:'Anteayer',mentions5d:'menciones · 5 días',last24:'últimas 24 h',askedVote:'pidió el voto',noProfiles:'Sin perfiles documentados',lastEvidence:'Última evidencia',viewPost:'Ver publicación ↗',noEvidence:'Sin evidencias en este recorte.',noResults:'No hay registros para los filtros seleccionados.',people:'personas',previous:'← Anterior',next:'Siguiente →',views:'visualizaciones',interactions:'interacciones'}
 };
 const apoioT=k=>(APOIO_UI[lang]||APOIO_UI.pt)[k]||k;
-function apoioPhotoStyle(sq){const i=APOIO_PHOTO_INDEX.get(String(sq||'').trim());if(i==null)return null;const sheet=Math.floor(i/400)+1,j=i%400,x=(j%20)*64,y=Math.floor(j/20)*64;return `background-image:url('/images/candidatos/sprite-${sheet}.webp?v=1.5.6');background-position:-${x}px -${y}px;background-size:1280px auto`;}
+function apoioPhotoStyle(sq){const i=APOIO_PHOTO_INDEX.get(String(sq||'').trim());if(i==null)return null;const sheet=Math.floor(i/400)+1,j=i%400,cell=42,scale=cell/64,x=(j%20)*64*scale,y=Math.floor(j/20)*64*scale;return `background-image:url('/images/candidatos/sprite-${sheet}.webp?v=1.5.7');background-position:-${x}px -${y}px;background-size:${1280*scale}px auto;background-repeat:no-repeat`;}
 
 // APOIO V1.4 — snapshot normalizado do Flaviômetro, sem D1
 const APOIO_NETWORKS={instagram:'Instagram',facebook:'Facebook',x:'X / Twitter',tiktok:'TikTok',youtube:'YouTube',threads:'Threads',kwai:'Kwai',telegram:'Telegram'};
