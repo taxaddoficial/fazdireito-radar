@@ -1080,3 +1080,19 @@ html{font-size:var(--base-font-size)}
 .disinfo-stat small{display:block;margin-top:4px;color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 @media(max-width:850px){#panel-apoio .apoio-filters{grid-template-columns:repeat(2,minmax(0,1fr))}#panel-apoio .apoio-classification-row .apoio-field{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){#panel-apoio .apoio-filters{grid-template-columns:1fr}}
+
+/* V1.5.6 — usability, accessibility and responsive hardening */
+:focus-visible{outline:3px solid #fbbf24!important;outline-offset:3px!important}
+.apoio-photo{background:#e8eef5 center/cover no-repeat;flex:0 0 auto}
+.apoio-photo.is-sprite img{display:none}
+.apoio-photo.is-fallback{background-image:url('/images/candidatos/silhueta.svg')!important;background-size:cover}
+.apoio-toggle button,.apoio-pagination button,.apoio-social{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.apoio-field select,.apoio-field input,.apoio-sort select,.apoio-uf-filter select{min-height:44px}
+.apoio-person-card{border-color:#d7e0ea!important}
+.apoio-square{width:14px!important;height:14px!important;flex:0 0 14px}
+.apoio-timeline{gap:7px}
+.apoio-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:900px){.apoio-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.apoio-people-grid{grid-template-columns:1fr}.apoio-head{align-items:flex-start;gap:12px;flex-wrap:wrap}.apoio-territory-controls{width:100%;justify-content:space-between}.apoio-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.apoio-filters{grid-template-columns:1fr}.apoio-kpis{grid-template-columns:1fr}.apoio-classification-row .apoio-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.apoio-person-metrics{grid-template-columns:1fr}.apoio-person-card{padding:14px}.apoio-pagination{overflow-x:auto;justify-content:flex-start;padding-bottom:6px}.apoio-uf-wide,.apoio-evidence-wide,.apoio-section{padding:14px}.apoio-sort{width:100%;justify-content:space-between}.apoio-sort select{max-width:none;flex:1}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media(forced-colors:active){.apoio-square{forced-color-adjust:none;border:1px solid CanvasText}.apoio-pill{border:1px solid CanvasText}}
