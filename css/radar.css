@@ -1096,3 +1096,12 @@ html{font-size:var(--base-font-size)}
 @media(max-width:560px){.apoio-filters{grid-template-columns:1fr}.apoio-kpis{grid-template-columns:1fr}.apoio-classification-row .apoio-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.apoio-person-metrics{grid-template-columns:1fr}.apoio-person-card{padding:14px}.apoio-pagination{overflow-x:auto;justify-content:flex-start;padding-bottom:6px}.apoio-uf-wide,.apoio-evidence-wide,.apoio-section{padding:14px}.apoio-sort{width:100%;justify-content:space-between}.apoio-sort select{max-width:none;flex:1}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 @media(forced-colors:active){.apoio-square{forced-color-adjust:none;border:1px solid CanvasText}.apoio-pill{border:1px solid CanvasText}}
+
+
+/* V1.5.7 — compact social badges + correctly scaled candidate portraits */
+#panel-apoio .apoio-socials{gap:5px;padding-top:9px}
+#panel-apoio .apoio-social{min-height:28px!important;padding:3px 7px!important;font-size:9px!important;line-height:1.1;border-radius:999px;white-space:nowrap}
+#panel-apoio .apoio-person-card header{grid-template-columns:42px minmax(0,1fr) auto}
+#panel-apoio .apoio-avatar,#panel-apoio .apoio-photo{width:42px;height:42px;min-width:42px;min-height:42px}
+#panel-apoio .apoio-photo.is-sprite{background-size:840px auto}
+@media(max-width:560px){#panel-apoio .apoio-social{min-height:28px!important;padding:3px 7px!important;font-size:9px!important}#panel-apoio .apoio-avatar,#panel-apoio .apoio-photo{width:40px;height:40px;min-width:40px;min-height:40px}}
