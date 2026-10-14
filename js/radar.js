@@ -32,7 +32,8 @@ const RADAR_API = {
 
     sources: "/api/sources",
 
-    youtube: "/api/youtube"
+    youtube: "/api/youtube",
+    coverageMovement: "/api/coverage-movement"
 
   }
 
@@ -63,6 +64,7 @@ let liveNews = null;
 let liveNewsMeta = null;
 
 let liveStatus = null;
+let liveCoverageMovement = null;
 
 
 
@@ -4419,6 +4421,19 @@ function renderCoverageCards() {
 
 
 // ============================================================
+// MOVIMENTO DA COBERTURA — cálculo consolidado no Worker/D1
+// ============================================================
+async function loadCoverageMovement(){
+  try{
+    const data=await radarApiFetch(RADAR_API.endpoints.coverageMovement);
+    liveCoverageMovement=(data&&data.status==="ok"&&Array.isArray(data.items))?data:null;
+  }catch(error){
+    console.warn("[Radar] Movimento da cobertura indisponível; usando fallback local.",error?.message||error);
+    liveCoverageMovement=null;
+  }
+}
+
+// ============================================================
 
 // ASSUNTOS EMERGENTES — 24H ATUAIS × 24H ANTERIORES
 
@@ -4455,6 +4470,18 @@ function renderEmergingTopics() {
 
 
   const texts = translations[lang] || translations.pt;
+
+  if (liveCoverageMovement && Array.isArray(liveCoverageMovement.items) && liveCoverageMovement.items.length) {
+    const items=liveCoverageMovement.items.slice(0,8);
+    const maxScore=Math.max(...items.map(item=>Number(item.score||item.delta||item.current||1)),1);
+    container.innerHTML=items.map((item,index)=>{
+      const score=Number(item.score||item.delta||item.current||1);
+      const width=Math.max(12,(score/maxScore)*100);
+      const variation=item.previous===0?texts.emerging_new:(Number.isFinite(Number(item.growth_pct))?`${Number(item.growth_pct)>=0?"+":""}${Number(item.growth_pct).toFixed(0)}%`:"—");
+      return `<article class="emerging-item"><span class="emerging-rank">${index+1}</span><div class="emerging-content"><div class="emerging-heading"><strong>${escapeHTML(item.term)}</strong><span class="emerging-growth">${escapeHTML(variation)}</span></div><div class="emerging-track"><i style="width:${width}%"></i></div><small>${escapeHTML(texts.emerging_counts.replace("{current}",formatNumber(item.current)).replace("{previous}",formatNumber(item.previous)))}</small></div></article>`;
+    }).join("");
+    return;
+  }
 
 
 
@@ -10978,7 +11005,9 @@ async function initializeRadar() {
 
     sourcesResult,
 
-    newsResult
+    newsResult,
+
+    coverageResult
 
   ] =
 
@@ -10990,7 +11019,9 @@ async function initializeRadar() {
 
         loadRadarSources(),
 
-        loadRadarNews()
+        loadRadarNews(),
+
+        loadCoverageMovement()
 
       ]
 
