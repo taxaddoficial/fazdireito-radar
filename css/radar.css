@@ -1056,3 +1056,9 @@ html{font-size:var(--base-font-size)}
 #panel-apoio .apoio-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#panel-apoio .apoio-post{height:100%}
 @media(max-width:800px){#panel-apoio .apoio-criteria-posts,#panel-apoio .apoio-list{grid-template-columns:1fr}#panel-apoio .apoio-temporal-chart{overflow-x:auto}#panel-apoio .apoio-temporal-chart svg{min-width:720px}}
 .dark #panel-apoio .apoio-person-card.state-vote,.dark #panel-apoio .apoio-person-card.state-mention,.dark #panel-apoio .apoio-person-card.state-silent{background:#101827}.dark #panel-apoio .apoio-person-card.state-norecord{background:#0d1522}.dark #panel-apoio .uf-grid{stroke:#334155}.dark #panel-apoio .uf-axis{fill:#94a3b8}
+
+/* V1.5.4 — cards neutros e régua diária de 5 dias */
+#panel-apoio .apoio-person-card,#panel-apoio .apoio-person-card.state-vote,#panel-apoio .apoio-person-card.state-mention,#panel-apoio .apoio-person-card.state-silent,#panel-apoio .apoio-person-card.state-norecord{border:1px solid #dfe7f0!important;background:#fff!important;border-left:1px solid #dfe7f0!important;border-left-style:solid!important}
+#panel-apoio .apoio-timeline{gap:7px;min-height:22px;flex-wrap:nowrap}
+#panel-apoio .apoio-timeline .apoio-square{width:13px;height:13px;border-radius:3px}
+.dark #panel-apoio .apoio-person-card,.dark #panel-apoio .apoio-person-card.state-vote,.dark #panel-apoio .apoio-person-card.state-mention,.dark #panel-apoio .apoio-person-card.state-silent,.dark #panel-apoio .apoio-person-card.state-norecord{background:#101827!important;border-color:#45576d!important}
