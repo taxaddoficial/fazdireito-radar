@@ -1033,3 +1033,26 @@ html{font-size:var(--base-font-size)}
 @media(max-width:900px){#panel-apoio .apoio-overview,#panel-apoio .apoio-evidence-grid,#panel-apoio .apoio-people-grid{grid-template-columns:1fr}#panel-apoio .apoio-people-head{align-items:flex-start;gap:12px;flex-direction:column}#panel-apoio .apoio-sort{width:100%;justify-content:space-between}.apoio-sort select{flex:1}}
 @media(max-width:520px){#panel-apoio .apoio-person-metrics{grid-template-columns:1fr 1fr}.apoio-person-card header{grid-template-columns:38px 1fr}.apoio-person-card header>.apoio-pill{grid-column:2;justify-self:start}.apoio-pagination button{padding:0 8px}}
 .dark #panel-apoio .apoio-person-card,.dark #panel-apoio .apoio-mini-post{background:#101827;border-color:#26354a}.dark #panel-apoio .apoio-person-metrics>div,.dark #panel-apoio .apoio-social{background:#172235}.dark #panel-apoio .apoio-person-id strong,.dark #panel-apoio .apoio-person-metrics strong{color:#f1f5f9}.dark #panel-apoio .apoio-mini-post p,.dark #panel-apoio .apoio-last-post p{color:#cbd5e1}
+
+/* Apoio V1.5.3 — 5 dias, gráfico temporal, fotos locais */
+#panel-apoio .apoio-uf-wide,#panel-apoio .apoio-evidence-wide{width:100%;margin:16px 0;padding:20px}
+#panel-apoio .apoio-chart-note{margin:-4px 0 12px;color:var(--muted);font-size:.76rem}
+#panel-apoio .apoio-temporal-chart svg{display:block;width:100%;height:auto;min-height:230px;max-height:300px}
+#panel-apoio .uf-grid{stroke:#e5eaf0;stroke-width:1}#panel-apoio .uf-axis{fill:#718096;font-size:11px}
+#panel-apoio .apoio-uf-legend{display:flex;gap:10px 18px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#64748b}
+#panel-apoio .apoio-uf-legend span{display:flex;align-items:center;gap:5px}#panel-apoio .apoio-uf-legend i{width:9px;height:9px;border-radius:50%}#panel-apoio .apoio-uf-legend b{color:var(--ink)}
+#panel-apoio .apoio-criteria-posts{grid-template-columns:repeat(2,minmax(0,1fr))}
+#panel-apoio .apoio-people-title{font-size:1.28rem!important;letter-spacing:-.015em;margin-top:2px!important}
+#panel-apoio .apoio-people-head .eyebrow{font-size:.67rem;letter-spacing:.08em;color:#6b7f95;font-weight:850}
+#panel-apoio .apoio-person-card{position:relative;overflow:hidden;border-left-width:5px;transition:transform .15s ease,box-shadow .15s ease}
+#panel-apoio .apoio-person-card:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(15,23,42,.08)}
+#panel-apoio .apoio-person-card.state-vote{border-left-color:#dc2626;background:linear-gradient(90deg,rgba(220,38,38,.035),#fff 18%)}
+#panel-apoio .apoio-person-card.state-mention{border-left-color:#2563eb;background:linear-gradient(90deg,rgba(37,99,235,.035),#fff 18%)}
+#panel-apoio .apoio-person-card.state-silent{border-left-color:#94a3b8;background:linear-gradient(90deg,rgba(148,163,184,.04),#fff 18%)}
+#panel-apoio .apoio-person-card.state-norecord{border-left-color:#cbd5e1;border-left-style:dashed;background:#fbfcfd}
+#panel-apoio .apoio-pill.norecord{background:#f1f5f9;color:#64748b;border:1px dashed #cbd5e1}
+#panel-apoio .apoio-square.norecord{background:transparent;border:1px dashed #94a3b8}
+#panel-apoio .apoio-photo{overflow:hidden;background:#e7f0fa}#panel-apoio .apoio-photo img{width:100%;height:100%;object-fit:cover;display:block}
+#panel-apoio .apoio-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#panel-apoio .apoio-post{height:100%}
+@media(max-width:800px){#panel-apoio .apoio-criteria-posts,#panel-apoio .apoio-list{grid-template-columns:1fr}#panel-apoio .apoio-temporal-chart{overflow-x:auto}#panel-apoio .apoio-temporal-chart svg{min-width:720px}}
+.dark #panel-apoio .apoio-person-card.state-vote,.dark #panel-apoio .apoio-person-card.state-mention,.dark #panel-apoio .apoio-person-card.state-silent{background:#101827}.dark #panel-apoio .apoio-person-card.state-norecord{background:#0d1522}.dark #panel-apoio .uf-grid{stroke:#334155}.dark #panel-apoio .uf-axis{fill:#94a3b8}
