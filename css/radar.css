@@ -1062,3 +1062,21 @@ html{font-size:var(--base-font-size)}
 #panel-apoio .apoio-timeline{gap:7px;min-height:22px;flex-wrap:nowrap}
 #panel-apoio .apoio-timeline .apoio-square{width:13px;height:13px;border-radius:3px}
 .dark #panel-apoio .apoio-person-card,.dark #panel-apoio .apoio-person-card.state-vote,.dark #panel-apoio .apoio-person-card.state-mention,.dark #panel-apoio .apoio-person-card.state-silent,.dark #panel-apoio .apoio-person-card.state-norecord{background:#101827!important;border-color:#45576d!important}
+
+/* V1.5.5 — filtros, cores diárias e acumulados */
+#panel-apoio .apoio-classification-row{margin-bottom:10px;padding:14px 18px}
+#panel-apoio .apoio-classification-row .apoio-field{display:flex;align-items:center;gap:16px}
+#panel-apoio .apoio-classification-row .apoio-field label{margin:0;white-space:nowrap}
+#panel-apoio .apoio-filters{grid-template-columns:repeat(5,minmax(0,1fr))}
+#panel-apoio .apoio-territory-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#panel-apoio .apoio-uf-filter{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#62758b}
+#panel-apoio .apoio-uf-filter select{padding:8px 28px 8px 9px;border:1px solid #d3deea;border-radius:8px;background:#fff}
+/* O seletor-base tinha especificidade maior que as classes de estado. */
+#panel-apoio .apoio-square.vote{background:#dc2626!important;border-color:#dc2626!important}
+#panel-apoio .apoio-square.mention{background:#2563eb!important;border-color:#2563eb!important}
+#panel-apoio .apoio-square.silent{background:#94a3b8!important;border-color:#94a3b8!important}
+#panel-apoio .apoio-square.norecord{background:transparent!important;border:1px dashed #94a3b8!important}
+.disinfo-cumulative-note{margin:-4px 0 18px;color:var(--muted);font-size:.76rem}
+.disinfo-stat small{display:block;margin-top:4px;color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:850px){#panel-apoio .apoio-filters{grid-template-columns:repeat(2,minmax(0,1fr))}#panel-apoio .apoio-classification-row .apoio-field{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){#panel-apoio .apoio-filters{grid-template-columns:1fr}}
