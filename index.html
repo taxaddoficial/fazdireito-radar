@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.5.7">
+  <link rel="stylesheet" href="/css/radar.css?v=1.5.8">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -728,6 +728,15 @@
 
     <section class="panel poly-panel" aria-labelledby="polyHeading"><div class="poly-header"><div><span class="eyebrow">MERCADO DE PREVISÃO · FONTE EXTERNA</span><h3 id="polyHeading">Polymarket — preços de contratos</h3><p>Indicador de mercado separado das pesquisas eleitorais. Não representa intenção de voto nem resultado oficial.</p></div><a href="https://polymarket.com/event/brazil-presidential-election" target="_blank" rel="noopener noreferrer">Ver mercado original ↗</a></div><div id="polyStatus" role="status" aria-live="polite">Consultando dados públicos...</div><div id="polyValues" class="poly-values"></div><div id="polyHistory" class="poly-history" role="img" aria-label="Histórico dos preços de contratos de previsão"></div><p class="poly-disclaimer">Preços de negociação refletem oferta e demanda entre participantes. Não são percentuais de pesquisas nem probabilidades estatísticas certificadas. Séries são exibidas somente quando fornecidas pela API.</p></section>
 
+    <section class="panel eurasia-panel" aria-labelledby="eurasiaHeading">
+      <div class="poly-header"><div><span class="eyebrow" data-i18n="eurasia_eyebrow">ANÁLISE DE RISCO POLÍTICO · FONTE EXTERNA</span><h3 id="eurasiaHeading">Eurasia Group — <span data-i18n="eurasia_title">probabilidade estimada de vitória</span></h3><p data-i18n="eurasia_intro">Avaliação de consultoria especializada; não é pesquisa eleitoral nem preço de contrato.</p></div><a href="https://www.eurasiagroup.net/in-the-news" target="_blank" rel="noopener noreferrer" data-i18n="eurasia_source">Consultar Eurasia ↗</a></div>
+      <div id="eurasiaStatus" role="status" aria-live="polite" data-i18n="eurasia_loading">Consultando histórico validado...</div>
+      <div id="eurasiaValues" class="eurasia-values"></div>
+      <div class="eurasia-controls"><label for="eurasiaPeriod" data-i18n="eurasia_period">Histórico</label><select id="eurasiaPeriod"><option value="1" data-i18n="eurasia_24h">Últimas 24 horas</option><option value="2" data-i18n="eurasia_48h">Últimas 48 horas</option><option value="7" data-i18n="eurasia_7d">7 dias</option><option value="15" data-i18n="eurasia_15d">15 dias</option><option value="30" data-i18n="eurasia_30d">30 dias</option><option value="all" selected data-i18n="eurasia_all">Início das eleições</option></select></div>
+      <div id="eurasiaHistory" class="eurasia-history" role="list" aria-live="polite"></div>
+      <p class="poly-disclaimer" data-i18n="eurasia_disclaimer">A última estimativa validada permanece visível independentemente do filtro. O histórico inclui somente revisões publicadas no período; não há interpolação.</p>
+    </section>
+
     <section class="panel indicator-sources" aria-labelledby="indicatorSourcesHeading">
 
       <span class="eyebrow">OUTRAS FONTES · SÉRIES INDEPENDENTES</span><h3 id="indicatorSourcesHeading">Agregadores e histórico</h3>
@@ -780,6 +789,6 @@
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.5.7" defer></script>
+<script src="/js/radar.js?v=1.5.8" defer></script>
 
 </body></html>
