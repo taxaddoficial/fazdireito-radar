@@ -828,7 +828,7 @@ html{font-size:var(--base-font-size)}
 
 /* Radar v1.6.4 — controles legíveis e cards de mercado */
 
-#panel-polls .election-controls{grid-template-columns:minmax(185px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,1.2fr) auto;gap:12px;align-items:end}
+#panel-polls .election-controls{grid-template-columns:minmax(185px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(165px,1.15fr) minmax(165px,1.15fr) auto;gap:12px;align-items:end}
 
 #panel-polls .election-controls label{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;min-width:0;font:700 12px/1.35 inherit;color:var(--muted)}
 
