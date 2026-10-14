@@ -1,765 +1,944 @@
-<!doctype html>
+:root{--base-font-size:100%;--navy:#0b2341;--blue:#154b8b;--yellow:#fdb813;--green:#168447;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--panel:#fff;--soft:#f8fafc}
 
-<html lang="pt-BR" class="scroll-smooth">
 
-<head>
 
-  <meta charset="utf-8">
+html{font-size:var(--base-font-size)}
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+*{box-sizing:border-box}
 
-  <title>Radar 2026 | A Direita faz Direito</title>
 
-  <meta name="description" content="Painel público para acompanhar cobertura, palavras-chave, fontes e tendências relacionadas ao cenário eleitoral de 2026.">
 
-  <meta name="robots" content="noindex,nofollow">
+.svg-sprite{position:absolute;width:0;height:0;overflow:hidden}
 
-  <meta name="theme-color" content="#0b2341">
+.ui-icon{width:1em;height:1em;fill:currentColor;display:inline-block}
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 504'&gt;&lt;rect width='720' height='504' fill='%23009b3a'/&gt;&lt;polygon points='360,36 684,252 360,468 36,252' fill='%23fedf00'/&gt;&lt;circle cx='360' cy='252' r='126' fill='%23002776'/&gt;&lt;path d='M 235,260 A 130,130 0 0,0 485,240' fill='none' stroke='%23ffffff' stroke-width='14'/&gt;&lt;/svg&gt;">
 
-  <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css">
+.skip-link{position:absolute;left:-9999px;top:0}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+.skip-link:focus{left:1rem;top:1rem;z-index:999;background:#fff;color:#0b2341;padding:.7rem 1rem;border-radius:.5rem}
 
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional" onload="this.onload=null;this.rel='stylesheet'">
 
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional"></noscript>
+.lang-btn{opacity:.6;padding:.125rem;border:1px solid transparent;border-radius:.25rem}
 
-</head>
+.lang-btn.active{opacity:1;border-color:var(--yellow)}
 
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+.access-btn{padding:.125rem .5rem;border-radius:.25rem;background:#334155}
 
-<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+.access-btn:hover{background:#475569}
 
+.access-btn:focus-visible,.lang-btn:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
 
 
-<svg aria-hidden="true" class="svg-sprite">
 
-  <symbol id="i-access" viewBox="0 0 512 512"><path d="M256 112a56 56 0 1 0 0-112 56 56 0 0 0 0 112zM118 136a24 24 0 0 0-12 46l82 21v75l-53 153a24 24 0 1 0 45 16l48-139h56l48 139a24 24 0 1 0 45-16l-53-153v-75l82-21a24 24 0 0 0-12-46l-106 27h-64z"/></symbol>
+.nav-link{padding-bottom:.25rem;border-bottom:2px solid transparent;transition:.2s}
 
-  <symbol id="i-moon" viewBox="0 0 384 512"><path d="M223.5 32C100 32 0 132.3 0 256s100 224 223.5 224c63.6 0 121-26.5 161.5-69-7.5 1-15.2 1.5-23 1.5-105.9 0-191.8-86-191.8-192 0-80.7 49.8-149.7 120.3-178.1A224 224 0 0 0 223.5 32z"/></symbol>
+.nav-link:hover,.nav-link.active{color:var(--yellow);border-color:var(--yellow)}
 
-  <symbol id="i-flag" viewBox="0 0 448 512"><path d="M32 0C14.3 0 0 14.3 0 32v448c0 17.7 14.3 32 32 32s32-14.3 32-32V352h64l32-64 32 64h160c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H192l-32 64-32-64H64V32C64 14.3 49.7 0 32 0z"/></symbol>
+.mobile-link{color:#fff;padding:.75rem;border-radius:.5rem}
 
-  <symbol id="i-bars" viewBox="0 0 448 512"><path d="M0 96c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32A32 32 0 0 1 0 96zm0 160c0-17.7 14.3-32 32-32h384a32 32 0 1 1 0 64H32a32 32 0 0 1-32-32zm448 160a32 32 0 0 1-32 32H32a32 32 0 1 1 0-64h384c17.7 0 32 14.3 32 32z"/></symbol>
+.mobile-link:hover,.mobile-link.active{background:#1e293b;color:var(--yellow)}
 
-  <symbol id="i-x" viewBox="0 0 384 512"><path d="M342.6 150.6a32 32 0 0 0-45.3-45.3L192 210.7 86.6 105.4a32 32 0 0 0-45.3 45.3L146.7 256 41.4 361.4a32 32 0 0 0 45.3 45.3L192 301.3l105.4 105.3a32 32 0 0 0 45.3-45.3L237.3 256z"/></symbol>
 
-  <symbol id="i-external" viewBox="0 0 512 512"><path d="M320 0a32 32 0 1 0 0 64h82.7L201.4 265.4a32 32 0 0 0 45.3 45.3L448 109.3V192a32 32 0 1 0 64 0V32a32 32 0 0 0-32-32zM80 32C35.8 32 0 67.8 0 112v320c0 44.2 35.8 80 80 80h320c44.2 0 80-35.8 80-80V320a32 32 0 1 0-64 0v112c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16h112a32 32 0 1 0 0-64z"/></symbol>
 
-</svg>
+.radar-hero{background:linear-gradient(115deg,#0b2341 0%,#154b8b 58%,#0b2341 100%);border:1px solid rgba(253,184,19,.35);border-radius:1rem;padding:2rem;color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;box-shadow:0 18px 40px rgba(11,35,65,.16)}
 
+.radar-hero h2{font-size:clamp(2rem,4vw,3.2rem);font-weight:900;line-height:1;margin:.7rem 0}
 
+.radar-hero p{max-width:760px;color:#dbeafe}
 
-<aside aria-label="Controles de Acessibilidade" class="bg-slate-800 text-white text-xs py-1.5 px-4 border-b border-slate-700">
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:var(--navy);font-size:.7rem;font-weight:900;letter-spacing:.08em;padding:.45rem .7rem;border-radius:999px}
 
-  <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+.live-dot{width:.45rem;height:.45rem;background:#168447;border-radius:50%;box-shadow:0 0 0 4px rgba(22,132,71,.15)}
 
-    <div class="flex items-center space-x-3">
+.hero-status{min-width:170px;text-align:right}
 
-      <div class="flex items-center space-x-2">
+.hero-status span,.hero-status small{display:block;color:#cbd5e1;font-size:.72rem}
 
-        <svg class="ui-icon font-bold text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-access"></use></svg>
+.hero-status strong{display:block;font-size:1.25rem;margin:.2rem 0}
 
-        <span class="font-medium" data-i18n="accessibility">Acessibilidade:</span>
 
-      </div>
 
-      <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-700" role="group" aria-label="Seleção de idioma">
+.filter-panel,.panel{background:var(--panel);border:1px solid var(--line);border-radius:1rem;box-shadow:0 8px 25px rgba(15,23,42,.05)}
 
-        <button onclick="setLanguage('pt')" id="lang-pt" class="opacity-100 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Português" aria-label="Português">
+.filter-panel{padding:1rem 1.1rem;margin:1rem 0}
 
-          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 720 504"><rect width="720" height="504" fill="#009b3a"/><polygon points="360,36 684,252 360,468 36,252" fill="#fedf00"/><circle cx="360" cy="252" r="126" fill="#002776"/><path d="M 235,260 A 130,130 0 0,0 485,240" fill="none" stroke="#ffffff" stroke-width="14"/></svg>
+.filter-heading,.panel-head,.section-intro{display:flex;justify-content:space-between;align-items:center;gap:1rem}
 
-        </button>
+.filter-heading h3,.panel h3,.section-intro h3{font-weight:850;font-size:1.05rem}
 
-        <button onclick="setLanguage('en')" id="lang-en" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="English" aria-label="English">
+.eyebrow{font-size:.65rem;letter-spacing:.12em;font-weight:900;color:var(--blue)}
 
-          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 508 268"><rect width="508" height="268" fill="#bf0a30"/><g fill="#fff"><rect width="508" height="20.6"/><rect y="41.2" width="508" height="20.6"/><rect y="82.4" width="508" height="20.6"/><rect y="123.6" width="508" height="20.6"/><rect y="164.8" width="508" height="20.6"/><rect y="206" width="508" height="20.6"/><rect y="247.2" width="508" height="20.8"/></g><rect width="203.2" height="144.2" fill="#002868"/></svg>
 
-        </button>
 
-        <button onclick="setLanguage('es')" id="lang-es" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded border border-transparent focus:border-yellow-400" title="Español" aria-label="Español">
+/* FILTROS PRINCIPAIS */
 
-          <svg class="w-5 h-3.5 rounded shadow-sm" viewBox="0 0 750 500"><rect width="750" height="500" fill="#aa151b"/><rect width="750" height="250" y="125" fill="#f1bf00"/></svg>
+.filter-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:.75rem;margin-top:.8rem;align-items:end}
 
-        </button>
+.filter-grid label{grid-column:span 2;min-width:0}
 
-      </div>
+.filter-grid .search-field{grid-column:span 3}
 
-    </div>
+.filter-grid label span,.config-list label span{display:block;font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.25rem}
 
-    <div class="flex items-center space-x-4">
+.filter-grid select,.filter-grid input,.inline-filters input,.inline-filters select,.config-list input,.config-list select{width:100%;min-width:0;border:1px solid var(--line);background:#fff;border-radius:.65rem;padding:.65rem .7rem;font-size:.8rem}
 
-      <div class="flex items-center space-x-1" role="group" aria-label="Controle de tamanho de fonte">
+.btn-primary,.btn-secondary{border-radius:.65rem;padding:.65rem .9rem;font-size:.78rem;font-weight:800}
 
-        <button onclick="changeFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
+.btn-primary{background:var(--yellow);color:var(--navy);align-self:end}
 
-        <button onclick="resetFontSize()" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 text-xs" title="Redefinir fonte" aria-label="Redefinir fonte">A</button>
+.filter-grid .btn-primary{grid-column:span 3;width:100%;min-width:0;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 
-        <button onclick="changeFontSize(1)" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400 font-bold" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
+.btn-secondary{background:#f1f5f9;color:#334155}
 
-      </div>
 
-      <button id="themeToggle" type="button" onclick="toggleTheme()" class="flex items-center space-x-1 px-2.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600 focus:ring-2 focus:ring-yellow-400">
 
-        <svg id="themeIcon" class="ui-icon text-yellow-400" aria-hidden="true" focusable="false"><use href="#i-moon"></use></svg>
+.radar-tabs{display:flex;overflow-x:auto;gap:.25rem;border-bottom:1px solid var(--line);margin:1.2rem 0}
 
-        <span id="themeText" data-i18n="high_contrast">Alto Contraste</span>
+.tab{white-space:nowrap;padding:.8rem 1rem;font-size:.82rem;font-weight:750;color:#64748b;border-bottom:3px solid transparent}
 
-      </button>
+.tab:hover,.tab.active{color:var(--navy);border-color:var(--yellow)}
 
-    </div>
+.tab-panel{display:none}.tab-panel.active{display:block}
 
-  </div>
 
-</aside>
 
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:.8rem}
 
+.metric-card{background:#fff;border:1px solid var(--line);border-radius:1rem;padding:1rem;box-shadow:0 6px 20px rgba(15,23,42,.04)}
 
-<header class="bg-brand-navy text-white sticky top-0 z-50 shadow-md">
+.metric-card span{display:block;color:var(--muted);font-size:.72rem;font-weight:700}
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+.metric-card strong{display:block;color:var(--navy);font-size:1.8rem;line-height:1;margin:.55rem 0}
 
-    <a href="https://fazdireito.neocities.org/" class="flex items-center space-x-3 group focus:outline-none" aria-label="A Direita faz Direito — voltar ao portal">
+.metric-card small{color:#64748b}.metric-card small.up{color:#168447;font-weight:750}
 
-      <div class="w-10 h-10 rounded-full bg-brand-yellow flex items-center justify-center text-brand-navy shadow-inner group-hover:scale-105 transition-transform">
 
-        <svg class="ui-icon text-xl text-brand-blue" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>
 
-      </div>
+.dashboard-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:.8rem}
 
-      <div>
+.panel{padding:1rem;min-width:0}
 
-        <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">A Direita faz Direito | O Brasil Vai Vencer</h1>
+.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:1/-1}
 
-        <p class="text-xs text-yellow-400 font-medium hidden sm:block">Rumo à Vitória no 2º Turno • Portal de Mobilização</p>
 
-      </div>
 
-    </a>
+.legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.68rem;color:#64748b}
 
+.legend i{width:.5rem;height:.5rem;border-radius:50%;display:inline-block;margin-right:.25rem}
 
+.legend-main{background:var(--blue)}.legend-all{background:var(--yellow)}
 
-    <nav class="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Navegação principal">
+.canvas-wrap{height:250px;margin-top:1rem}.canvas-wrap canvas{width:100%;height:100%}
 
-      <a href="https://fazdireito.neocities.org/" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_map">Mapa de Votos</a>
+.chart-caption{font-size:.7rem;color:#94a3b8;margin-top:.6rem}
 
-      <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow flex items-center gap-1"><span data-i18n="nav_plan">Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
 
-      <a href="https://fazdireito.neocities.org/assuntos.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_axes">Eixos Temáticos</a>
 
-      <a href="https://fazdireito.neocities.org/materiais.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
+.ranking{display:grid;gap:.65rem;margin-top:1rem}
 
-      <a href="https://fazdireito.neocities.org/guia.html" class="hover:text-brand-yellow transition-colors pb-1 border-b-2 border-transparent hover:border-brand-yellow" data-i18n="nav_guide">Guia de Diálogo</a>
+.rank-row{display:grid;grid-template-columns:28px 1fr auto;gap:.6rem;align-items:center}
 
-    </nav>
+.rank-no{width:26px;height:26px;display:grid;place-items:center;border-radius:.5rem;background:#f1f5f9;font-size:.7rem;font-weight:900;color:var(--navy)}
 
+.rank-name{font-size:.78rem;font-weight:750}.rank-meta{font-size:.65rem;color:#64748b}.rank-score{font-size:.72rem;font-weight:900;color:var(--green)}
 
 
-    <div class="flex items-center space-x-3">
 
-      <span class="bg-brand-yellow text-brand-navy font-bold px-3 py-1.5 rounded-lg text-xs shadow" data-i18n="campaign_2026">Campanha 2026</span>
+/* PANORAMA */
 
-      <button id="mobileMenuBtn" type="button" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mobileMenu" title="Abrir menu de navegação" class="md:hidden p-2 rounded-md hover:bg-slate-800">
+.radar-visual{margin-top:1rem}
 
-        <svg class="ui-icon text-xl" aria-hidden="true" focusable="false"><use id="mobileMenuIcon" href="#i-bars"></use></svg>
+.monitoring-panorama{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
 
-      </button>
+.monitoring-item{min-width:0;padding:.85rem;background:linear-gradient(145deg,#f8fafc,#fff);border:1px solid var(--line);border-radius:.85rem;box-shadow:0 4px 14px rgba(15,23,42,.035)}
 
-    </div>
+.monitoring-label{display:block;color:var(--muted);font-size:.66rem;font-weight:800;line-height:1.25}
 
-  </div>
+.monitoring-value{display:block;margin:.3rem 0;color:var(--navy);font-size:1.45rem;font-weight:900;line-height:1}
 
-  <nav id="mobileMenu" hidden aria-label="Navegação mobile" class="md:hidden border-t border-slate-700">
+.monitoring-description{display:block;color:#64748b;font-size:.62rem;line-height:1.35}
 
-    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-medium">
+.monitoring-note{margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--line);color:#94a3b8;font-size:.64rem;line-height:1.4}
 
-      <a href="https://fazdireito.neocities.org/" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_map">Mapa de Votos</a>
+.monitoring-loading{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;padding:1rem;text-align:center;border:1px dashed var(--line);border-radius:.85rem;background:#f8fafc}
 
-      <a href="https://www.flaviobolsonaro.com.br/plano-de-governo" target="_blank" rel="noopener noreferrer" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors flex items-center gap-2"><span data-i18n="nav_plan">Plano de Governo</span><svg class="ui-icon text-[10px]" aria-hidden="true" focusable="false"><use href="#i-external"></use></svg></a>
+.monitoring-loading strong{color:var(--navy);font-size:.9rem}.monitoring-loading span{max-width:280px;color:var(--muted);font-size:.7rem;line-height:1.45}
 
-      <a href="https://fazdireito.neocities.org/assuntos.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_axes">Eixos Temáticos</a>
 
-      <a href="https://fazdireito.neocities.org/materiais.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_kit">Kit Mídia &amp; Rede</a>
 
-      <a href="https://fazdireito.neocities.org/guia.html" class="text-white px-3 py-3 rounded-lg hover:bg-slate-800 hover:text-brand-yellow transition-colors" data-i18n="nav_guide">Guia de Diálogo</a>
+/* PUBLICAÇÕES */
 
-    </div>
+.news-feed,.mentions-list{display:grid;gap:.65rem;margin-top:.8rem}
 
-  </nav>
+.news-item{border:1px solid var(--line);border-radius:.75rem;padding:.75rem;background:#fbfdff}
 
-</header>
+.news-item .source{display:flex;justify-content:space-between;gap:.5rem;font-size:.65rem;color:#64748b}
 
+.news-item h4{font-size:.8rem;font-weight:800;color:#172033;margin:.3rem 0}
 
+.news-item p{font-size:.7rem;color:#64748b}
 
-<main id="conteudo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+.tag{display:inline-flex;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:.15rem .45rem;font-size:.62rem;font-weight:800}
 
-  <section class="radar-hero">
+.text-btn{font-size:.72rem;color:var(--blue);font-weight:800}
 
-    <div>
+.section-intro{margin-bottom:.8rem}
 
-      <span class="hero-badge"><span class="live-dot"></span><span data-i18n="prototype">RADAR • DADOS MONITORADOS</span></span>
+.section-intro p{font-size:.75rem;color:#64748b;margin-top:.2rem}
 
-      <h2 data-i18n="hero_title">Radar Eleitoral 2026</h2>
 
-      <p data-i18n="hero_desc">Uma central para acompanhar cobertura pública, publicações, palavras-chave, fontes e tendências a partir dos dados coletados pelo Radar.</p>
 
-    </div>
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
 
-    <div class="hero-status"><span data-i18n="last_update">Última atualização</span><strong id="lastUpdate">—</strong><small data-i18n="mock_notice">Dados monitorados</small></div>
+.theme-card{background:#fff;border:1px solid var(--line);border-radius:1rem;padding:1rem;text-align:left;transition:.2s}
 
-  </section>
+.theme-card:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(15,23,42,.08);border-color:#bfdbfe}
 
+.theme-card .theme-top{display:flex;justify-content:space-between;gap:.5rem}
 
+.theme-card h4{font-weight:850;color:var(--navy)}.theme-card strong{font-size:1.45rem;color:var(--navy)}
 
-  <section class="filter-panel" aria-labelledby="filterTitle">
+.attention{font-size:.62rem;font-weight:900;border-radius:999px;padding:.2rem .45rem}
 
-    <div class="filter-heading"><div><span class="eyebrow" data-i18n="monitoring">MONITORAMENTO</span><h3 id="filterTitle" data-i18n="filters">Filtros do radar</h3></div></div>
+.attention.high{background:#fef2f2;color:#b91c1c}.attention.medium{background:#fffbeb;color:#a16207}.attention.stable{background:#f0fdf4;color:#15803d}
 
-<div class="filter-grid">
+.mini-track,.keyword-track{height:.45rem;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-top:.7rem}
 
-  <label>
+.mini-track i,.keyword-track i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--yellow));border-radius:999px}
 
-    <span data-i18n="period">Período</span>
 
-    <select id="period">
 
-      <option value="48h" selected data-i18n="period_48h">Últimas 48 horas</option>
+/* FILTROS INTERNOS E COBERTURA */
 
-      <option value="24h" data-i18n="period_24h">Últimas 24 horas</option>
+.inline-filters{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;flex-wrap:wrap;min-width:0}
 
-    </select>
+.inline-filters input{min-width:240px}
 
-  </label>
 
 
+#coverageCandidateFilter,#coverageFilter,.coverage-candidate-filter,.coverage-filter{width:auto;min-width:112px;max-width:160px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.65rem;padding:.48rem 2rem .48rem .65rem;font-size:.72rem;font-weight:800;line-height:1.2;cursor:pointer}
 
-  <label>
+#coverageCandidateFilter:focus-visible,#coverageFilter:focus-visible,.coverage-candidate-filter:focus-visible,.coverage-filter:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
 
-    <span data-i18n="scope">Candidato</span>
+.panel-head .coverage-actions,.coverage-actions{display:flex;align-items:center;justify-content:flex-end;gap:.55rem;flex-wrap:wrap}
 
-    <select id="scope">
 
-      <option value="all" data-i18n="candidate_all">Todos</option>
 
-      <option value="flavio" data-i18n="candidate_flavio" selected>Flávio Bolsonaro</option>
+.keyword-bars{display:grid;gap:.75rem;margin-top:1rem}
 
-      <option value="lula" data-i18n="candidate_lula">Lula</option>
+.keyword-row{display:grid;grid-template-columns:150px 1fr 50px;gap:.7rem;align-items:center;font-size:.75rem}
 
-      <option value="both" data-i18n="candidate_both_same">Ambos na mesma matéria</option>
+.word-cloud{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;justify-content:center;padding:1.2rem 0}
 
-    </select>
+.word{font-weight:850;color:var(--navy);cursor:pointer}
 
-  </label>
+.callout{margin-top:1rem;padding:.75rem;border-left:3px solid var(--yellow);background:#fffbeb;color:#6b5b2d;border-radius:0 .6rem .6rem 0;font-size:.7rem}
 
 
 
-  <label>
+.spike-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-top:1rem}
 
-    <span data-i18n="source">Veículo</span>
+.spike{padding:.8rem;border:1px solid var(--line);border-radius:.75rem}
 
-    <select id="source">
+.spike time{font-size:.65rem;color:#64748b}.spike strong{display:block;color:var(--navy);margin:.25rem 0}.spike span{font-size:.68rem;color:#168447;font-weight:800}
 
-      <option value="all" data-i18n="all_publishers">Todos os veículos</option>
 
-    </select>
 
-  </label>
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
 
+.video-card{background:#fff;border:1px solid var(--line);border-radius:1rem;overflow:hidden}
 
+.video-thumb{aspect-ratio:16/9;background:linear-gradient(135deg,#0b2341,#154b8b);display:grid;place-items:center;color:#fff;font-weight:900}
 
-  <label class="search-field">
+.video-info{padding:.8rem}.video-info h4{font-size:.8rem;font-weight:800}.video-info p{font-size:.68rem;color:#64748b;margin-top:.3rem}
 
-    <span data-i18n="search">Buscar termo</span>
 
-    <input
 
-      id="searchTerm"
+.api-list{display:grid;gap:.6rem;margin-top:1rem}
 
-      type="search"
+.api-row{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;border:1px solid var(--line);padding:.75rem;border-radius:.75rem}
 
-      placeholder="Ex.: economia, segurança..."
+.api-row strong{display:block;font-size:.8rem}.api-row span{font-size:.68rem;color:#64748b}
 
-    >
+.api-status{font-size:.65rem;font-weight:900;border-radius:999px;padding:.25rem .5rem}
 
-  </label>
+.api-status.mock{background:#f1f5f9;color:#475569}.api-status.ready{background:#f0fdf4;color:#15803d}.api-status.planned{background:#fffbeb;color:#a16207}
 
+.config-list{display:grid;gap:.75rem;margin-top:1rem}
 
 
-  <div class="filter-actions">
 
-    <button id="resetFilters" class="btn-secondary" type="button" data-i18n="reset">Limpar filtros</button>
+/* MODO ESCURO */
 
-    <button id="applyFilters" class="btn-primary" type="button" data-i18n="apply">Aplicar filtros</button>
+.dark body{background:#020617;color:#e2e8f0}
 
-  </div>
+.dark .filter-panel,.dark .panel,.dark .metric-card,.dark .theme-card,.dark .video-card{background:#0f172a;border-color:#334155}
 
-</div>
+.dark .filter-grid select,.dark .filter-grid input,.dark .inline-filters input,.dark .inline-filters select,.dark .config-list input,.dark .config-list select,.dark .news-item{background:#111c31;color:#e2e8f0;border-color:#334155}
 
-  </section>
+.dark .panel h3,.dark .metric-card strong,.dark .theme-card h4,.dark .theme-card strong,.dark .news-item h4,.dark .word,.dark .spike strong{color:#f8fafc}
 
+.dark .radar-tabs{border-color:#334155}.dark .tab.active{color:#fff}
 
+.dark .monitoring-item{background:#111c31;border-color:#334155;box-shadow:none}
 
-  <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
+.dark .monitoring-value{color:#f8fafc}.dark .monitoring-label,.dark .monitoring-description{color:#cbd5e1}
 
-    <button role="tab" aria-selected="true" class="tab active" data-tab="overview" data-i18n="tab_overview">Visão geral</button>
+.dark .monitoring-note{border-color:#334155;color:#94a3b8}
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="themes" data-i18n="tab_themes">Temas</button>
+.dark .monitoring-loading{background:#111c31;border-color:#475569}.dark .monitoring-loading strong{color:#f8fafc}.dark .monitoring-loading span{color:#cbd5e1}
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="mentions" data-i18n="tab_mentions">Menções</button>
+.dark #coverageCandidateFilter,.dark #coverageFilter,.dark .coverage-candidate-filter,.dark .coverage-filter{background:#111c31;color:#e2e8f0;border-color:#334155}
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="trends" data-i18n="tab_trends">Tendências</button>
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="videos" data-i18n="tab_videos">Vídeos</button>
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="disinfo" data-i18n="tab_disinfo">Desinformação</button>
+/* TABLET */
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="polls" data-i18n="tab_polls">Pesquisas</button>
+@media(max-width:1024px){
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="vote" data-i18n="tab_vote">Voto agora</button>
+  .filter-grid label{grid-column:span 4}
 
-    <button role="tab" aria-selected="false" class="tab" data-tab="sources" data-i18n="tab_sources">Fontes & APIs</button>
+  .filter-grid .search-field{grid-column:span 8}
 
-  </div>
+  .filter-grid .btn-primary{grid-column:span 4}
 
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
 
+  .span-4,.span-5,.span-7,.span-8{grid-column:1/-1}
 
-  <section id="panel-overview" class="tab-panel active">
+  .theme-grid,.video-grid{grid-template-columns:repeat(2,1fr)}
 
-<div class="metrics-grid">
+}
 
-  <article class="metric-card">
 
-    <span data-i18n="metric_mentions">Matérias coletadas</span>
 
-    <strong id="metricMentions">—</strong>
+/* MOBILE */
 
-    <small>
+@media(max-width:640px){
 
-      <span data-i18n="vs_period">no período monitorado</span>
+  .radar-hero{padding:1.35rem;display:block}
 
-    </small>
+  .hero-status{text-align:left;margin-top:1rem}
 
-  </article>
+  .filter-grid label,.filter-grid .search-field,.filter-grid .btn-primary{grid-column:1/-1}
 
+  .filter-grid .btn-primary{white-space:nowrap}
 
+  .metrics-grid,.theme-grid,.video-grid,.spike-grid{grid-template-columns:1fr}
 
-  <article class="metric-card">
+  .filter-heading,.panel-head.wrap,.section-intro{align-items:flex-start;flex-direction:column}
 
-    <span data-i18n="metric_topics">Matérias com candidatos</span>
+  .inline-filters{width:100%;flex-direction:column;align-items:stretch}
 
-    <strong id="metricTopics">—</strong>
+  .inline-filters input{min-width:0}
 
-    <small>
+  #coverageCandidateFilter,#coverageFilter,.coverage-candidate-filter,.coverage-filter{width:100%;max-width:none}
 
-      <span data-i18n="high_attention">referências identificadas</span>
+  .panel-head .coverage-actions,.coverage-actions{width:100%;justify-content:space-between}
 
-    </small>
+  .keyword-row{grid-template-columns:100px 1fr 42px}
 
-  </article>
+  .radar-tabs{margin-left:-1rem;margin-right:-1rem;padding-left:1rem}
 
+  .legend{display:none}
 
+  .monitoring-panorama{grid-template-columns:1fr}
 
-  <article class="metric-card">
+  .monitoring-item{padding:.8rem}
 
-    <span data-i18n="metric_sources">Veículos monitorados</span>
+  .monitoring-value{font-size:1.35rem}
 
-    <strong id="metricSources">—</strong>
+}
 
-    <small>
 
-      <span data-i18n="source_types">veículos distintos</span>
 
-    </small>
+/* ==========================================================
 
-  </article>
+   AJUSTES FINAIS — FILTROS E COBERTURA
 
+   ========================================================== */
 
+.sr-only{
 
-  <article class="metric-card">
+  position:absolute!important;
 
-    <span data-i18n="metric_peak">Maior volume/hora</span>
+  width:1px!important;
 
-    <strong id="metricPeak">—</strong>
+  height:1px!important;
 
-    <small data-i18n="peak_desc">
+  padding:0!important;
 
-      publicações na hora de maior volume
+  margin:-1px!important;
 
-    </small>
+  overflow:hidden!important;
 
-  </article>
+  clip:rect(0,0,0,0)!important;
 
-</div>
+  clip-path:inset(50%)!important;
 
-    <article id="tseOfficialPanel" class="panel" aria-live="polite"><div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div><p>Consultando fonte oficial...</p></article>
+  white-space:nowrap!important;
 
-    <div class="dashboard-grid">
+  border:0!important
 
-      <article class="panel span-8"><div class="panel-head"><div><span class="eyebrow">VOLUME</span><h3 data-i18n="volume_title">Evolução das menções</h3></div><div class="legend">
+}
 
-  <span><i class="legend-main"></i>Flávio Bolsonaro</span>
 
-  <span><i class="legend-all"></i>Lula</span>
 
-</div></div><div class="canvas-wrap"><canvas id="volumeChart" aria-label="Gráfico demonstrativo de evolução das menções"></canvas></div><p class="chart-caption" data-i18n="demo_chart">Dados ilustrativos para validar o layout. Serão substituídos por dados das APIs.</p></article>
+.filter-actions{
 
-      <article class="panel span-4"><div class="panel-head"><div><span class="eyebrow">AGORA</span><h3 data-i18n="hot_title">Assuntos em destaque</h3></div></div><div id="hotTopics" class="ranking"></div></article>
+  grid-column:span 3;
 
-      <article class="panel span-5">
+  display:grid;
 
-  <div class="panel-head">
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
 
-    <div>
+  gap:.5rem;
 
-      <span class="eyebrow">RADAR</span>
+  align-self:end;
 
-      <h3 data-i18n="radar_title">Panorama de Monitoramento</h3>
+}
 
-    </div>
+.filter-actions .btn-primary,
 
-  </div>
+.filter-actions .btn-secondary{
 
+  width:100%;
 
+  min-width:0;
 
-  <div
+  min-height:42px;
 
-    class="radar-visual"
+  margin:0;
 
-    id="radarVisual"
+  padding:.65rem .55rem;
 
-    role="group"
+  display:inline-flex;
 
-    aria-label="Panorama dos dados coletados pelo Radar 2026"
+  align-items:center;
 
-  ></div>
+  justify-content:center;
 
-</article>
+  text-align:center;
 
-<article class="panel span-7">
+  white-space:nowrap;
 
+}
 
+.filter-actions .btn-primary{grid-column:auto}
 
-  <div class="panel-head">
 
 
+.coverage-actions{
 
-    <div>
+  display:flex;
 
-      <span class="eyebrow">
+  align-items:center;
 
-        COBERTURA
+  justify-content:flex-end;
 
-      </span>
+  gap:.65rem;
 
+  flex-wrap:nowrap;
 
+}
 
-      <h3 data-i18n="news_title">
+.coverage-filter{
 
-        Últimas menções encontradas
+  position:relative;
 
-      </h3>
+  width:auto!important;
 
-    </div>
+  min-width:0!important;
 
+  max-width:none!important;
 
+  margin:0;
 
-    <div class="coverage-actions">
+  padding:0!important;
 
+  border:0!important;
 
+  background:transparent!important;
 
-      <label
+  border-radius:0!important;
 
-        class="coverage-filter"
+}
 
-        for="coverageFilter"
+.coverage-filter select,
 
-      >
+#coverageFilter{
 
-        <span class="sr-only" data-i18n="coverage_filter_label">
+  width:auto;
 
-          Filtrar cobertura por candidato
+  min-width:112px;
 
-        </span>
+  max-width:150px;
 
+  border:1px solid var(--line);
 
+  background:#fff;
 
-        <select
+  color:var(--ink);
 
-          id="coverageFilter"
+  border-radius:.65rem;
 
-        >
+  padding:.48rem 2rem .48rem .65rem;
 
-          <option
+  font-size:.72rem;
 
-            value="flavio"
+  font-weight:800;
 
-            selected
+  line-height:1.2;
 
-            data-i18n="coverage_flavio"
+  cursor:pointer;
 
-          >
+}
 
-            Flávio
+.dark .coverage-filter{background:transparent!important;border:0!important}
 
-          </option>
+.dark .coverage-filter select,
 
+.dark #coverageFilter{background:#111c31;color:#e2e8f0;border-color:#334155}
 
 
-          <option value="lula" data-i18n="coverage_lula">
 
-            Lula
+@media(max-width:900px){
 
-          </option>
+  .filter-actions{grid-column:span 4}
 
+}
 
+@media(max-width:640px){
 
-          <option value="both" data-i18n="coverage_both">
+  .filter-actions{grid-column:1/-1}
 
-            Ambos
+  .coverage-actions{width:100%;justify-content:space-between;flex-wrap:wrap}
 
-          </option>
+  .coverage-filter select,#coverageFilter{width:auto;min-width:112px;max-width:150px}
 
-        </select>
+}
 
-      </label>
 
 
+/* ASSUNTOS EMERGENTES */
 
-      <button
+.emerging-panel{margin-top:.8rem}
 
-        class="text-btn"
+.emerging-panel .panel-head p{font-size:.72rem;color:var(--muted);margin-top:.25rem;max-width:680px}
 
-        data-open-tab="mentions"
+.emerging-window{white-space:nowrap;background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;border-radius:999px;padding:.35rem .6rem;font-size:.65rem;font-weight:850}
 
-        data-i18n="view_all"
+.emerging-topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:1rem}
 
-        type="button"
+.emerging-item{display:grid;grid-template-columns:30px 1fr;gap:.65rem;align-items:start;padding:.8rem;border:1px solid var(--line);border-radius:.8rem;background:#fbfdff}
 
-      >
+.emerging-rank{width:28px;height:28px;display:grid;place-items:center;border-radius:.55rem;background:#f1f5f9;color:var(--navy);font-size:.68rem;font-weight:900}
 
-        Ver todas
+.emerging-content{min-width:0}.emerging-heading{display:flex;justify-content:space-between;align-items:center;gap:.6rem}.emerging-heading strong{color:var(--navy);font-size:.8rem;text-transform:capitalize}.emerging-growth{color:var(--green);font-size:.66rem;font-weight:900;white-space:nowrap}
 
-      </button>
+.emerging-track{height:.4rem;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:.5rem 0}.emerging-track i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--yellow));border-radius:999px}.emerging-content small{color:var(--muted);font-size:.63rem}
 
+.emerging-empty{grid-column:1/-1;padding:1rem;border:1px dashed var(--line);border-radius:.8rem;background:var(--soft);text-align:center}.emerging-empty strong,.emerging-empty span{display:block}.emerging-empty strong{color:var(--navy);font-size:.82rem}.emerging-empty span{color:var(--muted);font-size:.68rem;margin-top:.25rem}
 
+.emerging-methodology{margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--line);color:#94a3b8;font-size:.64rem;line-height:1.45}
 
-    </div>
+.dark .emerging-item,.dark .emerging-empty{background:#111c31;border-color:#334155}.dark .emerging-heading strong,.dark .emerging-empty strong{color:#f8fafc}.dark .emerging-window{background:#172554;border-color:#1e40af;color:#dbeafe}
 
+@media(max-width:640px){.emerging-topics{grid-template-columns:1fr}.emerging-window{white-space:normal}.emerging-heading{align-items:flex-start}}
 
 
-  </div>
 
 
 
-  <div
+/* AJUSTES ABA TEMAS — cards principais */
 
-    id="newsFeed"
+#panel-themes .theme-card .attention.stable{
 
-    class="news-feed"
+  display:inline-flex;
 
-  ></div>
+  align-items:center;
 
+  justify-content:center;
 
+  min-width:72px;
 
-</article>    </div>
+  height:28px;
 
-  </section>
+  padding:0 .65rem;
 
+  border-radius:.55rem;
 
+  white-space:nowrap;
 
-  <section id="panel-themes" class="tab-panel">
+  line-height:1;
 
-    <div class="section-intro"><div><span class="eyebrow">TEMAS</span><h3 data-i18n="themes_title">Mapa de temas monitorados</h3><p data-i18n="themes_desc">Cards demonstrativos com volume, variação e nível de atenção. Clique para filtrar o restante do painel.</p></div></div>
+}
 
-    <div id="themeCards" class="theme-grid"></div>
+#panel-themes .theme-card .theme-top{align-items:flex-start}
 
+@media(max-width:640px){
 
+  #panel-themes .theme-card .attention.stable{min-width:68px;height:26px}
 
-    <article class="panel emerging-panel">
+}
 
-      <div class="panel-head wrap">
 
-        <div>
 
-          <span class="eyebrow" data-i18n="emerging_eyebrow">MOVIMENTO DA COBERTURA</span>
+/* Menções: campo de busca à esquerda da ordenação, na mesma linha em desktop. */
 
-          <h3 data-i18n="emerging_title">Assuntos emergentes</h3>
+#panel-mentions .inline-filters{display:grid;grid-template-columns:minmax(200px,1fr) minmax(150px,190px);align-items:center;gap:.6rem;width:min(100%,540px);flex:none}
 
-          <p class="emerging-description" data-i18n="emerging_desc">Termos que ganharam presença nas últimas 24 horas em comparação com as 24 horas anteriores.</p>
+#panel-mentions .inline-filters input{min-width:0;width:100%}
 
-        </div>
+#panel-mentions .inline-filters select{min-width:0;width:100%}
 
-        <span class="emerging-window" data-i18n="emerging_window">24h × 24h anteriores</span>
+@media(max-width:640px){#panel-mentions .inline-filters{grid-template-columns:1fr;width:100%}}
 
-      </div>
 
-      <div id="emergingTopics" class="emerging-topics" aria-live="polite"></div>
 
-      <p class="emerging-methodology" data-i18n="emerging_methodology">A variação representa frequência na cobertura jornalística monitorada. Não mede popularidade, sentimento, aprovação ou intenção de voto.</p>
+/* ============================================================
 
-    </article>
+   VÍDEOS — YOUTUBE DATA API V3
 
-  </section>
+   ============================================================ */
 
+.video-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 
+.video-actions{display:grid;grid-template-columns:minmax(220px,1fr) 180px;gap:.55rem;min-width:min(100%,460px)}
 
-  <section id="panel-mentions" class="tab-panel">
+.video-actions input,.video-actions select{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.75rem;padding:.7rem .8rem;font:inherit;font-size:.75rem}
 
-    <div class="panel"><div class="panel-head wrap"><div><span class="eyebrow">MENÇÕES</span><h3 data-i18n="mentions_title">Cobertura e publicações</h3></div><div class="inline-filters"><input id="mentionFilter" type="search" placeholder="Filtrar título ou fonte" data-i18n-placeholder="mentions_filter_placeholder" aria-label="Filtrar título ou fonte"><select id="mentionSort" aria-label="Ordenar menções"><option value="recent" data-i18n="mentions_sort_recent">Mais recentes</option><option value="impact" data-i18n="mentions_sort_relevance">Maior relevância</option><option value="source" data-i18n="mentions_sort_source">Por fonte</option></select></div></div><div id="mentionsList" class="mentions-list"></div></div>
+.video-summary{margin:.8rem 0;color:#64748b;font-size:.7rem;font-weight:700}
 
-  </section>
+.video-thumb-link{position:relative;display:block;aspect-ratio:16/9;background:#0b2341;overflow:hidden}
 
+.video-thumb-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
 
+.video-thumb-link:hover .video-thumb-img{transform:scale(1.025)}
 
-  <section id="panel-trends" class="tab-panel">
+.video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;padding-left:3px}
 
-    <div class="dashboard-grid">
+.video-meta,.video-footer{display:flex;align-items:center;justify-content:space-between;gap:.6rem;color:#64748b;font-size:.65rem}
 
-      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">PALAVRAS-CHAVE</span><h3 data-i18n="keywords_title">Termos com maior presença</h3></div></div><div id="keywordBars" class="keyword-bars"></div></article>
+.video-info h4{margin:.5rem 0 .7rem;line-height:1.35}
 
-      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">NUVEM</span><h3 data-i18n="cloud_title">Nuvem de termos</h3></div></div><div id="wordCloud" class="word-cloud"></div><div class="callout" data-i18n="cloud_note">O tamanho representa apenas o peso demonstrativo neste protótipo.</div></article>
+.video-info h4 a{color:inherit;text-decoration:none}.video-info h4 a:hover{text-decoration:underline}
 
-      <article class="panel span-12"><div class="panel-head"><div><span class="eyebrow">PICOS</span><h3 data-i18n="spikes_title">Detecção de picos</h3></div></div><div id="spikeTimeline" class="spike-grid"></div></article>
+.video-footer a{font-weight:800;color:var(--navy);text-decoration:none}
 
-    </div>
+.video-state{grid-column:1/-1;padding:1.2rem;border:1px dashed var(--line);border-radius:1rem;text-align:center;color:#64748b;font-size:.75rem}
 
-  </section>
+.video-methodology{margin-top:1rem}
 
+.dark .video-actions input,.dark .video-actions select{background:#0f172a;border-color:#334155;color:#e2e8f0}
 
+.dark .video-footer a{color:#93c5fd}
 
-  <section id="panel-videos" class="tab-panel">
+@media(max-width:700px){.video-actions{grid-template-columns:1fr;width:100%;min-width:0}}
 
-    <div class="section-intro video-intro">
 
-      <div><span class="eyebrow">VÍDEOS</span><h3 data-i18n="videos_title">Conteúdos relacionados</h3><p data-i18n="videos_desc">Vídeos públicos relacionados ao candidato selecionado, coletados pela YouTube Data API v3.</p></div>
 
-      <div class="video-actions">
+/* Vídeos — indicadores e enquadramento */
 
-        <input id="videoFilter" type="search" placeholder="Filtrar título ou canal" aria-label="Filtrar vídeos por título ou canal">
+.video-actions{grid-template-columns:minmax(220px,1fr) 190px 170px}
 
-        <select id="videoFrame" aria-label="Filtrar por enquadramento">
+.video-indicators{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;margin:.9rem 0}
 
-          <option value="all">Todos os enquadramentos</option>
+.video-indicator{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.55rem;text-align:left;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.9rem;padding:.7rem .8rem;cursor:pointer;font:inherit}
 
-          <option value="favorable">Favorável a Flávio</option>
+.video-indicator strong{font-size:1rem}.video-indicator span{font-size:.68rem;font-weight:800}.video-indicator small{font-size:.62rem;color:#64748b}
 
-          <option value="critical">Crítico a Flávio</option>
+.video-frame-badge{display:inline-flex;margin-top:.55rem;padding:.2rem .45rem;border-radius:999px;background:#eef2f7;color:#334155;font-size:.58rem;font-weight:800}
 
-          <option value="right">Direita / campo aliado</option>
+.video-frame-favorable{background:#ecfdf5;color:#166534}.video-frame-critical{background:#fef2f2;color:#991b1b}.video-frame-right{background:#eff6ff;color:#1d4ed8}.video-frame-neutral{background:#f8fafc;color:#475569}
 
-          <option value="neutral">Comparativo / neutro</option>
+.dark .video-indicator{background:#0f172a;border-color:#334155;color:#e2e8f0}.dark .video-indicator small{color:#94a3b8}
 
-        </select>
+@media(max-width:900px){.video-actions{grid-template-columns:1fr 1fr}.video-actions input{grid-column:1/-1}.video-indicators{grid-template-columns:repeat(2,1fr)}}
 
-        <select id="videoSort" aria-label="Ordenar vídeos">
+@media(max-width:700px){.video-actions,.video-indicators{grid-template-columns:1fr}.video-actions input{grid-column:auto}}
 
-          <option value="recent">Mais recentes</option>
 
-          <option value="views">Mais visualizados</option>
 
-        </select>
+#tseOfficialPanel{margin:16px 0;padding:20px}#tseOfficialPanel a{font-weight:700;text-decoration:underline}#tseOfficialPanel p{margin:8px 0}
 
-      </div>
 
-    </div>
 
-    <div id="videoIndicators" class="video-indicators" aria-live="polite"></div>
+/* Nova aba: Desinformação */
 
-    <div id="videoSummary" class="video-summary" aria-live="polite"></div>
+.disinfo-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;margin:1rem 0}
 
-    <div id="videoGrid" class="video-grid"></div>
+.disinfo-stat{border:1px solid var(--line);background:var(--panel);border-radius:.85rem;padding:1rem}.disinfo-stat span{display:block;font-size:.73rem;color:var(--muted);font-weight:700}.disinfo-stat strong{font-size:1.65rem;color:var(--navy);display:block;margin-top:.35rem}
 
-    <div class="callout video-methodology" data-i18n="videos_methodology">Resultados de busca do YouTube. A presença ou o número de visualizações de um vídeo não mede apoio, popularidade eleitoral, sentimento ou intenção de voto.</div>
+.disinfo-controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.7rem;margin:1rem 0}.disinfo-controls input,.disinfo-controls select{width:100%;min-width:0;border:1px solid var(--line);background:var(--panel);padding:.7rem;border-radius:.7rem;color:var(--ink)}
 
-  </section>
+.disinfo-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:.8rem}.disinfo-list{display:grid;gap:.7rem;margin-top:1rem;max-height:700px;overflow:auto}.disinfo-item{padding:.85rem;border:1px solid var(--line);border-radius:.75rem;background:var(--soft)}.disinfo-meta{display:flex;justify-content:space-between;gap:.7rem;flex-wrap:wrap;color:var(--muted);font-size:.7rem}.disinfo-badge{background:#eaf2ff;color:#194b88;border-radius:999px;padding:.15rem .5rem;font-weight:750}.disinfo-item h4{font-size:.85rem;font-weight:800;margin:.45rem 0}.disinfo-item a,.disinfo-aside a{color:var(--blue);font-size:.78rem;font-weight:750}.disinfo-aside>a{display:block;margin:.8rem 0}.disinfo-aside>p,.disinfo-empty{color:var(--muted);font-size:.78rem;margin:.8rem 0}.disinfo-aside .callout{margin-top:1.4rem}
 
+.radar-footer{background:#0b2341;color:#cbd5e1;padding:1.25rem 1rem;margin-top:2rem;font-size:.73rem}.radar-footer-inner{max-width:1280px;margin:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.7rem 1.5rem}.radar-footer strong{color:#fff;font-size:.78rem}.radar-footer nav{display:flex;flex-wrap:wrap;gap:.5rem 1.2rem}.radar-footer nav a{color:#e2e8f0}.radar-footer nav a:hover{color:#fdb813}
 
+.dark .disinfo-stat,.dark .disinfo-item,.dark .disinfo-controls input,.dark .disinfo-controls select{background:#111c31;border-color:#334155;color:#e2e8f0}.dark .disinfo-stat strong,.dark .disinfo-item h4{color:#f8fafc}.dark .disinfo-item a,.dark .disinfo-aside a{color:#93c5fd}
 
-  <section id="panel-disinfo" class="tab-panel" aria-label="Monitoramento de desinformação">
+@media(max-width:850px){.disinfo-stats{grid-template-columns:repeat(2,1fr)}.disinfo-grid{grid-template-columns:1fr}.disinfo-controls{grid-template-columns:1fr 1fr}.disinfo-controls input{grid-column:1/-1}}
 
-    <div class="section-intro"><div><span class="eyebrow" data-i18n="disinfo_eyebrow">VERIFICAÇÃO DE INFORMAÇÕES</span><h3 data-i18n="disinfo_title">Radar de Desinformação</h3><p data-i18n="disinfo_desc">Monitoramento exploratório de publicações sobre checagens e alegações. A presença de uma palavra-chave não comprova falsidade.</p></div></div>
+@media(max-width:500px){.disinfo-stats{grid-template-columns:1fr 1fr}.disinfo-controls{grid-template-columns:1fr}.disinfo-controls input{grid-column:auto}.radar-footer-inner{justify-content:center;text-align:center}.radar-footer nav{justify-content:center}}
 
-    <div class="disinfo-stats" id="disinfoStats" aria-live="polite"></div>
 
-    <div class="disinfo-scope"><label><span>Pessoa mencionada</span><select id="disinfoScope" aria-label="Pessoa mencionada"><option value="all">Todas as pessoas</option><option value="flavio">Flávio Bolsonaro</option><option value="lula">Lula</option><option value="both">Ambos na mesma matéria</option></select></label><label><span>Período</span><select id="disinfoPeriod" aria-label="Período de monitoramento"><option value="48">48 horas</option><option value="168">7 dias</option></select></label></div><p id="disinfoDiagnostics" class="disinfo-diagnostics" aria-live="polite"></p><div class="disinfo-controls"><input id="disinfoSearch" type="search" placeholder="Pesquisar título, fonte ou assunto" aria-label="Pesquisar publicações sobre desinformação"><select id="disinfoType" aria-label="Tipo de registro"><option value="all">Todos os registros</option><option value="checks">Notícias sobre checagens</option><option value="claims">Alegações e alertas</option></select><select id="disinfoSort" aria-label="Ordenar registros"><option value="recent">Mais recentes</option><option value="source">Por fonte</option></select></div>
 
-    <div class="disinfo-grid"><article class="panel"><div class="panel-head"><div><span class="eyebrow">COBERTURA MONITORADA</span><h3>Publicações relacionadas</h3></div></div><div id="disinfoList" class="disinfo-list" aria-live="polite"></div></article><aside class="panel disinfo-aside"><div class="panel-head"><div><span class="eyebrow">FONTES DE EVIDÊNCIA</span><h3>Consultar verificações</h3></div></div><p>Confira a checagem original antes de atribuir qualquer classificação a uma publicação.</p><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026" target="_blank" rel="noopener noreferrer">TSE — Eleições 2026 ↗</a><a href="https://www.tse.jus.br/comunicacao/noticias/2026/Agosto/fato-ou-boato-pagina-e-reformulada-para-as-eleicoes-2026-e-amplia-ferramentas-de-combate-a-desinformacao" target="_blank" rel="noopener noreferrer">TSE — Fato ou Boato ↗</a><a href="https://www.aosfatos.org/" target="_blank" rel="noopener noreferrer">Aos Fatos ↗</a><a href="https://lupa.uol.com.br/" target="_blank" rel="noopener noreferrer">Agência Lupa ↗</a><div class="callout">Os números representam somente itens encontrados nas fontes RSS monitoradas e no período selecionado. Não representam o total de desinformação na internet. Nenhum item é rotulado como falso sem checagem documental específica.</div></aside></div>
+/* Desinformação: filtros próprios e diagnóstico do corpus */
 
-  </section>
+.disinfo-scope{display:flex;gap:1rem;flex-wrap:wrap;margin:.7rem 0}.disinfo-scope label{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:700;color:var(--muted)}.disinfo-scope select{border:1px solid var(--line);border-radius:.6rem;padding:.55rem;background:var(--panel);color:var(--ink)}.disinfo-diagnostics{font-size:.76rem;color:var(--muted);margin:.3rem 0}.disinfo-stat[role="button"]{cursor:pointer}.disinfo-stat[role="button"]:focus-visible{outline:3px solid var(--blue);outline-offset:2px}.disinfo-item p{font-size:.78rem;color:var(--muted);margin:.4rem 0}.dark .disinfo-scope select{background:#111c31;color:#e2e8f0;border-color:#334155}
 
 
 
-  <section id="panel-polls" class="tab-panel" aria-labelledby="pollsHeading">
+/* v1.5.2 — controles da aba Desinformação com escala tipográfica consistente */
 
-    <div class="section-intro poll-heading-row"><div><span class="eyebrow" data-i18n="polls_label">LEVANTAMENTOS PUBLICADOS</span><h3 id="pollsHeading" data-i18n="polls_title">Pesquisas eleitorais</h3><p data-i18n="polls_intro">Resultados publicados e documentados, sem estimativas.</p></div><div class="poll-stage" role="group" aria-label="Etapa eleitoral"><button type="button" data-poll-stage="pre" class="selected">Anterior ao 1º turno</button><button type="button" data-poll-stage="first">1º turno</button><button type="button" data-poll-stage="second">2º turno</button></div></div>
+#panel-disinfo .disinfo-controls input,
 
-    <div class="election-controls"><label class="poll-institute-field"><span data-i18n="polls_institute">Instituto</span><input id="pollInstitute" type="search" list="pollInstituteList" autocomplete="off" placeholder="Digite ou selecione um instituto"><datalist id="pollInstituteList"></datalist></label><label><span data-i18n="polls_from">De</span><input id="pollFrom" type="date"></label><label><span data-i18n="polls_to">Até</span><input id="pollTo" type="date"></label><label class="poll-results-filter"><span>Percentuais</span><select id="pollHasResults" aria-label="Filtrar pesquisas com ou sem percentuais"><option value="all">Todas as pesquisas</option><option value="yes">Com porcentagem</option><option value="no">Sem porcentagem</option></select></label><label class="poll-leadership-filter"><span data-i18n="polls_leadership">Liderança</span><select id="pollLeadership" aria-label="Filtrar pesquisas por liderança"><option value="all" data-i18n="polls_leadership_all">Todas</option><option value="flavio" data-i18n="polls_leadership_flavio">Flávio lidera</option><option value="lula" data-i18n="polls_leadership_lula">Lula lidera</option><option value="other" data-i18n="polls_leadership_other">Outro lidera</option><option value="tie" data-i18n="polls_leadership_tie">Empate</option></select></label><button type="button" id="pollRefresh" class="election-action" data-i18n="refresh">Atualizar</button></div>
+#panel-disinfo .disinfo-controls select,
 
-    <div id="pollStatus" class="callout" role="status" aria-live="polite"></div>
+#panel-disinfo .disinfo-scope select {
 
-    <div class="poll-browser"><div class="poll-results-column"><div id="pollList" class="election-list poll-list"></div><nav id="pollPagination" class="poll-pagination" aria-label="Paginação das pesquisas"></nav></div><aside id="pollDetail" class="panel poll-detail" aria-live="polite"><span class="eyebrow">PESQUISA SELECIONADA</span><h3 id="pollDetailTitle">Selecione uma pesquisa</h3><div id="pollChart" class="election-chart poll-selected-chart" role="img" aria-label="Resultados da pesquisa selecionada, agrupados por cenário"></div><div id="pollDetailMeta" class="poll-detail-meta"></div></aside></div>
+  font-family:inherit;font-size:.78rem;font-weight:500;line-height:1.4;
 
-    <section class="panel poly-panel" aria-labelledby="polyHeading"><div class="poly-header"><div><span class="eyebrow">MERCADO DE PREVISÃO · FONTE EXTERNA</span><h3 id="polyHeading">Polymarket — preços de contratos</h3><p>Indicador de mercado separado das pesquisas eleitorais. Não representa intenção de voto nem resultado oficial.</p></div><a href="https://polymarket.com/event/brazil-presidential-election" target="_blank" rel="noopener noreferrer">Ver mercado original ↗</a></div><div id="polyStatus" role="status" aria-live="polite">Consultando dados públicos...</div><div id="polyValues" class="poly-values"></div><div id="polyHistory" class="poly-history" role="img" aria-label="Histórico dos preços de contratos de previsão"></div><p class="poly-disclaimer">Preços de negociação refletem oferta e demanda entre participantes. Não são percentuais de pesquisas nem probabilidades estatísticas certificadas. Séries são exibidas somente quando fornecidas pela API.</p></section>
+  min-height:2.7rem;box-sizing:border-box;
 
-    <section class="panel indicator-sources" aria-labelledby="indicatorSourcesHeading">
+}
 
-      <span class="eyebrow">OUTRAS FONTES · SÉRIES INDEPENDENTES</span><h3 id="indicatorSourcesHeading">Agregadores e histórico</h3>
+#panel-disinfo .disinfo-scope label {font-size:.78rem;gap:.45rem}
 
-      <p>Pesquisas, médias agregadas e preços de contratos são indicadores diferentes. Nunca são somados ou tratados como equivalentes.</p>
+#panel-disinfo .disinfo-scope label>span {white-space:nowrap}
 
-      <div class="indicator-source-grid">
+#panel-disinfo .disinfo-stat {font:inherit;text-align:left;color:var(--ink)}
 
-        <article><strong>ElectioLab</strong><small>API de pesquisas e médias. Importação histórica requer chave de API e validação dos registros.</small><a href="https://electiolab.com/api" target="_blank" rel="noopener noreferrer">Documentação da API ↗</a></article>
+#panel-disinfo button.disinfo-stat {cursor:pointer}
 
-        <article><strong>PollingData</strong><small>Agregador externo de pesquisas; integração automática depende de acesso autorizado a dados estruturados.</small><a href="https://flex.pollingdata.com.br/home" target="_blank" rel="noopener noreferrer">Consultar agregador ↗</a></article>
+#panel-disinfo button.disinfo-stat[aria-pressed="true"] {border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
 
-        <article><strong>Brazil Economy</strong><small>Agregador externo; importação automática pendente de API/exportação documentada.</small><a href="https://brazileconomy.com.br/agregador/" target="_blank" rel="noopener noreferrer">Consultar agregador ↗</a></article>
+#panel-disinfo button.disinfo-stat:focus-visible,
 
-      </div><p id="indicatorArchiveStatus" class="indicator-archive-status" role="status" aria-live="polite">Consultando histórico armazenado...</p>
+#panel-disinfo .disinfo-controls :focus-visible,
 
-    </section>
+#panel-disinfo .disinfo-scope select:focus-visible {outline:3px solid var(--blue);outline-offset:2px}
 
-    <div class="election-two"><article class="panel"><h3 data-i18n="poll_accuracy_low">Menores diferenças observadas</h3><div id="pollAccuracyLow" class="election-empty"></div></article><article class="panel"><h3 data-i18n="poll_accuracy_high">Maiores diferenças observadas</h3><div id="pollAccuracyHigh" class="election-empty"></div></article></div>
+#tseOfficialPanel {font-family:inherit}
 
-    <p class="callout" data-i18n="poll_method">Diferenças só serão calculadas quando houver pesquisas comparáveis e resultados oficiais validados. Margem de erro informada pelo instituto não equivale à diferença em relação à votação.</p>
+#tseOfficialPanel .tse-state {font-size:.83rem;line-height:1.5;font-weight:600;color:var(--ink);margin:.75rem 0}
 
-  </section>
+#tseOfficialPanel .tse-caption {font-size:.72rem;line-height:1.6;color:var(--muted);margin:.5rem 0 1rem}
 
-  <section id="panel-vote" class="tab-panel" aria-labelledby="voteHeading"><div class="section-intro"><div><span class="eyebrow" data-i18n="vote_official">RESULTADOS OFICIAIS</span><h3 id="voteHeading" data-i18n="vote_title">Voto agora</h3><p data-i18n="vote_intro">Apuração presidencial publicada pelo TSE, sem projeções.</p></div></div>
+#tseOfficialPanel .tse-link {display:inline-flex;align-items:center;font-size:.78rem;line-height:1.4;font-weight:700;color:var(--blue);text-decoration:underline;text-underline-offset:3px}
 
-    <div class="election-two vote-round-grid"><article class="panel vote-first-panel"><h3 data-i18n="first_round">Primeiro turno</h3><h4 id="voteMapHeading">Mapa por UF — 1º turno</h4><p class="election-note" id="voteMapNote">Azul: Flávio Bolsonaro · Amarelo: Lula · Cinza: dados indisponíveis. A cor indica apenas quem recebeu mais votos entre os dois candidatos, não o vencedor geral da UF.</p><div id="voteMap" class="vote-map" role="group" aria-labelledby="voteMapHeading"><p>Carregando mapa...</p><div id="voteMapTooltip" class="vote-map-tooltip" aria-hidden="true"></div></div><div id="voteMapStatic" class="vote-map-static" role="status" aria-live="polite">Passe o mouse, toque ou use o teclado sobre um estado para consultar os votos.</div><h4 class="vote-candidates-heading">Votação nacional — 1º turno</h4><div id="voteFirst" class="election-list" role="status" aria-live="polite"></div></article><article class="panel vote-second-panel"><div class="vote-live-header"><div><span class="eyebrow">APURAÇÃO OFICIAL</span><h3 data-i18n="second_round">Segundo turno · 25/10/2026</h3></div><span id="voteLiveBadge" class="vote-live-badge">Aguardando</span></div><p id="voteLiveStatus" class="vote-live-status" role="status" aria-live="polite">Aguardando publicação de resultados oficiais.</p><div id="voteSecond" class="election-list" role="status" aria-live="polite"></div><div class="vote-live-meta"><span id="voteLastSync">Última consulta: —</span><button type="button" id="voteRefreshNow" class="election-action">Atualizar agora</button></div><p class="election-note" data-i18n="vote_refresh">Atualização automática durante a apuração, conforme disponibilidade de dados oficiais.</p></article></div>
+#tseOfficialPanel .tse-link:focus-visible {outline:3px solid var(--blue);outline-offset:3px}
 
-    <p class="callout" data-i18n="vote_method">Os números são exibidos somente após ingestão e validação de arquivos oficiais. A ausência de dados não significa zero votos.</p>
+.dark #tseOfficialPanel .tse-state {color:#e2e8f0}
 
-  </section>
+.dark #tseOfficialPanel .tse-link {color:#93c5fd}
 
+@media(max-width:650px){#panel-disinfo .disinfo-scope{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}#panel-disinfo .disinfo-scope label{display:grid;gap:.25rem}#panel-disinfo .disinfo-scope select{width:100%;min-width:0}}
 
+@media(max-width:380px){#panel-disinfo .disinfo-scope{grid-template-columns:1fr}}
 
-  <section id="panel-sources" class="tab-panel">
 
-    <div class="dashboard-grid">
 
-      <article class="panel span-7"><div class="panel-head"><div><span class="eyebrow">INTEGRAÇÕES</span><h3 data-i18n="apis_title">Fontes e serviços planejados</h3></div></div><div id="apiList" class="api-list"></div></article>
+/* Radar 2026 v1.6.2 — módulos eleitorais */
 
-      <article class="panel span-5"><div class="panel-head"><div><span class="eyebrow">CONFIGURAÇÃO</span><h3 data-i18n="config_title">Parâmetros do radar</h3></div></div><div class="config-list"><label><span>Atualização automática</span><select disabled><option>30 minutos</option></select></label><label><span>Limite por consulta</span><input value="Conforme disponibilidade das fontes" disabled></label><label><span>Idioma da coleta</span><input value="Português (BR)" disabled></label></div><div class="callout"><strong>Informação:</strong> parâmetros exibidos conforme a configuração atual do Radar.</div></article>
+#panel-polls,#panel-vote{font-family:inherit;color:var(--ink)}
 
-    </div>
+#panel-polls button,#panel-polls input,#panel-polls select,#panel-vote button{font-family:inherit}
 
-  </section>
+#panel-polls .section-intro p,#panel-vote .section-intro p{font-size:.82rem;line-height:1.55;color:var(--muted)}
 
-</main>
+.poll-stage{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.25rem 0 .75rem}.poll-stage button{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:.65rem .85rem;border-radius:.65rem;cursor:pointer;font-size:.78rem;line-height:1.25;font-weight:800}.poll-stage button.selected{background:var(--blue);color:#fff;border-color:var(--blue)}
 
+.election-controls{display:grid;grid-template-columns:minmax(220px,2fr) minmax(135px,1fr) minmax(135px,1fr) auto;gap:.75rem;margin:1rem 0;align-items:end}.election-controls label{display:flex;flex-direction:column;gap:.28rem;min-width:0;font-size:.72rem;line-height:1.3;font-weight:750;color:var(--muted)}.election-controls input,.election-controls select,.election-action{width:100%;min-width:0;min-height:42px;padding:.62rem .7rem;border:1px solid var(--line);border-radius:.65rem;background:var(--panel);color:var(--ink);font-size:.8rem;line-height:1.3}.election-action{cursor:pointer;background:var(--blue);border-color:var(--blue);color:#fff;font-weight:850;padding-inline:1rem}
 
+.poll-browser{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:1rem;margin:1rem 0 1.25rem;align-items:start}.poll-results-column{min-width:0}.poll-list{display:grid;gap:.55rem}.poll-card{display:grid;gap:.35rem;width:100%;padding:.85rem .9rem;border:1px solid var(--line);border-radius:.8rem;background:var(--panel);color:var(--ink);text-align:left;cursor:pointer;box-shadow:0 4px 14px rgba(15,23,42,.035)}.poll-card:hover{border-color:#9eb5d0;background:#f8fbff}.poll-card.is-selected{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,75,139,.12)}.poll-card strong{font-size:.86rem;line-height:1.35;font-weight:850}.poll-card small{font-size:.72rem;line-height:1.5;color:var(--muted)}.poll-card-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.15rem}.poll-card-badges span{font-size:.65rem;font-weight:800;padding:.22rem .42rem;border-radius:999px;background:#eef4fb;color:var(--blue)}
 
-<footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
+.poll-detail{position:sticky;top:1rem;padding:1rem}.poll-detail h3{margin:.4rem 0 .8rem;font-size:1rem;line-height:1.3}.poll-detail-meta{display:grid;gap:.38rem;margin-top:.8rem;font-size:.72rem;line-height:1.5;color:var(--muted)}.poll-detail-meta strong{color:var(--ink)}.election-chart{display:grid;gap:.65rem}.election-bar-row{padding:.65rem 0;border-bottom:1px solid var(--line)}.election-bar-row:last-child{border-bottom:0}.election-bar-head{display:flex;justify-content:space-between;gap:.65rem;align-items:flex-start;font-size:.75rem;line-height:1.4}.election-bar-head strong{font-size:.8rem;color:var(--ink)}.election-bar-track{height:.55rem;background:#e5edf6;border-radius:999px;overflow:hidden;margin-top:.4rem}.election-bar-fill{height:100%;background:var(--blue);border-radius:999px}.poll-chart-empty{padding:1rem;border:1px dashed var(--line);border-radius:.7rem;color:var(--muted);font-size:.75rem;line-height:1.55;background:var(--soft)}
 
-<script src="/js/radar.js" defer></script>
+.poll-pagination{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.35rem;margin:1rem 0}.poll-pagination button{min-width:36px;min-height:36px;border:1px solid var(--line);border-radius:.55rem;background:var(--panel);color:var(--ink);font-size:.72rem;font-weight:800;cursor:pointer}.poll-pagination button[aria-current="page"]{background:var(--blue);border-color:var(--blue);color:#fff}.poll-pagination button:disabled{opacity:.4;cursor:not-allowed}.poll-pagination .poll-page-info{font-size:.7rem;color:var(--muted);padding:0 .3rem}
 
-</body></html>
+.election-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0}.election-two .panel{padding:1rem;min-width:0}.election-two h3{margin:0 0 .75rem;font-size:.95rem;line-height:1.35}.election-result{display:grid;gap:.4rem;padding:.75rem;border:1px solid var(--line);border-radius:.7rem;margin:.45rem 0;overflow-wrap:anywhere}.election-result strong{font-size:.82rem;line-height:1.35}.election-result small,.election-note,.election-empty{font-size:.72rem;line-height:1.55;color:var(--muted)}.election-candidate{display:flex;align-items:center;gap:.75rem}.election-candidate img{width:46px;height:46px;object-fit:cover;border-radius:50%}
+
+.vote-map{position:relative;max-width:620px;margin:.65rem auto;min-height:260px}.vote-map svg{width:100%;height:auto;display:block;overflow:visible}.vote-map path{cursor:pointer;transition:opacity .12s,stroke-width .12s;vector-effect:non-scaling-stroke}.vote-map path:hover,.vote-map path:focus-visible{opacity:.82;stroke:#0b2341;stroke-width:2.2}.vote-map-tooltip{position:absolute;z-index:5;display:none;pointer-events:none;max-width:290px;padding:.65rem .75rem;border:1px solid #aebed1;border-radius:.65rem;background:rgba(255,255,255,.98);color:var(--ink);box-shadow:0 10px 28px rgba(15,23,42,.18);font-size:.72rem;line-height:1.5}.vote-map-tooltip.is-visible{display:block}.vote-map-tooltip strong{display:block;font-size:.78rem;margin-bottom:.2rem}.vote-map-static{min-height:42px;padding:.65rem .75rem;border:1px solid var(--line);border-radius:.65rem;margin-top:.65rem;font-size:.72rem;line-height:1.5;color:var(--muted)}
+
+.poll-stage button:focus-visible,.election-action:focus-visible,.election-controls :focus-visible,.poll-card:focus-visible,.poll-pagination button:focus-visible,.vote-map path:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+.dark #panel-polls,.dark #panel-vote{color:#e2e8f0}.dark .election-controls input,.dark .election-controls select,.dark .poll-card,.dark .poll-stage button,.dark .poll-pagination button{background:#15243b;color:#e2e8f0;border-color:#45576d}.dark .poll-card:hover{background:#1b2e49}.dark .poll-card small,.dark .poll-detail-meta,.dark .election-result small,.dark .election-note,.dark .election-empty{color:#b8c5d6}.dark .poll-card-badges span{background:#203a5c;color:#cfe3ff}.dark .poll-chart-empty{background:#15243b;border-color:#45576d;color:#b8c5d6}.dark .vote-map-tooltip{background:rgba(21,36,59,.98);color:#fff;border-color:#60738d}.dark .election-result{border-color:#45576d}
+
+@media(max-width:900px){.election-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.poll-browser{grid-template-columns:1fr}.poll-detail{position:static}.election-two{grid-template-columns:1fr}}
+
+@media(max-width:560px){.election-controls{grid-template-columns:1fr}.poll-stage button{flex:1 1 100%}.poll-card{padding:.75rem}.poll-pagination{justify-content:flex-start}.vote-map-tooltip{max-width:min(260px,80vw)}}
+
+
+
+/* Radar 1.6.3 — Pesquisas / Voto agora */
+
+#panel-polls .poll-source-footer{margin:1.25rem 0 .35rem;line-height:1.5}
+
+#panel-polls .poll-source-footer a{display:inline-flex;align-items:center;gap:.35rem;padding:.65rem .9rem;border:1px solid var(--line);border-radius:.7rem;background:var(--panel);color:var(--blue);font:700 .8rem/1.4 inherit;text-decoration:none;max-width:100%;overflow-wrap:anywhere;transition:background .18s,border-color .18s}
+
+#panel-polls .poll-source-footer a:hover{background:var(--soft);border-color:var(--blue);text-decoration:underline}
+
+#panel-polls .poll-source-footer a:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+
+#panel-vote .vote-round-grid{align-items:start}
+
+#panel-vote .vote-first-panel h4{font-size:.85rem;font-weight:800;margin:1rem 0 .4rem;color:var(--ink)}
+
+#panel-vote .vote-first-panel .vote-candidates-heading{margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--line)}
+
+#panel-vote .vote-second-panel{border:1px solid var(--line);border-top:4px solid var(--blue);border-radius:1rem;background:var(--panel);box-shadow:0 8px 26px rgba(0,0,0,.06)}
+
+#panel-vote .vote-live-header{display:flex;align-items:start;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+
+#panel-vote .vote-live-header h3{font-size:1.05rem;margin:.3rem 0 .45rem}
+
+#panel-vote .vote-live-badge{font-size:.72rem;line-height:1.2;font-weight:800;padding:.4rem .65rem;border-radius:999px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+
+#panel-vote .vote-live-badge.is-live{background:#e9f7ed;color:#166534;border-color:#9dd8ad}
+
+#panel-vote .vote-live-status{font-size:.78rem;line-height:1.55;color:var(--muted);margin:.65rem 0 1rem}
+
+#panel-vote .vote-live-meta{display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;padding:.85rem 0;margin-top:1rem;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted)}
+
+#panel-vote .vote-live-meta button{font-size:.75rem}
+
+#panel-vote .vote-second-panel .election-result{background:var(--soft);padding:1rem}
+
+#panel-vote .vote-second-panel .election-result strong{font-size:.95rem}
+
+#panel-vote .vote-second-panel .election-bar-track{height:.7rem}
+
+.dark #panel-polls .poll-source-footer a{background:#15243b;color:#b8d8ff;border-color:#45576d}
+
+.dark #panel-vote .vote-live-badge.is-live{background:#103921;color:#bbf7d0;border-color:#328255}
+
+@media(max-width:560px){#panel-vote .vote-live-meta{align-items:stretch}#panel-vote .vote-live-meta button{width:100%}}
+
+#panel-polls .poll-provenance{display:grid;gap:.4rem;margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--line);font-size:.73rem;line-height:1.45}
+
+#panel-polls .poll-provenance a{color:var(--blue);overflow-wrap:anywhere;text-decoration:underline}
+
+.dark #panel-polls .poll-provenance a{color:#b8d8ff}
+
+
+
+/* Radar v1.6.4 — controles legíveis e cards de mercado */
+
+#panel-polls .election-controls{grid-template-columns:minmax(185px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(165px,1.15fr) minmax(165px,1.15fr) auto;gap:12px;align-items:end}
+
+#panel-polls .election-controls label{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;min-width:0;font:700 12px/1.35 inherit;color:var(--muted)}
+
+#panel-polls .election-controls label>span{display:block;font-size:12px;line-height:1.35;font-weight:750;white-space:nowrap}
+
+#panel-polls .election-controls input,#panel-polls .election-controls select{display:block;width:100%;min-height:44px;font-family:inherit;font-size:13px;line-height:1.3;padding:10px 12px}
+
+#panel-polls .election-controls .election-action{min-height:44px;font-family:inherit;white-space:nowrap}
+
+#panel-polls .poll-stage{gap:10px;margin:20px 0 12px}
+
+#panel-polls .poll-stage button{font-family:inherit;font-size:13px;line-height:1.4}
+
+#panel-polls .poly-panel{padding:22px;margin:24px 0;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+
+#panel-polls .poly-header{display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap}
+
+#panel-polls .poly-header h3{font-size:19px;line-height:1.35;margin:5px 0 8px}
+
+#panel-polls .poly-header p,#panel-polls .poly-disclaimer{font-size:12px;line-height:1.65;color:var(--muted);max-width:75ch}
+
+#panel-polls .poly-header a{font-size:12px;font-weight:750;color:var(--blue);text-decoration:underline}
+
+#panel-polls #polyStatus{margin:12px 0;font-size:12px;color:var(--muted)}
+
+#panel-polls .poly-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+
+#panel-polls .poly-price{display:flex;flex-direction:column;gap:7px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+
+#panel-polls .poly-price span{font-size:13px;font-weight:750}#panel-polls .poly-price strong{font-size:26px;line-height:1.15;font-weight:850}#panel-polls .poly-price small{font-size:11px;line-height:1.5;color:var(--muted)}
+
+#panel-polls .poly-history svg{width:100%;height:auto;display:block;max-height:270px}#panel-polls .poly-history text{font:12px sans-serif;fill:var(--muted)}
+
+#panel-polls .poly-grid{stroke:var(--line);stroke-width:1}#panel-polls .poly-line{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+
+#panel-polls .poly-flavio{stroke:#2476b9}#panel-polls .poly-lula{stroke:#e6b92b}#panel-polls .poly-legend{font-size:11px;color:var(--muted);margin:8px 0}
+
+#panel-vote .vote-round-grid{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:20px}
+
+#panel-vote .vote-first-panel,#panel-vote .vote-second-panel{padding:20px;border-radius:14px}
+
+#panel-vote .vote-first-panel h3,#panel-vote .vote-second-panel h3{font-family:inherit;font-size:18px;line-height:1.35}
+
+#panel-vote .vote-map-static,#panel-vote .election-note{font-family:inherit;font-size:12px;line-height:1.65}
+
+#panel-vote .vote-second-panel{position:sticky;top:16px;min-height:320px}
+
+#panel-vote .vote-live-status{padding:14px 16px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:13px;line-height:1.6}
+
+#panel-vote .vote-live-meta{font-size:12px;line-height:1.5}
+
+@media(max-width:1050px){#panel-polls .election-controls{grid-template-columns:repeat(2,minmax(0,1fr))}#panel-polls .election-controls .election-action{width:100%}#panel-vote .vote-round-grid{grid-template-columns:1fr}#panel-vote .vote-second-panel{position:static}}
+
+@media(max-width:600px){#panel-polls .election-controls{grid-template-columns:1fr}#panel-polls .poly-values{grid-template-columns:1fr}#panel-polls .poly-panel{padding:14px}}
+
+
+
+/* v1.6.5: source cards and indicator archive */
+
+#panel-polls .indicator-sources{padding:20px;margin:20px 0;border-radius:14px}
+
+#panel-polls .indicator-sources h3{font:800 19px/1.35 inherit;margin:8px 0}
+
+#panel-polls .indicator-sources>p{font-size:13px;line-height:1.6;color:var(--muted)}
+
+#panel-polls .indicator-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+
+#panel-polls .indicator-source-grid article{min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--soft);border:1px solid var(--line);border-radius:12px}
+
+#panel-polls .indicator-source-grid strong{font-size:15px;line-height:1.3}
+
+#panel-polls .indicator-source-grid small{font-size:12px;line-height:1.6;color:var(--muted)}
+
+#panel-polls .indicator-source-grid a{font-size:12px;font-weight:750;color:var(--blue);text-decoration:underline;text-underline-offset:3px;margin-top:auto}
+
+#panel-polls .indicator-archive-status{padding:12px 0 0;font-size:12px}
+
+@media(max-width:750px){#panel-polls .indicator-source-grid{grid-template-columns:1fr}}
+
+
+
+/* Radar 1.7.2 — comparativos documentados */
+
+.poll-accuracy-row{display:flex;flex-direction:column;gap:.3rem;padding:.8rem 0;border-bottom:1px solid var(--border,rgba(128,128,128,.25))}.poll-accuracy-row:last-child{border-bottom:0}.poll-accuracy-row small{line-height:1.5;opacity:.8}
+/* ==========================================================
+   UX PESQUISAS — AGRUPAMENTO VISUAL POR CENÁRIO
+   Mantém cada cenário independente e evita repetir o cenário
+   ao lado de cada candidato no painel de detalhe.
+   ========================================================== */
+#panel-polls .poll-selected-chart{gap:1rem}
+#panel-polls .poll-scenario{display:grid;gap:0;border:1px solid var(--line);border-radius:.85rem;overflow:hidden;background:var(--panel)}
+#panel-polls .poll-scenario+.poll-scenario{margin-top:.15rem}
+#panel-polls .poll-scenario-head{padding:.75rem .8rem .65rem;background:var(--soft);border-bottom:1px solid var(--line)}
+#panel-polls .poll-scenario-kicker{display:block;margin-bottom:.25rem;color:var(--blue);font-size:.62rem;line-height:1.2;font-weight:900;letter-spacing:.1em}
+#panel-polls .poll-scenario-head p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.45;font-weight:650;overflow-wrap:anywhere}
+#panel-polls .poll-scenario .election-bar-row{padding:.7rem .8rem}
+#panel-polls .poll-scenario .election-bar-row:last-child{border-bottom:0}
+#panel-polls .poll-candidate-name{min-width:0;color:var(--ink);font-weight:750;overflow-wrap:anywhere}
+#panel-polls .poll-candidate-name small{display:inline;font-size:.62rem;font-weight:700;color:var(--muted);white-space:nowrap}
+#panel-polls .poll-scenario .election-bar-head strong{flex:0 0 auto;font-size:.82rem}
+#panel-polls .poll-scenario .election-bar-track{height:.5rem;margin-top:.45rem}
+.dark #panel-polls .poll-scenario{background:#15243b;border-color:#45576d}
+.dark #panel-polls .poll-scenario-head{background:#111c31;border-color:#45576d}
+.dark #panel-polls .poll-scenario-head p,.dark #panel-polls .poll-candidate-name small{color:#b8c5d6}
+.dark #panel-polls .poll-candidate-name{color:#f8fafc}
+@media(max-width:600px){#panel-polls .poll-scenario-head{padding:.7rem}#panel-polls .poll-scenario .election-bar-row{padding:.65rem .7rem}#panel-polls .poll-scenario-head p{font-size:.68rem}}
+
+
+/* v1.0.1 — cabeçalho de Pesquisas: etapa eleitoral na mesma linha */
+#panel-polls .poll-heading-row{align-items:flex-end}
+#panel-polls .poll-heading-row>div:first-child{min-width:0}
+#panel-polls .poll-heading-row .poll-stage{margin-left:auto;margin-bottom:.1rem;flex:0 0 auto}
+@media (max-width:760px){#panel-polls .poll-heading-row{align-items:flex-start;flex-direction:column}#panel-polls .poll-heading-row .poll-stage{margin-left:0;width:100%;overflow-x:auto;justify-content:flex-start;padding-bottom:.2rem}}
