@@ -9793,6 +9793,8 @@ function openTab(name) {
 
   if (name === "disinfo") renderDisinfo();
 
+  if (name === "apoio") initApoio();
+
   if (name === "polls") loadPolls();
 
   if (name === "vote") loadVotes();
@@ -11239,7 +11241,7 @@ initializeRadar();
 // APOIO V1.4 — snapshot normalizado do Flaviômetro, sem D1
 const APOIO_NETWORKS={instagram:'Instagram',facebook:'Facebook',x:'X / Twitter',tiktok:'TikTok',youtube:'YouTube',threads:'Threads',kwai:'Kwai',telegram:'Telegram'};
 const APOIO_STATUS={vote:'Pediu voto',mention:'Falou',silent:'Não falou',off:'Sem postar',nored:'Sem coleta'};
-let apoioData={people:[],posts:[],metrics:{}},apoioKind='all',apoioPostTab='recent';
+let apoioData={people:[],posts:[],metrics:{}},apoioKind='all',apoioPostTab='recent',apoioLoaded=false,apoioLoading=null;
 function apoioEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function apoioNum(v){return Number.isFinite(Number(v))?Number(v).toLocaleString('pt-BR'):'—';}
 function apoioSet(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
@@ -11251,6 +11253,41 @@ function apoioFilteredPosts(){const f=apoioFilters();return apoioData.posts.filt
 function apoioPopulate(id,values,allLabel){const el=document.getElementById(id);if(!el)return;const old=el.value;el.replaceChildren(new Option(allLabel,'all'));[...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(x=>el.add(new Option(x,x)));el.value=[...el.options].some(x=>x.value===old)?old:'all';}
 function apoioRenderSummaries(){const f=apoioFilters(),base=apoioBasePeople(),counts={vote:0,mention:0,silent:0,off:0,nored:0};base.forEach(p=>counts[apoioPersonStatus(p,f.network)]++);apoioSet('apoioKpiTotal',apoioNum(base.length));apoioSet('apoioKpiSpoke',apoioNum(counts.vote+counts.mention));apoioSet('apoioKpiVote',apoioNum(counts.vote));const ps=apoioFilteredPosts();apoioSet('apoioKpiPosts',apoioNum(ps.length));apoioSet('apoioKpiViews',apoioNum(ps.reduce((n,p)=>n+(Number(p.views)||0),0)));const ufs={};base.forEach(p=>{const st=apoioPersonStatus(p,f.network);if(st==='vote'||st==='mention'){ufs[p.uf]=(ufs[p.uf]||0)+1;}});const ufTxt=Object.entries(ufs).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([uf,n])=>`${uf} ${n}`).join(' · ');apoioSet('apoioUfChart',ufTxt||'Nenhuma fala registrada neste recorte.');const nets=Object.entries(APOIO_NETWORKS).map(([id,label])=>`${label}: ${base.filter(p=>p.networks?.includes(id)).length}`).join(' · ');apoioSet('apoioNetworkChart',nets);}
 function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioFilteredPeople(),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();apoioSet('apoioCount',`${rows.length.toLocaleString('pt-BR')} de ${apoioBasePeople().length.toLocaleString('pt-BR')} pessoas no recorte`);people.innerHTML=rows.length?rows.slice(0,400).map(p=>{const st=apoioPersonStatus(p,f.network);return `<div class="apoio-person"><div class="apoio-avatar">${apoioEsc(p.name.slice(0,1))}</div><div><b>${apoioEsc(p.name)}</b><small>${apoioEsc([p.party,p.role,p.uf].filter(Boolean).join(' · '))}</small></div><span class="apoio-pill ${st}">${apoioEsc(APOIO_STATUS[st]||st)}</span></div>`;}).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));posts.innerHTML=sorted.length?sorted.slice(0,180).map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';}
-async function loadApoio(){apoioSet('apoioStatus','CONSULTANDO FONTE');try{const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),25000);let res;try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store'});}finally{clearTimeout(timer);}if(!res.ok)throw Error(`HTTP ${res.status}`);const d=await res.json();if(!d||!Array.isArray(d.people)||!Array.isArray(d.posts))throw Error('Formato inválido');apoioData=d;apoioSet('apoioStatus',d.status==='ok'?'DADOS SINCRONIZADOS':'ÚLTIMA CÓPIA VÁLIDA');apoioSet('apoioNotice',d.message||'Classificações reproduzidas da fonte; silêncio não é interpretado como oposição.');apoioSet('apoioSync',`${d.fetchedAt?`Radar: ${new Date(d.fetchedAt).toLocaleString('pt-BR')}`:'Radar: —'}${d.sourceGenerated?` · Fonte: ${new Date(Number(d.sourceGenerated)).toLocaleString('pt-BR')}`:''}${d.syncMode?` · modo ${d.syncMode}`:''}`);apoioPopulate('apoioParty',d.people.map(p=>p.party),'Todos');apoioPopulate('apoioRole',d.people.map(p=>p.role),'Todos');apoioPopulate('apoioState',d.people.map(p=>p.uf),'Todas');renderApoio();}catch(e){apoioSet('apoioStatus','FONTE INDISPONÍVEL');apoioSet('apoioNotice','Não foi possível consultar a fonte. Nenhum indicador histórico foi apresentado como atual.');renderApoio();}}
-function initApoio(){const root=document.getElementById('panel-apoio');if(!root||root.dataset.ready==='1')return;root.dataset.ready='1';root.querySelectorAll('#apoioKind button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioKind button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioKind=b.dataset.v;renderApoio();}));root.querySelectorAll('#apoioPostTabs button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioPostTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioPostTab=b.dataset.v;renderApoio();}));['apoioParty','apoioRole','apoioState','apoioNetwork','apoioName'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener(id==='apoioName'?'input':'change',renderApoio);});loadApoio();}
+async function loadApoio({force=false}={}){
+ if(apoioLoaded&&!force){renderApoio();return apoioData;}
+ if(apoioLoading&&!force)return apoioLoading;
+ console.info('[Radar Apoio] Inicializando consulta');
+ apoioSet('apoioStatus','CONSULTANDO FONTE');
+ apoioSet('apoioNotice','Consultando o snapshot validado da fonte externa…');
+ apoioLoading=(async()=>{try{
+  const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),25000);let res;
+  try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store',headers:{accept:'application/json'}});}finally{clearTimeout(timer);}
+  if(!res.ok)throw Error(`HTTP ${res.status}`);
+  const d=await res.json();
+  if(!d||!Array.isArray(d.people)||!Array.isArray(d.posts))throw Error('Formato inválido');
+  apoioData=d;apoioLoaded=true;
+  console.info('[Radar Apoio] API carregada',{status:d.status,people:d.people.length,posts:d.posts.length,sourceVersion:d.sourceVersion,syncMode:d.syncMode});
+  apoioSet('apoioStatus',d.status==='ok'?'DADOS SINCRONIZADOS':'ÚLTIMA CÓPIA VÁLIDA');
+  apoioSet('apoioNotice',d.message||'Classificações reproduzidas da fonte; silêncio não é interpretado como oposição.');
+  apoioSet('apoioSync',`${d.fetchedAt?`Radar: ${new Date(d.fetchedAt).toLocaleString('pt-BR')}`:'Radar: —'}${d.sourceGenerated?` · Fonte: ${new Date(Number(d.sourceGenerated)).toLocaleString('pt-BR')}`:''}${d.syncMode?` · modo ${d.syncMode}`:''}`);
+  apoioPopulate('apoioParty',d.people.map(p=>p.party),'Todos');apoioPopulate('apoioRole',d.people.map(p=>p.role),'Todos');apoioPopulate('apoioState',d.people.map(p=>p.uf),'Todas');
+  renderApoio();console.info('[Radar Apoio] Renderização concluída',{people:d.people.length,posts:d.posts.length});return d;
+ }catch(e){console.error('[Radar Apoio] Falha ao carregar',e);apoioSet('apoioStatus','FONTE INDISPONÍVEL');apoioSet('apoioNotice',`Não foi possível consultar a fonte agora (${e?.message||'erro desconhecido'}). Nenhum indicador histórico foi apresentado como atual.`);renderApoio();return null;}
+ finally{apoioLoading=null;}})();
+ return apoioLoading;
+}
+function initApoio(){
+ const root=document.getElementById('panel-apoio');if(!root){console.warn('[Radar Apoio] Painel não encontrado');return;}
+ if(root.dataset.ready!=='1'){
+  root.dataset.ready='1';console.info('[Radar Apoio] Eventos vinculados');
+  root.querySelectorAll('#apoioKind button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioKind button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioKind=b.dataset.v;renderApoio();}));
+  root.querySelectorAll('#apoioPostTabs button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioPostTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioPostTab=b.dataset.v;renderApoio();}));
+  ['apoioParty','apoioRole','apoioState','apoioNetwork','apoioName'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener(id==='apoioName'?'input':'change',renderApoio);});
+ }
+ loadApoio();
+}
+
+// Segurança adicional: se Apoio já estiver ativo por hash/restauração do navegador, inicializa após o DOM.
+function bootstrapApoioIfActive(){const root=document.getElementById('panel-apoio');if(root?.classList.contains('active')||root?.classList.contains('is-active'))initApoio();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootstrapApoioIfActive,{once:true});else bootstrapApoioIfActive();
 
