@@ -1134,3 +1134,6 @@ html{font-size:var(--base-font-size)}
 
 /* V1.6.1 — período histórico controlado pelo filtro global */
 .overview-history-global-period{display:flex;flex-direction:column;gap:4px;min-width:190px}.overview-history-global-period span{font-size:.78rem;color:var(--muted,#64748b)}.overview-history-global-period strong{font-size:.9rem;font-weight:700;color:var(--text,#172033)}@media(max-width:760px){.overview-history-global-period{min-width:0;width:100%}}
+
+/* V1.6.2 — Temas: comparação temporal pelo período global */
+.theme-history-delta{display:block;margin-top:.45rem;color:var(--muted,#64748b);font-size:.76rem;font-weight:700;line-height:1.35}
