@@ -1131,3 +1131,6 @@ html{font-size:var(--base-font-size)}
 .overview-delta{display:block;margin-top:5px;font-size:.72rem;line-height:1.25;font-style:normal;font-weight:700;color:var(--muted,#64748b)}
 .overview-delta.is-up{color:#087f5b}.overview-delta.is-down{color:#b42318}.overview-delta.is-flat{color:var(--muted,#64748b)}
 @media(max-width:700px){.overview-history-toolbar{align-items:stretch;flex-direction:column}.overview-history-toolbar label{min-width:0;width:100%}.overview-history-toolbar select{width:100%}}
+
+/* V1.6.1 — período histórico controlado pelo filtro global */
+.overview-history-global-period{display:flex;flex-direction:column;gap:4px;min-width:190px}.overview-history-global-period span{font-size:.78rem;color:var(--muted,#64748b)}.overview-history-global-period strong{font-size:.9rem;font-weight:700;color:var(--text,#172033)}@media(max-width:760px){.overview-history-global-period{min-width:0;width:100%}}
