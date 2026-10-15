@@ -11383,3 +11383,16 @@ function syncMentionsPeriodUI(){
 document.addEventListener('change',e=>{if(e.target?.id==='period')syncMentionsPeriodUI();});
 document.addEventListener('click',e=>{if(e.target?.closest?.('[data-lang]'))setTimeout(syncMentionsPeriodUI,0);});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncMentionsPeriodUI,{once:true});else syncMentionsPeriodUI();
+
+// V1.6.7 — Apoio acompanha o período global sem consultar D1.
+(function(){
+ const labels={"24h":"Últimas 24 horas","48h":"Últimas 48 horas","7d":"7 dias","15d":"15 dias","30d":"30 dias","election":"Início das eleições"};
+ function apoioGlobalPeriodV167(){
+  const sel=document.querySelector('#periodFilter, #period, select[name="period"]');
+  const raw=String(sel?.value||'24h');
+  const normalized=raw==='24'?'24h':raw==='48'?'48h':raw==='7'?'7d':raw==='15'?'15d':raw==='30'?'30d':raw==='all'?'election':raw;
+  const out=document.getElementById('apoioHistoryPeriod'); if(out)out.textContent=labels[normalized]||labels['24h'];
+ }
+ document.addEventListener('DOMContentLoaded',()=>{apoioGlobalPeriodV167();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',apoioGlobalPeriodV167));document.getElementById('applyFilters')?.addEventListener('click',apoioGlobalPeriodV167);});
+ window.apoioGlobalPeriodV167=apoioGlobalPeriodV167;
+})();
