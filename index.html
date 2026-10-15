@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.6.0">
+  <link rel="stylesheet" href="/css/radar.css?v=1.6.1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -230,9 +230,17 @@
 
     <select id="period">
 
-      <option value="48h" selected data-i18n="period_48h">Últimas 48 horas</option>
+      <option value="24h" selected data-i18n="period_24h">Últimas 24 horas</option>
 
-      <option value="24h" data-i18n="period_24h">Últimas 24 horas</option>
+      <option value="48h" data-i18n="period_48h">Últimas 48 horas</option>
+
+      <option value="7d" data-i18n="period_7d">7 dias</option>
+
+      <option value="15d" data-i18n="period_15d">15 dias</option>
+
+      <option value="30d" data-i18n="period_30d">30 dias</option>
+
+      <option value="election" data-i18n="period_election">Início das eleições</option>
 
     </select>
 
@@ -409,17 +417,11 @@
         <strong data-i18n="overview_history_title">Comparar Visão Geral</strong>
         <small id="overviewHistoryStatus" aria-live="polite" data-i18n="overview_history_forming">O histórico começa a ser preservado após a ativação desta versão.</small>
       </div>
-      <label for="overviewPeriod">
+      <div class="overview-history-global-period" aria-live="polite">
         <span data-i18n="overview_history_period">Período</span>
-        <select id="overviewPeriod">
-          <option value="24h" data-i18n="overview_24h">Últimas 24 horas</option>
-          <option value="48h" data-i18n="overview_48h">Últimas 48 horas</option>
-          <option value="7d" selected data-i18n="overview_7d">7 dias</option>
-          <option value="15d" data-i18n="overview_15d">15 dias</option>
-          <option value="30d" data-i18n="overview_30d">30 dias</option>
-          <option value="election" data-i18n="overview_election">Início das eleições</option>
-        </select>
-      </label>
+        <strong id="overviewPeriodLabel">Últimas 24 horas</strong>
+        <input type="hidden" id="overviewPeriod" value="24h">
+      </div>
     </div>
 
     <article id="tseOfficialPanel" class="panel" aria-live="polite"><div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div><p>Consultando fonte oficial...</p></article>
@@ -812,6 +814,6 @@
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.6.0" defer></script>
+<script src="/js/radar.js?v=1.6.1" defer></script>
 
 </body></html>
