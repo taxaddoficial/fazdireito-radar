@@ -3040,21 +3040,12 @@ function renderMetrics() {
 
   if (metricPeak) {
 
-
-
-    metricPeak.textContent =
-
-      formatNumber(
-
-        peak.count
-
-      );
-
-
+    metricPeak.textContent = formatNumber(peak.count);
 
   }
 
-
+  const overviewPeriodNow=getEl("overviewPeriod")?.value||"7d";
+  if(overviewHistoryCache?.has?.(overviewPeriodNow)) renderOverviewHistory(overviewHistoryCache.get(overviewPeriodNow));
 
 }
 
@@ -11316,3 +11307,40 @@ async function loadEurasia(){
 }
 document.addEventListener('change',event=>{if(event.target?.id==='eurasiaPeriod')renderEurasia();});
 document.addEventListener('click',event=>{if(event.target?.closest?.('[data-lang]'))setTimeout(()=>{if(eurasiaCache)renderEurasia();},0);});
+
+
+// ============================================================
+// V1.6.0 — HISTÓRICO INCREMENTAL DA VISÃO GERAL
+// O estado atual continua vindo das fontes atuais. D1 guarda somente
+// snapshots relevantes e o frontend consulta uma série já agregada.
+// ============================================================
+const OVERVIEW_HISTORY_I18N={
+ pt:{overview_history_eyebrow:'HISTÓRICO',overview_history_title:'Comparar Visão Geral',overview_history_forming:'O histórico começa a ser preservado após a ativação desta versão.',overview_history_period:'Período',overview_24h:'Últimas 24 horas',overview_48h:'Últimas 48 horas',overview_7d:'7 dias',overview_15d:'15 dias',overview_30d:'30 dias',overview_election:'Início das eleições'},
+ en:{overview_history_eyebrow:'HISTORY',overview_history_title:'Compare Overview',overview_history_forming:'History starts being preserved after this version is activated.',overview_history_period:'Period',overview_24h:'Last 24 hours',overview_48h:'Last 48 hours',overview_7d:'7 days',overview_15d:'15 days',overview_30d:'30 days',overview_election:'Start of the election period'},
+ es:{overview_history_eyebrow:'HISTÓRICO',overview_history_title:'Comparar Visión General',overview_history_forming:'El histórico comienza a conservarse después de activar esta versión.',overview_history_period:'Período',overview_24h:'Últimas 24 horas',overview_48h:'Últimas 48 horas',overview_7d:'7 días',overview_15d:'15 días',overview_30d:'30 días',overview_election:'Inicio de las elecciones'}
+};
+for(const code of ['pt','en','es'])Object.assign(translations[code]||{},OVERVIEW_HISTORY_I18N[code]);
+let overviewHistoryCache=new Map();
+function overviewPeriodLabel(v){return ({'24h':'24 h','48h':'48 h','7d':'7 dias','15d':'15 dias','30d':'30 dias','election':'início das eleições'})[v]||v;}
+function overviewDeltaText(current,baseline,period,kind='count'){
+ const c=Number(current),b=Number(baseline);if(!Number.isFinite(c)||!Number.isFinite(b))return {text:'Histórico em formação',cls:''};
+ const d=c-b;if(d===0)return {text:`Sem variação em ${overviewPeriodLabel(period)}`,cls:'is-flat'};
+ const sign=d>0?'+':'';const arrow=d>0?'▲':'▼';
+ if(kind==='count')return {text:`${sign}${d.toLocaleString('pt-BR')} ${arrow} em ${overviewPeriodLabel(period)}`,cls:d>0?'is-up':'is-down'};
+ return {text:`${sign}${d.toLocaleString('pt-BR')} ${arrow} em ${overviewPeriodLabel(period)}`,cls:d>0?'is-up':'is-down'};
+}
+function renderOverviewHistory(data){
+ const period=getEl('overviewPeriod')?.value||'7d';const status=getEl('overviewHistoryStatus');
+ const current=calculateMetrics(filteredNews.length?filteredNews:(liveNews||[]));const peak=calculatePeak(filteredNews.length?filteredNews:(liveNews||[]));
+ const base=data?.baseline;
+ const values={metricMentions:[current.total,base?.total_articles],metricTopics:[current.candidateMentions,base?.candidate_mentions],metricSources:[current.publishers,base?.unique_publishers],metricPeak:[peak.count,base?.peak_count]};
+ for(const [id,pair] of Object.entries(values)){const el=getEl(id+'Delta');if(!el)continue;const d=overviewDeltaText(pair[0],pair[1],period);el.textContent=d.text;el.className='overview-delta '+d.cls;}
+ if(status){if(!data||data.status!=='ok')status.textContent='Histórico temporariamente indisponível; os dados atuais continuam funcionando.';else if(!base)status.textContent='Histórico em formação. A primeira referência será criada pela próxima coleta agendada.';else status.textContent=`Comparação com ${data.baseline.reference_at_display||'o início do período'} · ${data.points?.length||0} snapshot(s) no intervalo.`;}
+}
+async function loadOverviewHistory(force=false){
+ const select=getEl('overviewPeriod');if(!select)return;const period=select.value||'7d';
+ if(!force&&overviewHistoryCache.has(period)){renderOverviewHistory(overviewHistoryCache.get(period));return;}
+ try{const r=await fetch(`${RADAR_API.baseUrl}/api/overview/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});const d=await r.json();if(!r.ok||d.status!=='ok')throw Error(d.message||r.status);overviewHistoryCache.set(period,d);renderOverviewHistory(d);}catch(e){renderOverviewHistory(null);}
+}
+document.addEventListener('change',e=>{if(e.target?.id==='overviewPeriod')loadOverviewHistory(true);});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>loadOverviewHistory(),{once:true});else loadOverviewHistory();
