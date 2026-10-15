@@ -11412,3 +11412,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  document.addEventListener('DOMContentLoaded',()=>{pollsGlobalPeriodV168();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',pollsGlobalPeriodV168));document.getElementById('applyFilters')?.addEventListener('click',pollsGlobalPeriodV168);});
  window.pollsGlobalPeriodV168=pollsGlobalPeriodV168;
 })();
+
+
+// V1.6.9 — Voto agora: período global prepara a consulta histórica.
+// A visualização ao vivo continua mostrando o estado oficial mais recente do TSE.
+(function(){
+ const labels={"24h":"Últimas 24 horas","48h":"Últimas 48 horas","7d":"7 dias","15d":"15 dias","30d":"30 dias","election":"Início das eleições"};
+ function voteGlobalPeriodV169(){
+  const sel=document.querySelector('#periodFilter, #period, select[name="period"]');
+  const raw=String(sel?.value||'24h');
+  const normalized=raw==='24'?'24h':raw==='48'?'48h':raw==='7'?'7d':raw==='15'?'15d':raw==='30'?'30d':raw==='all'?'election':raw;
+  const out=document.getElementById('voteHistoryPeriod'); if(out)out.textContent=labels[normalized]||labels['24h'];
+ }
+ document.addEventListener('DOMContentLoaded',()=>{voteGlobalPeriodV169();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',voteGlobalPeriodV169));document.getElementById('applyFilters')?.addEventListener('click',voteGlobalPeriodV169);});
+ window.voteGlobalPeriodV169=voteGlobalPeriodV169;
+})();
