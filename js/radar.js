@@ -11396,3 +11396,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  document.addEventListener('DOMContentLoaded',()=>{apoioGlobalPeriodV167();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',apoioGlobalPeriodV167));document.getElementById('applyFilters')?.addEventListener('click',apoioGlobalPeriodV167);});
  window.apoioGlobalPeriodV167=apoioGlobalPeriodV167;
 })();
+
+
+// V1.6.8 — Pesquisas: o período global prepara o recorte histórico.
+// A listagem atual preserva os filtros próprios (etapa, instituto e datas)
+// até a camada pública KV ser materializada no T0.
+(function(){
+ const labels={"24h":"Últimas 24 horas","48h":"Últimas 48 horas","7d":"7 dias","15d":"15 dias","30d":"30 dias","election":"Início das eleições"};
+ function pollsGlobalPeriodV168(){
+  const sel=document.querySelector('#periodFilter, #period, select[name="period"]');
+  const raw=String(sel?.value||'24h');
+  const normalized=raw==='24'?'24h':raw==='48'?'48h':raw==='7'?'7d':raw==='15'?'15d':raw==='30'?'30d':raw==='all'?'election':raw;
+  const out=document.getElementById('pollsHistoryPeriod'); if(out)out.textContent=labels[normalized]||labels['24h'];
+ }
+ document.addEventListener('DOMContentLoaded',()=>{pollsGlobalPeriodV168();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',pollsGlobalPeriodV168));document.getElementById('applyFilters')?.addEventListener('click',pollsGlobalPeriodV168);});
+ window.pollsGlobalPeriodV168=pollsGlobalPeriodV168;
+})();
