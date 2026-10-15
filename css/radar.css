@@ -1165,3 +1165,9 @@ html{font-size:var(--base-font-size)}
 .polls-history-context{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:0 0 1rem;padding:.75rem 1rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:12px;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.84rem}
 .polls-history-context span{opacity:.72}.polls-history-context strong{font-size:.9rem}.polls-history-context small{margin-left:auto;opacity:.68}
 @media(max-width:720px){.polls-history-context small{width:100%;margin-left:0}}
+
+
+/* V1.6.9 — contexto histórico de Voto agora */
+.vote-history-context{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:0 0 1rem;padding:.75rem 1rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:12px;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.84rem}
+.vote-history-context span{opacity:.72}.vote-history-context strong{font-size:.9rem}.vote-history-context small{margin-left:auto;opacity:.68}
+@media(max-width:720px){.vote-history-context small{width:100%;margin-left:0}}
