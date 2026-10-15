@@ -1123,3 +1123,11 @@ html{font-size:var(--base-font-size)}
 @media(max-width:1100px){#panel-polls .eurasia-panel .eurasia-method-note{white-space:normal;font-size:11.5px}}
 @media(max-width:560px){#panel-polls .eurasia-panel .eurasia-controls{align-items:stretch;gap:.4rem}#panel-polls .eurasia-panel #eurasiaPeriod{width:100%;max-width:none;min-width:0}#panel-polls .eurasia-panel .eurasia-method-note{font-size:11.5px;white-space:normal}}
 @media(prefers-reduced-motion:reduce){#panel-polls .eurasia-panel #eurasiaPeriod{transition:none}}
+\n\n/* V1.6.0 — Histórico incremental da Visão Geral */
+.overview-history-toolbar{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:0 0 18px;padding:14px 16px;border:1px solid var(--border,#dce5ef);border-radius:14px;background:var(--surface,#fff)}
+.overview-history-toolbar>div{display:grid;gap:3px}.overview-history-toolbar strong{font-size:.96rem}.overview-history-toolbar small{color:var(--muted,#64748b);font-size:.78rem;line-height:1.35}
+.overview-history-toolbar label{display:grid;gap:5px;min-width:210px;font-size:.76rem;font-weight:700;color:var(--muted,#64748b)}
+.overview-history-toolbar select{min-height:40px;padding:8px 34px 8px 11px;border:1px solid var(--border,#cbd5e1);border-radius:10px;background:var(--surface,#fff);color:inherit;font:inherit;font-weight:700}
+.overview-delta{display:block;margin-top:5px;font-size:.72rem;line-height:1.25;font-style:normal;font-weight:700;color:var(--muted,#64748b)}
+.overview-delta.is-up{color:#087f5b}.overview-delta.is-down{color:#b42318}.overview-delta.is-flat{color:var(--muted,#64748b)}
+@media(max-width:700px){.overview-history-toolbar{align-items:stretch;flex-direction:column}.overview-history-toolbar label{min-width:0;width:100%}.overview-history-toolbar select{width:100%}}
