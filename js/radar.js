@@ -4081,29 +4081,6 @@ function renderKeywords() {
 
 
 
-let themeHistoryData = null;
-let themeHistoryPeriod = null;
-
-function themeDeltaText(current, previous, period){
-  if(previous===null || previous===undefined) return "Histórico em formação";
-  const d=Number(current||0)-Number(previous||0);
-  if(d===0) return `Sem variação vs. período anterior`;
-  return `${d>0?"+":""}${d.toLocaleString("pt-BR")} ${d>0?"▲":"▼"} vs. período anterior`;
-}
-
-async function loadThemeHistory(force=false){
-  const period=getEl("period")?.value||"24h";
-  if(!force && themeHistoryData && themeHistoryPeriod===period) return themeHistoryData;
-  try{
-    const r=await fetch(`${RADAR_API.baseUrl}/api/themes/history?period=${encodeURIComponent(period)}`,{cache:"no-store"});
-    const d=await r.json();
-    if(!r.ok||d.status!=="ok") throw Error(d.message||r.status);
-    themeHistoryData=d;themeHistoryPeriod=period;
-  }catch(e){console.warn("[Radar] Histórico de Temas indisponível",e?.message||e);themeHistoryData=null;themeHistoryPeriod=period;}
-  renderCoverageCards();
-  return themeHistoryData;
-}
-
 function renderCoverageCards() {
 
 
@@ -4196,8 +4173,6 @@ function renderCoverageCards() {
 
     {
 
-      key: "flavio",
-
       name:
 
         "Flávio Bolsonaro",
@@ -4226,8 +4201,6 @@ function renderCoverageCards() {
 
     {
 
-      key: "lula",
-
       name:
 
         "Lula",
@@ -4255,8 +4228,6 @@ function renderCoverageCards() {
 
 
     {
-
-      key: "both",
 
       name:
 
@@ -4296,13 +4267,7 @@ function renderCoverageCards() {
 
       .map(
 
-        card => {
-          const hist=(themeHistoryData && themeHistoryPeriod===selectedPeriod)?themeHistoryData.current?.[card.key]:null;
-          const prev=(themeHistoryData && themeHistoryPeriod===selectedPeriod)?themeHistoryData.previous?.[card.key]:null;
-          const shownCount=hist?.count ?? card.count;
-          const shownShare=hist?.share ?? card.share;
-          const delta=themeDeltaText(shownCount,prev?.count,selectedPeriod);
-          return `
+        card => `
 
           <button
 
@@ -4376,7 +4341,7 @@ function renderCoverageCards() {
 
               <strong>
 
-                ${formatNumber(shownCount)}
+                ${formatNumber(card.count)}
 
               </strong>
 
@@ -4384,7 +4349,7 @@ function renderCoverageCards() {
 
               <span>
 
-                ${Number(shownShare||0).toFixed(1)}%
+                ${card.share.toFixed(1)}%
 
               </span>
 
@@ -4393,8 +4358,6 @@ function renderCoverageCards() {
             </div>
 
 
-
-            <small class="theme-history-delta">${escapeHTML(delta)}</small>
 
             <div class="mini-track">
 
@@ -4410,7 +4373,7 @@ function renderCoverageCards() {
 
                       0,
 
-                      shownShare
+                      card.share
 
                     )
 
@@ -4428,7 +4391,8 @@ function renderCoverageCards() {
 
         `
 
-      })
+      )
+
       .join("");
 
 
@@ -5939,7 +5903,7 @@ function renderSourceFilter() {
 
 
 
-// V1.6.2 — período temporal global do Radar.
+// V1.6.1 — período temporal global do Radar.
 const RADAR_ELECTION_START = new Date("2026-08-16T00:00:00-03:00").getTime();
 function radarPeriodHours(period) { return ({"24h":24,"48h":48,"7d":168,"15d":360,"30d":720})[period] || 24; }
 function radarPeriodStart(period) { return period === "election" ? RADAR_ELECTION_START : Date.now() - radarPeriodHours(period) * 3600000; }
@@ -6299,7 +6263,6 @@ function applyRadarFilters() {
 
 
   renderFilteredData();
-  loadThemeHistory(true);
 
 
 
@@ -11365,15 +11328,34 @@ async function loadOverviewHistory(force=false){
  try{const r=await fetch(`${RADAR_API.baseUrl}/api/overview/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});const d=await r.json();if(!r.ok||d.status!=='ok')throw Error(d.message||r.status);overviewHistoryCache.set(period,d);renderOverviewHistory(d);}catch(e){renderOverviewHistory(null);}
 }
 document.addEventListener('change',e=>{if(e.target?.id==='overviewPeriod')loadOverviewHistory(true);});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>loadOverviewHistory(),{once:true});else loadOverviewHistory();
+// V1.6.3: consultas históricas permanecem pausadas até o T0 global.
+// A Visão Geral continua funcional com dados atuais e o período global.
 
 
-// V1.6.2 — rótulos e sincronização do período global
+// V1.6.1 — rótulos e sincronização do período global
 Object.assign(translations.pt||{}, {period_7d:'7 dias',period_15d:'15 dias',period_30d:'30 dias',period_election:'Início das eleições'});
 Object.assign(translations.en||{}, {period_7d:'7 days',period_15d:'15 days',period_30d:'30 days',period_election:'Start of the election period'});
 Object.assign(translations.es||{}, {period_7d:'7 días',period_15d:'15 días',period_30d:'30 días',period_election:'Inicio de las elecciones'});
 document.addEventListener('change',e=>{if(e.target?.id==='period')syncOverviewPeriodFromGlobal(true);});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>syncOverviewPeriodFromGlobal(false),{once:true});else syncOverviewPeriodFromGlobal(false);
 
-// V1.6.2 — inicializa a leitura histórica de Temas sem criar snapshots.
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>loadThemeHistory(),{once:true});else loadThemeHistory();
+
+// ============================================================
+// V1.6.3 — MENÇÕES: preparação histórica (T0 ainda desativado)
+// O período global controla a aba. Até a ativação do T0, nenhuma consulta
+// histórica adicional é disparada automaticamente contra o D1.
+// ============================================================
+const MENTIONS_PERIOD_LABELS={
+ pt:{'24h':'Últimas 24 horas','48h':'Últimas 48 horas','7d':'7 dias','15d':'15 dias','30d':'30 dias','election':'Início das eleições'},
+ en:{'24h':'Last 24 hours','48h':'Last 48 hours','7d':'7 days','15d':'15 days','30d':'30 days','election':'Start of the election period'},
+ es:{'24h':'Últimas 24 horas','48h':'Últimas 48 horas','7d':'7 días','15d':'15 días','30d':'30 días','election':'Inicio de las elecciones'}
+};
+function syncMentionsPeriodUI(){
+ const p=getEl('period')?.value||'24h'; const lang=(document.documentElement.lang||'pt').slice(0,2);
+ const label=getEl('mentionsPeriodLabel'); if(label) label.textContent=(MENTIONS_PERIOD_LABELS[lang]||MENTIONS_PERIOD_LABELS.pt)[p]||p;
+ const status=getEl('mentionsHistoryStatus');
+ if(status) status.textContent=lang==='en'?'History prepared · activation at the initial snapshot':lang==='es'?'Histórico preparado · activación en el snapshot inicial':'Histórico preparado · ativação no snapshot inicial';
+}
+document.addEventListener('change',e=>{if(e.target?.id==='period')syncMentionsPeriodUI();});
+document.addEventListener('click',e=>{if(e.target?.closest?.('[data-lang]'))setTimeout(syncMentionsPeriodUI,0);});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncMentionsPeriodUI,{once:true});else syncMentionsPeriodUI();
