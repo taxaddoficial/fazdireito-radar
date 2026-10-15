@@ -4141,19 +4141,13 @@ function renderCoverageCards() {
 
       ?.value ||
 
-    "48h";
+    "24h";
 
 
 
 
 
-  const periodHours =
-
-    selectedPeriod === "24h"
-
-      ? 24
-
-      : 48;
+  const periodHours = radarPeriodHours(selectedPeriod);
 
 
 
@@ -5909,6 +5903,17 @@ function renderSourceFilter() {
 
 
 
+// V1.6.1 — período temporal global do Radar.
+const RADAR_ELECTION_START = new Date("2026-08-16T00:00:00-03:00").getTime();
+function radarPeriodHours(period) { return ({"24h":24,"48h":48,"7d":168,"15d":360,"30d":720})[period] || 24; }
+function radarPeriodStart(period) { return period === "election" ? RADAR_ELECTION_START : Date.now() - radarPeriodHours(period) * 3600000; }
+function syncOverviewPeriodFromGlobal(force=false) {
+  const globalPeriod=getEl("period")?.value||"24h", overviewPeriod=getEl("overviewPeriod"), label=getEl("overviewPeriodLabel");
+  if(overviewPeriod) overviewPeriod.value=globalPeriod;
+  if(label){const lang=document.documentElement.lang||"pt", texts=translations[lang]||translations.pt, key=globalPeriod==="election"?"period_election":`period_${globalPeriod}`; label.textContent=texts?.[key]||globalPeriod;}
+  if(typeof loadOverviewHistory==="function") loadOverviewHistory(force);
+}
+
 function hasActiveFilters() {
 
 
@@ -5957,7 +5962,7 @@ function hasActiveFilters() {
 
       ?.value ||
 
-    "48h";
+    "24h";
 
 
 
@@ -5971,7 +5976,7 @@ function hasActiveFilters() {
 
     scope !== "all" ||
 
-    period !== "48h"
+    period !== "24h"
 
   );
 
@@ -6053,35 +6058,15 @@ function applyRadarFilters() {
 
       ?.value ||
 
-    "48h";
+    "24h";
 
 
 
 
 
-  const periodHours =
+  const periodHours = radarPeriodHours(period);
 
-    period === "24h"
-
-      ? 24
-
-      : 48;
-
-
-
-
-
-  const periodStart =
-
-    Date.now() -
-
-    periodHours *
-
-    60 *
-
-    60 *
-
-    1000;
+  const periodStart = radarPeriodStart(period);
 
 
 
@@ -6516,7 +6501,7 @@ function resetRadarFilters() {
 
   if (period) {
 
-    period.value = "48h";
+    period.value = "24h";
 
   }
 
@@ -11344,3 +11329,11 @@ async function loadOverviewHistory(force=false){
 }
 document.addEventListener('change',e=>{if(e.target?.id==='overviewPeriod')loadOverviewHistory(true);});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>loadOverviewHistory(),{once:true});else loadOverviewHistory();
+
+
+// V1.6.1 — rótulos e sincronização do período global
+Object.assign(translations.pt||{}, {period_7d:'7 dias',period_15d:'15 dias',period_30d:'30 dias',period_election:'Início das eleições'});
+Object.assign(translations.en||{}, {period_7d:'7 days',period_15d:'15 days',period_30d:'30 days',period_election:'Start of the election period'});
+Object.assign(translations.es||{}, {period_7d:'7 días',period_15d:'15 días',period_30d:'30 días',period_election:'Inicio de las elecciones'});
+document.addEventListener('change',e=>{if(e.target?.id==='period')syncOverviewPeriodFromGlobal(true);});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>syncOverviewPeriodFromGlobal(false),{once:true});else syncOverviewPeriodFromGlobal(false);
