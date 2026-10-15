@@ -6390,13 +6390,12 @@ function renderDisinfo(){
 
  }[lang]||[];
 
- const ui={pt:{scope:["Pessoa mencionada","Todas as pessoas","Flávio Bolsonaro","Lula","Ambos na mesma matéria"],period:["Período","48 horas","7 dias"],type:["Todos os registros","Notícias sobre checagens","Alegações e alertas"],sort:["Mais recentes","Por fonte"],search:"Pesquisar título, fonte ou assunto"},en:{scope:["Person mentioned","All people","Flávio Bolsonaro","Lula","Both in the same article"],period:["Period","48 hours","7 days"],type:["All records","Fact-check coverage","Claims and alerts"],sort:["Most recent","By source"],search:"Search title, source or topic"},es:{scope:["Persona mencionada","Todas las personas","Flávio Bolsonaro","Lula","Ambos en la misma noticia"],period:["Período","48 horas","7 días"],type:["Todos los registros","Noticias sobre verificaciones","Alegaciones y alertas"],sort:["Más recientes","Por fuente"],search:"Buscar título, fuente o tema"}}[lang]||{};
+ const ui={pt:{scope:["Pessoa mencionada","Todas as pessoas","Flávio Bolsonaro","Lula","Ambos na mesma matéria"],type:["Todos os registros","Notícias sobre checagens","Alegações e alertas"],sort:["Mais recentes","Por fonte"],search:"Pesquisar título, fonte ou assunto"},en:{scope:["Person mentioned","All people","Flávio Bolsonaro","Lula","Both in the same article"],type:["All records","Fact-check coverage","Claims and alerts"],sort:["Most recent","By source"],search:"Search title, source or topic"},es:{scope:["Persona mencionada","Todas las personas","Flávio Bolsonaro","Lula","Ambos en la misma noticia"],type:["Todos los registros","Noticias sobre verificaciones","Alegaciones y alertas"],sort:["Más recientes","Por fuente"],search:"Buscar título, fuente o tema"}}[lang]||{};
 
- const scopeEl=getEl('disinfoScope'), periodEl=getEl('disinfoPeriod'), typeEl=getEl('disinfoType'), sortEl=getEl('disinfoSort'), searchEl=getEl('disinfoSearch');
+ const scopeEl=getEl('disinfoScope'), typeEl=getEl('disinfoType'), sortEl=getEl('disinfoSort'), searchEl=getEl('disinfoSearch');
 
  if(scopeEl){scopeEl.previousElementSibling.textContent=ui.scope[0]; [...scopeEl.options].forEach((o,i)=>o.textContent=ui.scope[i+1]);}
 
- if(periodEl){periodEl.previousElementSibling.textContent=ui.period[0]; [...periodEl.options].forEach((o,i)=>o.textContent=ui.period[i+1]);}
 
  if(typeEl)[...typeEl.options].forEach((o,i)=>o.textContent=ui.type[i]);
 
@@ -6408,9 +6407,10 @@ function renderDisinfo(){
 
  const scope=getEl('disinfoScope')?.value||'all';
 
- const hours=Number(getEl('disinfoPeriod')?.value||48);
-
- const since=Date.now()-hours*3600000;
+ const globalPeriod=getEl('period')?.value||'24h';
+ const electionStart=Date.parse('2026-08-16T03:00:00.000Z');
+ const hours=radarPeriodHours(globalPeriod);
+ const since=globalPeriod==='election'?electionStart:Date.now()-hours*3600000;
 
  const base=all.filter(a=>{
 
@@ -6432,10 +6432,9 @@ function renderDisinfo(){
 
  }).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
 
- const cumulative=all.map(a=>{const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
- const checks=cumulative.filter(a=>a._disinfoType==='checks').length;
- const distinct=new Set(cumulative.map(disinfoPublisher).filter(Boolean)).size;
- stats.innerHTML=[[texts[0],cumulative.length,'all'],[texts[1],checks,'checks'],[texts[2],cumulative.length-checks,'claims'],[texts[3],distinct,null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}" aria-label="${escapeHTML(name)}: ${num}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong><small>cumulativo</small></div>`).join('');
+ const checks=relevant.filter(a=>a._disinfoType==='checks').length;
+ const distinct=new Set(relevant.map(disinfoPublisher).filter(Boolean)).size;
+ stats.innerHTML=[[texts[0],relevant.length,'all'],[texts[1],checks,'checks'],[texts[2],relevant.length-checks,'claims'],[texts[3],distinct,null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}" aria-label="${escapeHTML(name)}: ${num}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong><small>período global</small></div>`).join('');
 
  const q=normalizeText(getEl('disinfoSearch')?.value||'');const type=getEl('disinfoType')?.value||'all';const sort=getEl('disinfoSort')?.value||'recent';
 
@@ -6460,13 +6459,24 @@ function renderDisinfo(){
  const pag=getEl('disinfoPagination');if(pag){const pages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));let nums=[];for(let i=Math.max(1,disinfoPage-2);i<=Math.min(pages,disinfoPage+2);i++)nums.push(i);pag.innerHTML=selected.length>DISINFO_PAGE_SIZE?`<button ${disinfoPage===1?'disabled':''} data-dispage="${disinfoPage-1}">${apoioT('previous')}</button>${nums.map(i=>`<button class="${i===disinfoPage?'active':''}" data-dispage="${i}">${i}</button>`).join('')}<button ${disinfoPage===pages?'disabled':''} data-dispage="${disinfoPage+1}">${apoioT('next')}</button>`:'';pag.querySelectorAll('button[data-dispage]').forEach(b=>b.addEventListener('click',()=>{disinfoPage=Number(b.dataset.dispage)||1;renderDisinfo();document.getElementById('disinfoList')?.scrollIntoView({behavior:'smooth',block:'start'});}));}
 }
 
-['disinfoSearch','disinfoType','disinfoSort','disinfoScope','disinfoPeriod'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
+['disinfoSearch','disinfoType','disinfoSort','disinfoScope','period'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
 
 document.addEventListener('click',e=>{const item=e.target.closest('[data-disinfo-type]');if(!item)return;const select=getEl('disinfoType');if(select){select.value=item.dataset.disinfoType;renderDisinfo()}});
 
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-disinfo-type]')){e.preventDefault();e.target.click()}});
 
 
+
+// V1.6.6 — Desinformação segue o período global; sem segundo seletor temporal.
+const DISINFO_PERIOD_LABELS=MENTIONS_PERIOD_LABELS;
+function syncDisinfoPeriodUI(){
+ const p=getEl('period')?.value||'24h'; const lg=(document.documentElement.lang||'pt').slice(0,2);
+ const label=getEl('disinfoPeriodLabel'); if(label)label.textContent=(DISINFO_PERIOD_LABELS[lg]||DISINFO_PERIOD_LABELS.pt)[p]||p;
+ const status=getEl('disinfoHistoryStatus'); if(status)status.textContent=lg==='en'?'History prepared · activation at the initial snapshot':lg==='es'?'Histórico preparado · activación en el snapshot inicial':'Histórico preparado · ativação no snapshot inicial';
+}
+document.addEventListener('change',e=>{if(e.target?.id==='period'){syncDisinfoPeriodUI();renderDisinfo();}});
+document.addEventListener('click',e=>{if(e.target?.closest?.('[data-lang]'))setTimeout(syncDisinfoPeriodUI,0);});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncDisinfoPeriodUI,{once:true});else syncDisinfoPeriodUI();
 
 // ============================================================
 
