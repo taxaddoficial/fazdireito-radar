@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.5.9">
+  <link rel="stylesheet" href="/css/radar.css?v=1.6.0">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -340,6 +340,7 @@
     <span data-i18n="metric_mentions">Matérias coletadas</span>
 
     <strong id="metricMentions">—</strong>
+    <em class="overview-delta" id="metricMentionsDelta" aria-live="polite">Histórico em formação</em>
 
     <small>
 
@@ -356,6 +357,7 @@
     <span data-i18n="metric_topics">Matérias com candidatos</span>
 
     <strong id="metricTopics">—</strong>
+    <em class="overview-delta" id="metricTopicsDelta" aria-live="polite">Histórico em formação</em>
 
     <small>
 
@@ -372,6 +374,7 @@
     <span data-i18n="metric_sources">Veículos monitorados</span>
 
     <strong id="metricSources">—</strong>
+    <em class="overview-delta" id="metricSourcesDelta" aria-live="polite">Histórico em formação</em>
 
     <small>
 
@@ -388,6 +391,7 @@
     <span data-i18n="metric_peak">Maior volume/hora</span>
 
     <strong id="metricPeak">—</strong>
+    <em class="overview-delta" id="metricPeakDelta" aria-live="polite">Histórico em formação</em>
 
     <small data-i18n="peak_desc">
 
@@ -398,6 +402,25 @@
   </article>
 
 </div>
+
+    <div class="overview-history-toolbar" aria-label="Histórico da Visão Geral">
+      <div>
+        <span class="eyebrow" data-i18n="overview_history_eyebrow">HISTÓRICO</span>
+        <strong data-i18n="overview_history_title">Comparar Visão Geral</strong>
+        <small id="overviewHistoryStatus" aria-live="polite" data-i18n="overview_history_forming">O histórico começa a ser preservado após a ativação desta versão.</small>
+      </div>
+      <label for="overviewPeriod">
+        <span data-i18n="overview_history_period">Período</span>
+        <select id="overviewPeriod">
+          <option value="24h" data-i18n="overview_24h">Últimas 24 horas</option>
+          <option value="48h" data-i18n="overview_48h">Últimas 48 horas</option>
+          <option value="7d" selected data-i18n="overview_7d">7 dias</option>
+          <option value="15d" data-i18n="overview_15d">15 dias</option>
+          <option value="30d" data-i18n="overview_30d">30 dias</option>
+          <option value="election" data-i18n="overview_election">Início das eleições</option>
+        </select>
+      </label>
+    </div>
 
     <article id="tseOfficialPanel" class="panel" aria-live="polite"><div class="panel-head"><div><span class="eyebrow">TSE • 2026</span><h3>Resultados eleitorais oficiais</h3></div></div><p>Consultando fonte oficial...</p></article>
 
@@ -789,6 +812,6 @@
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.5.9" defer></script>
+<script src="/js/radar.js?v=1.6.0" defer></script>
 
 </body></html>
