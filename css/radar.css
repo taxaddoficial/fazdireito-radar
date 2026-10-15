@@ -1148,3 +1148,9 @@ html{font-size:var(--base-font-size)}
 /* V1.6.5 — contexto histórico de Vídeos */
 #panel-videos .history-prepared-note{margin:0 0 14px;padding:10px 12px;border:1px solid var(--border, #d9dee7);border-radius:10px;font-size:.84rem;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 #panel-videos .history-prepared-note span{opacity:.72}
+
+
+/* V1.6.6 — Desinformação: período global e preparação histórica */
+.disinfo-history-context{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:0 0 1rem;padding:.75rem 1rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:12px;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.84rem}
+.disinfo-history-context span{opacity:.72}.disinfo-history-context strong{font-size:.9rem}.disinfo-history-context small{margin-left:auto;opacity:.68}
+@media(max-width:720px){.disinfo-history-context small{width:100%;margin-left:0}}
