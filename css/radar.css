@@ -1159,3 +1159,9 @@ html{font-size:var(--base-font-size)}
 .apoio-history-context{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:0 0 1rem;padding:.75rem 1rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:12px;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.84rem}
 .apoio-history-context span{opacity:.72}.apoio-history-context strong{font-size:.9rem}.apoio-history-context small{margin-left:auto;opacity:.68}
 @media(max-width:720px){.apoio-history-context small{width:100%;margin-left:0}}
+
+
+/* V1.6.8 — contexto histórico de Pesquisas */
+.polls-history-context{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:0 0 1rem;padding:.75rem 1rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:12px;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.84rem}
+.polls-history-context span{opacity:.72}.polls-history-context strong{font-size:.9rem}.polls-history-context small{margin-left:auto;opacity:.68}
+@media(max-width:720px){.polls-history-context small{width:100%;margin-left:0}}
