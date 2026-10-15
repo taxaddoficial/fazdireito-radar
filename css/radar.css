@@ -1135,5 +1135,5 @@ html{font-size:var(--base-font-size)}
 /* V1.6.1 — período histórico controlado pelo filtro global */
 .overview-history-global-period{display:flex;flex-direction:column;gap:4px;min-width:190px}.overview-history-global-period span{font-size:.78rem;color:var(--muted,#64748b)}.overview-history-global-period strong{font-size:.9rem;font-weight:700;color:var(--text,#172033)}@media(max-width:760px){.overview-history-global-period{min-width:0;width:100%}}
 
-/* V1.6.2 — Temas: comparação temporal pelo período global */
-.theme-history-delta{display:block;margin-top:.45rem;color:var(--muted,#64748b);font-size:.76rem;font-weight:700;line-height:1.35}
+/* V1.6.3 — contexto temporal da aba Menções */
+.mentions-history-context{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;margin:.75rem 0 .15rem;padding:.6rem .75rem;border:1px solid var(--border,rgba(127,127,127,.22));border-radius:.7rem;background:var(--surface-soft,rgba(127,127,127,.06));font-size:.82rem}.mentions-history-context span{opacity:.7}.mentions-history-context strong{font-size:.86rem}.mentions-history-context small{margin-left:auto;opacity:.68}@media(max-width:640px){.mentions-history-context{align-items:flex-start}.mentions-history-context small{width:100%;margin-left:0}}
