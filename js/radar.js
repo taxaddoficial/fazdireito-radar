@@ -7354,7 +7354,7 @@ async function loadYouTubeVideos(force = false) {
 
   try {
 
-    const globalPeriod = getGlobalPeriodValue?.() || getEl("periodFilter")?.value || "24h";
+    const globalPeriod = getEl("period")?.value || getEl("periodFilter")?.value || "24h";
     const response = await fetch(`${RADAR_API.baseUrl}${RADAR_API.endpoints.youtube}?scope=${encodeURIComponent(scope)}&period=${encodeURIComponent(globalPeriod)}`, { cache: "no-store" });
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -7439,7 +7439,9 @@ function renderYouTubeVideos() {
 
     const channels = new Set(items.map(item=>item.channel).filter(Boolean)).size;
 
-    summary.textContent = `${items.length} de ${totalMatches} vídeo${totalMatches===1?"":"s"} compatíveis • ${channels} canal${channels===1?"":"is"} • período global: ${getGlobalPeriodLabel?.() || "Últimas 24 horas"}`;
+    const periodValue = getEl("period")?.value || getEl("periodFilter")?.value || "24h";
+    const periodLabels = {"24h":"Últimas 24 horas","48h":"Últimas 48 horas","7d":"7 dias","15d":"15 dias","30d":"30 dias","election":"Início das eleições"};
+    summary.textContent = `${items.length} de ${totalMatches} vídeo${totalMatches===1?"":"s"} compatíveis • ${channels} canal${channels===1?"":"is"} • período global: ${periodLabels[periodValue] || periodLabels["24h"]}`;
 
   }
 
