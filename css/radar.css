@@ -1186,3 +1186,24 @@ html{font-size:var(--base-font-size)}
   color:#fed7aa;
   border-color:#9a3412;
 }
+
+
+/* Apoio V1.6.11 — cobertura observacional dos cards */
+.apoio-observation-legend{display:flex;flex-wrap:wrap;gap:.55rem 1rem;align-items:center}
+.apoio-observation-key{display:inline-flex;align-items:center;gap:.35rem}
+.apoio-observation-dot{width:.78rem;height:.78rem;border-radius:3px;display:inline-block}
+.apoio-observation-dot.observed{background:#2563eb}
+.apoio-observation-dot.absent{background:#94a3b8}
+.apoio-observation-dot.no-record{background:transparent;border:1px dashed #94a3b8}
+[data-theme="dark"] .apoio-observation-dot.absent{background:#64748b}
+
+
+/* Apoio V1.6.12 — destaque factual da evidência mais recente */
+.apoio-latest-evidence,
+.apoio-card .latest-evidence{
+  border-top:1px solid var(--border, rgba(148,163,184,.35));
+  margin-top:.75rem;
+  padding-top:.75rem;
+}
+.apoio-latest-evidence time,
+.apoio-card .latest-evidence time{font-weight:700}
