@@ -6468,7 +6468,11 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.tar
 
 
 // V1.6.6 — Desinformação segue o período global; sem segundo seletor temporal.
-const DISINFO_PERIOD_LABELS=MENTIONS_PERIOD_LABELS;
+const DISINFO_PERIOD_LABELS={
+ pt:{'24h':'Últimas 24 horas','48h':'Últimas 48 horas','7d':'7 dias','15d':'15 dias','30d':'30 dias','election':'Início das eleições'},
+ en:{'24h':'Last 24 hours','48h':'Last 48 hours','7d':'7 days','15d':'15 days','30d':'30 days','election':'Start of the election period'},
+ es:{'24h':'Últimas 24 horas','48h':'Últimas 48 horas','7d':'7 días','15d':'15 días','30d':'30 días','election':'Inicio de las elecciones'}
+};
 function syncDisinfoPeriodUI(){
  const p=getEl('period')?.value||'24h'; const lg=(document.documentElement.lang||'pt').slice(0,2);
  const label=getEl('disinfoPeriodLabel'); if(label)label.textContent=(DISINFO_PERIOD_LABELS[lg]||DISINFO_PERIOD_LABELS.pt)[p]||p;
