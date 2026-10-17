@@ -63,6 +63,8 @@ let liveSources = null;
 let liveNews = null;
 
 let liveNewsMeta = null;
+let disinfoOfficial = null;
+let disinfoOfficialLoading = null;
 
 let liveStatus = null;
 let liveCoverageMovement = null;
@@ -6375,88 +6377,30 @@ function disinfoPublisher(article) {
 
 }
 
+async function loadDisinfoOfficial(force=false){
+ if(disinfoOfficial&&!force){renderDisinfo();return disinfoOfficial;}
+ if(disinfoOfficialLoading&&!force)return disinfoOfficialLoading;
+ disinfoOfficialLoading=(async()=>{try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo`,{cache:'no-store'});const d=await r.json();if(r.ok&&(d.status==='ok'||d.status==='stale'))disinfoOfficial=d;}catch(e){}finally{disinfoOfficialLoading=null;renderDisinfo();}})();
+ return disinfoOfficialLoading;
+}
 let disinfoPage=1; const DISINFO_PAGE_SIZE=12;
 function renderDisinfo(){
-
- const stats=getEl('disinfoStats'), list=getEl('disinfoList'); if(!stats||!list)return;
-
- const texts={
-
-  pt:['Publicações relacionadas','Notícias sobre checagens','Alegações e alertas','Fontes distintas','Nenhuma publicação sobre checagens ou alegações encontrada neste recorte. Isso não significa ausência de desinformação.','Ler publicação ↗','Aguardando notícias da API.','Nenhuma notícia disponível no corpus atual.','O filtro selecionado não encontrou registros. Experimente “Todas as pessoas” ou ampliar o período.','Registros encontrados no corpus de notícias; correspondência por termos, sem verificação automática.'],
-
-  en:['Related publications','Fact-check coverage','Claims and alerts','Distinct sources','No related coverage found for this selection. This does not imply an absence of misinformation.','Read publication ↗','Waiting for news API.','No news available in the current dataset.','No matching records. Try “All people” or a longer period.','Keyword-based coverage, not automated fact verification.'],
-
-  es:['Publicaciones relacionadas','Noticias sobre verificaciones','Alegaciones y alertas','Fuentes distintas','No se encontró cobertura relacionada en esta selección. Esto no implica ausencia de desinformación.','Leer publicación ↗','Esperando noticias de la API.','No hay noticias en el conjunto actual.','No hay registros para estos filtros. Pruebe “Todas las personas” o amplíe el período.','Cobertura basada en palabras clave, sin verificación automática.']
-
- }[lang]||[];
-
- const ui={pt:{scope:["Pessoa mencionada","Todas as pessoas","Flávio Bolsonaro","Lula","Ambos na mesma matéria"],type:["Todos os registros","Notícias sobre checagens","Alegações e alertas"],sort:["Mais recentes","Por fonte"],search:"Pesquisar título, fonte ou assunto"},en:{scope:["Person mentioned","All people","Flávio Bolsonaro","Lula","Both in the same article"],type:["All records","Fact-check coverage","Claims and alerts"],sort:["Most recent","By source"],search:"Search title, source or topic"},es:{scope:["Persona mencionada","Todas las personas","Flávio Bolsonaro","Lula","Ambos en la misma noticia"],type:["Todos los registros","Noticias sobre verificaciones","Alegaciones y alertas"],sort:["Más recientes","Por fuente"],search:"Buscar título, fuente o tema"}}[lang]||{};
-
- const scopeEl=getEl('disinfoScope'), typeEl=getEl('disinfoType'), sortEl=getEl('disinfoSort'), searchEl=getEl('disinfoSearch');
-
- if(scopeEl){scopeEl.previousElementSibling.textContent=ui.scope[0]; [...scopeEl.options].forEach((o,i)=>o.textContent=ui.scope[i+1]);}
-
-
- if(typeEl)[...typeEl.options].forEach((o,i)=>o.textContent=ui.type[i]);
-
- if(sortEl)[...sortEl.options].forEach((o,i)=>o.textContent=ui.sort[i]);
-
- if(searchEl){searchEl.placeholder=ui.search;searchEl.setAttribute('aria-label',ui.search);}
-
- const all=Array.isArray(liveNews)?liveNews:[];
-
- const scope=getEl('disinfoScope')?.value||'all';
-
- const globalPeriod=getEl('period')?.value||'24h';
- const electionStart=Date.parse('2026-08-16T03:00:00.000Z');
- const hours=radarPeriodHours(globalPeriod);
- const since=globalPeriod==='election'?electionStart:Date.now()-hours*3600000;
-
- const base=all.filter(a=>{
-
-  const m=a.mentions||{};
-
-  const matches=scope==='all'||(scope==='flavio'&&m.flavio)||(scope==='lula'&&m.lula)||(scope==='both'&&m.flavio&&m.lula);
-
-  const date=validDate(a.publishedAt);
-
-  return matches&&date&&date.getTime()>=since;
-
- });
-
- const relevant=base.map(a=>{
-
-  const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));
-
-  return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};
-
- }).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
-
- const checks=relevant.filter(a=>a._disinfoType==='checks').length;
- const distinct=new Set(relevant.map(disinfoPublisher).filter(Boolean)).size;
- stats.innerHTML=[[texts[0],relevant.length,'all'],[texts[1],checks,'checks'],[texts[2],relevant.length-checks,'claims'],[texts[3],distinct,null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}" aria-label="${escapeHTML(name)}: ${num}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong><small>período global</small></div>`).join('');
-
- const q=normalizeText(getEl('disinfoSearch')?.value||'');const type=getEl('disinfoType')?.value||'all';const sort=getEl('disinfoSort')?.value||'recent';
-
- const selected=relevant.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,disinfoPublisher(a),a.publisher,a.source,a.sourceName,a.subtitle,a.description].join(' ')).includes(q)));
-
- selected.sort((a,b)=>sort==='source'?disinfoPublisher(a).localeCompare(disinfoPublisher(b),'pt-BR'):(new Date(b.publishedAt||0)-new Date(a.publishedAt||0)));
-
- const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=liveNews===null?texts[6]:!all.length?texts[7]:`${all.length} notícias recebidas · ${base.length} no recorte · ${relevant.length} relacionadas. ${texts[9]}`;
-
- const empty=liveNews===null?texts[6]:!all.length?texts[7]:!base.length?texts[8]:texts[4];
-
- const totalPages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));disinfoPage=Math.min(disinfoPage,totalPages);const pageStart=(disinfoPage-1)*DISINFO_PAGE_SIZE;const selectedPage=selected.slice(pageStart,pageStart+DISINFO_PAGE_SIZE);
- list.innerHTML=selectedPage.length?selectedPage.map(a=>{
-
-  const label=a._disinfoType==='checks'?texts[1]:texts[2];const name=disinfoPublisher(a);const url=String(a.url||a.link||'');const safe=/^https?:\/\//i.test(url)?escapeHTML(url):'';
-
-  const excerpt=String(a.subtitle||a.description||'').trim();
-
-  return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">${escapeHTML(texts[5])}</a>`:''}</article>`;
-
- }).join(''):`<p class="disinfo-empty">${escapeHTML(empty)}</p>`;
- const pag=getEl('disinfoPagination');if(pag){const pages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));let nums=[];for(let i=Math.max(1,disinfoPage-2);i<=Math.min(pages,disinfoPage+2);i++)nums.push(i);pag.innerHTML=selected.length>DISINFO_PAGE_SIZE?`<button ${disinfoPage===1?'disabled':''} data-dispage="${disinfoPage-1}">${apoioT('previous')}</button>${nums.map(i=>`<button class="${i===disinfoPage?'active':''}" data-dispage="${i}">${i}</button>`).join('')}<button ${disinfoPage===pages?'disabled':''} data-dispage="${disinfoPage+1}">${apoioT('next')}</button>`:'';pag.querySelectorAll('button[data-dispage]').forEach(b=>b.addEventListener('click',()=>{disinfoPage=Number(b.dataset.dispage)||1;renderDisinfo();document.getElementById('disinfoList')?.scrollIntoView({behavior:'smooth',block:'start'});}));}
+ const stats=getEl('disinfoStats'),list=getEl('disinfoList');if(!stats||!list)return;
+ if(!disinfoOfficial&&!disinfoOfficialLoading)loadDisinfoOfficial();
+ const all=Array.isArray(liveNews)?liveNews:[], official=disinfoOfficial?.checks?.items||[];
+ const scope=getEl('disinfoScope')?.value||'all', globalPeriod=getEl('period')?.value||'24h', electionStart=Date.parse('2026-08-16T03:00:00.000Z'),hours=radarPeriodHours(globalPeriod),since=globalPeriod==='election'?electionStart:Date.now()-hours*3600000;
+ const matchScope=a=>{const body=normalizeText([a.title,a.subtitle,a.description].join(' '));const f=/flavio bolsonaro/.test(body),l=/(^|\W)lula(\W|$)|luiz inacio lula/.test(body);return scope==='all'||(scope==='flavio'&&f)||(scope==='lula'&&l)||(scope==='both'&&f&&l);};
+ const officialRows=official.filter(a=>Date.parse(a.publishedAt)>=since&&matchScope(a)).map(a=>({...a,_disinfoType:'checks',publisher:a.source||'Fato ou Boato — Justiça Eleitoral'}));
+ const rssRows=all.filter(a=>{const d=validDate(a.publishedAt);return d&&d.getTime()>=since&&matchScope(a);}).map(a=>{const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
+ const seen=new Set(officialRows.map(x=>normalizeText(x.title)));const rssUnique=rssRows.filter(x=>!seen.has(normalizeText(x.title)));const combined=[...officialRows,...rssUnique];
+ const totalVerified=Number(disinfoOfficial?.checks?.total||official.length||0),recent7=Number(disinfoOfficial?.checks?.recent7d||0),siade=Number(disinfoOfficial?.siade?.alerts||0),sources=new Set(combined.map(x=>x.publisher||disinfoPublisher(x)).filter(Boolean)).size;
+ stats.innerHTML=[["Checagens verificadas",totalVerified,'checks'],["Novas em 7 dias",recent7,'checks'],["Alertas SIADE",siade,null],["Fontes de evidência",Math.max(sources,Number(disinfoOfficial?.sources?.length||0)),null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong><small>${name==='Alertas SIADE'?'apontamentos · até 14/10':'base 2026'}</small></div>`).join('');
+ const q=normalizeText(getEl('disinfoSearch')?.value||''),type=getEl('disinfoType')?.value||'all',sort=getEl('disinfoSort')?.value||'recent';let selected=combined.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.publisher,a.source,a.subtitle,a.description].join(' ')).includes(q)));
+ selected.sort((a,b)=>sort==='source'?String(a.publisher||disinfoPublisher(a)).localeCompare(String(b.publisher||disinfoPublisher(b)),'pt-BR'):Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0));
+ const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=disinfoOfficial?`${totalVerified} checagens históricas documentadas · ${recent7} nos últimos 7 dias · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`:'Carregando base histórica verificada…';
+ const totalPages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));disinfoPage=Math.min(disinfoPage,totalPages);const pageStart=(disinfoPage-1)*DISINFO_PAGE_SIZE,selectedPage=selected.slice(pageStart,pageStart+DISINFO_PAGE_SIZE);
+ list.innerHTML=selectedPage.length?selectedPage.map(a=>{const label=a._disinfoType==='checks'?'Checagem verificada':'Alegação ou alerta',name=a.publisher||disinfoPublisher(a),url=String(a.url||a.link||''),safe=/^https?:\/\//i.test(url)?escapeHTML(url):'',excerpt=String(a.subtitle||a.description||'').trim();return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">Ler publicação ↗</a>`:''}</article>`;}).join(''):'<p class="disinfo-empty">Nenhum registro encontrado neste recorte. Isso não significa ausência de desinformação.</p>';
+ const pag=getEl('disinfoPagination');if(pag){let nums=[];for(let i=Math.max(1,disinfoPage-2);i<=Math.min(totalPages,disinfoPage+2);i++)nums.push(i);pag.innerHTML=selected.length>DISINFO_PAGE_SIZE?`<button ${disinfoPage===1?'disabled':''} data-dispage="${disinfoPage-1}">Anterior</button>${nums.map(i=>`<button class="${i===disinfoPage?'active':''}" data-dispage="${i}">${i}</button>`).join('')}<button ${disinfoPage===totalPages?'disabled':''} data-dispage="${disinfoPage+1}">Próximo</button>`:'';pag.querySelectorAll('button[data-dispage]').forEach(b=>b.addEventListener('click',()=>{disinfoPage=Number(b.dataset.dispage)||1;renderDisinfo();}));}
 }
 
 ['disinfoSearch','disinfoType','disinfoSort','disinfoScope','period'].forEach(id=>document.addEventListener('input',e=>{if(e.target?.id===id)renderDisinfo()}));
@@ -6476,7 +6420,7 @@ const DISINFO_PERIOD_LABELS={
 function syncDisinfoPeriodUI(){
  const p=getEl('period')?.value||'24h'; const lg=(document.documentElement.lang||'pt').slice(0,2);
  const label=getEl('disinfoPeriodLabel'); if(label)label.textContent=(DISINFO_PERIOD_LABELS[lg]||DISINFO_PERIOD_LABELS.pt)[p]||p;
- const status=getEl('disinfoHistoryStatus'); if(status)status.textContent=lg==='en'?'History prepared · activation at the initial snapshot':lg==='es'?'Histórico preparado · activación en el snapshot inicial':'Histórico preparado · ativação no snapshot inicial';
+ const status=getEl('disinfoHistoryStatus'); if(status)status.textContent=lg==='en'?'History prepared · activation at the initial snapshot':lg==='es'?'Histórico preparado · activación en el snapshot inicial':'Base histórica verificada · atualização nos checkpoints';
 }
 document.addEventListener('change',e=>{if(e.target?.id==='period'){syncDisinfoPeriodUI();renderDisinfo();}});
 document.addEventListener('click',e=>{if(e.target?.closest?.('[data-lang]'))setTimeout(syncDisinfoPeriodUI,0);});
@@ -9787,7 +9731,7 @@ function openTab(name) {
 
 
 
-  if (name === "disinfo") renderDisinfo();
+  if (name === "disinfo") { loadDisinfoOfficial(); renderDisinfo(); }
 
   if (name === "apoio") initApoio();
 
