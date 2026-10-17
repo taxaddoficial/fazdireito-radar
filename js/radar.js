@@ -65,6 +65,8 @@ let liveNews = null;
 let liveNewsMeta = null;
 let disinfoOfficial = null;
 let disinfoOfficialLoading = null;
+let disinfoOfficialAttempted = false;
+let disinfoOfficialRetryAfter = 0;
 
 let liveStatus = null;
 let liveCoverageMovement = null;
@@ -6378,26 +6380,29 @@ function disinfoPublisher(article) {
 }
 
 async function loadDisinfoOfficial(force=false){
+ const now=Date.now();
  if(disinfoOfficial&&!force){renderDisinfo();return disinfoOfficial;}
  if(disinfoOfficialLoading&&!force)return disinfoOfficialLoading;
- disinfoOfficialLoading=(async()=>{try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo`,{cache:'no-store'});const d=await r.json();if(r.ok&&(d.status==='ok'||d.status==='stale'))disinfoOfficial=d;}catch(e){}finally{disinfoOfficialLoading=null;renderDisinfo();}})();
+ if(!force&&disinfoOfficialAttempted&&now<disinfoOfficialRetryAfter)return disinfoOfficial;
+ disinfoOfficialAttempted=true;
+ disinfoOfficialLoading=(async()=>{try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo`,{cache:'no-store'});const d=await r.json().catch(()=>null);if(r.ok&&d&&(d.status==='ok'||d.status==='stale'||d.status==='degraded'||d.status==='error')){disinfoOfficial=d;disinfoOfficialRetryAfter=0;}else{disinfoOfficialRetryAfter=Date.now()+5*60*1000;}}catch(e){disinfoOfficialRetryAfter=Date.now()+5*60*1000;}finally{disinfoOfficialLoading=null;renderDisinfo();}})();
  return disinfoOfficialLoading;
 }
 let disinfoPage=1; const DISINFO_PAGE_SIZE=12;
 function renderDisinfo(){
  const stats=getEl('disinfoStats'),list=getEl('disinfoList');if(!stats||!list)return;
- if(!disinfoOfficial&&!disinfoOfficialLoading)loadDisinfoOfficial();
+ if(!disinfoOfficial&&!disinfoOfficialLoading&&!disinfoOfficialAttempted)loadDisinfoOfficial();
  const all=Array.isArray(liveNews)?liveNews:[], official=disinfoOfficial?.checks?.items||[];
  const scope=getEl('disinfoScope')?.value||'all', globalPeriod=getEl('period')?.value||'24h', electionStart=Date.parse('2026-08-16T03:00:00.000Z'),hours=radarPeriodHours(globalPeriod),since=globalPeriod==='election'?electionStart:Date.now()-hours*3600000;
  const matchScope=a=>{const body=normalizeText([a.title,a.subtitle,a.description].join(' '));const f=/flavio bolsonaro/.test(body),l=/(^|\W)lula(\W|$)|luiz inacio lula/.test(body);return scope==='all'||(scope==='flavio'&&f)||(scope==='lula'&&l)||(scope==='both'&&f&&l);};
  const officialRows=official.filter(a=>Date.parse(a.publishedAt)>=since&&matchScope(a)).map(a=>({...a,_disinfoType:'checks',publisher:a.source||'Fato ou Boato — Justiça Eleitoral'}));
  const rssRows=all.filter(a=>{const d=validDate(a.publishedAt);return d&&d.getTime()>=since&&matchScope(a);}).map(a=>{const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
  const seen=new Set(officialRows.map(x=>normalizeText(x.title)));const rssUnique=rssRows.filter(x=>!seen.has(normalizeText(x.title)));const combined=[...officialRows,...rssUnique];
- const totalVerified=Number(disinfoOfficial?.checks?.total||official.length||0),recent7=Number(disinfoOfficial?.checks?.recent7d||0),siade=Number(disinfoOfficial?.siade?.alerts||0),sources=new Set(combined.map(x=>x.publisher||disinfoPublisher(x)).filter(Boolean)).size;
- stats.innerHTML=[["Checagens verificadas",totalVerified,'checks'],["Novas em 7 dias",recent7,'checks'],["Alertas SIADE",siade,null],["Fontes de evidência",Math.max(sources,Number(disinfoOfficial?.sources?.length||0)),null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}"`:''}><span>${escapeHTML(name)}</span><strong>${formatNumber(num)}</strong><small>${name==='Alertas SIADE'?'apontamentos · até 14/10':'base 2026'}</small></div>`).join('');
+ const rawTotal=disinfoOfficial?.checks?.total,rawRecent7=disinfoOfficial?.checks?.recent7d,totalVerified=rawTotal==null?null:Number(rawTotal),recent7=rawRecent7==null?null:Number(rawRecent7),siade=Number(disinfoOfficial?.siade?.alerts||0),sources=new Set(combined.map(x=>x.publisher||disinfoPublisher(x)).filter(Boolean)).size;
+ stats.innerHTML=[["Checagens verificadas",totalVerified,'checks'],["Novas em 7 dias",recent7,'checks'],["Alertas SIADE",siade,null],["Fontes de evidência",Math.max(sources,Number(disinfoOfficial?.sources?.length||0)),null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}"`:''}><span>${escapeHTML(name)}</span><strong>${num==null?'—':formatNumber(num)}</strong><small>${name==='Alertas SIADE'?'apontamentos · até 14/10':'base 2026'}</small></div>`).join('');
  const q=normalizeText(getEl('disinfoSearch')?.value||''),type=getEl('disinfoType')?.value||'all',sort=getEl('disinfoSort')?.value||'recent';let selected=combined.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.publisher,a.source,a.subtitle,a.description].join(' ')).includes(q)));
  selected.sort((a,b)=>sort==='source'?String(a.publisher||disinfoPublisher(a)).localeCompare(String(b.publisher||disinfoPublisher(b)),'pt-BR'):Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0));
- const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=disinfoOfficial?`${totalVerified} checagens históricas documentadas · ${recent7} nos últimos 7 dias · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`:'Carregando base histórica verificada…';
+ const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=disinfoOfficial?(totalVerified==null?`T0 histórico aguardando carga válida · ${siade.toLocaleString('pt-BR')} apontamentos SIADE preservados. Alertas não equivalem a casos confirmados.`:`${totalVerified} checagens históricas documentadas · ${recent7} nos últimos 7 dias · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`):'Carregando base histórica verificada…';
  const totalPages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));disinfoPage=Math.min(disinfoPage,totalPages);const pageStart=(disinfoPage-1)*DISINFO_PAGE_SIZE,selectedPage=selected.slice(pageStart,pageStart+DISINFO_PAGE_SIZE);
  list.innerHTML=selectedPage.length?selectedPage.map(a=>{const label=a._disinfoType==='checks'?'Checagem verificada':'Alegação ou alerta',name=a.publisher||disinfoPublisher(a),url=String(a.url||a.link||''),safe=/^https?:\/\//i.test(url)?escapeHTML(url):'',excerpt=String(a.subtitle||a.description||'').trim();return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">Ler publicação ↗</a>`:''}</article>`;}).join(''):'<p class="disinfo-empty">Nenhum registro encontrado neste recorte. Isso não significa ausência de desinformação.</p>';
  const pag=getEl('disinfoPagination');if(pag){let nums=[];for(let i=Math.max(1,disinfoPage-2);i<=Math.min(totalPages,disinfoPage+2);i++)nums.push(i);pag.innerHTML=selected.length>DISINFO_PAGE_SIZE?`<button ${disinfoPage===1?'disabled':''} data-dispage="${disinfoPage-1}">Anterior</button>${nums.map(i=>`<button class="${i===disinfoPage?'active':''}" data-dispage="${i}">${i}</button>`).join('')}<button ${disinfoPage===totalPages?'disabled':''} data-dispage="${disinfoPage+1}">Próximo</button>`:'';pag.querySelectorAll('button[data-dispage]').forEach(b=>b.addEventListener('click',()=>{disinfoPage=Number(b.dataset.dispage)||1;renderDisinfo();}));}
