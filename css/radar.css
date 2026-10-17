@@ -1197,6 +1197,7 @@ html{font-size:var(--base-font-size)}
 .apoio-observation-dot.no-record{background:transparent;border:1px dashed #94a3b8}
 [data-theme="dark"] .apoio-observation-dot.absent{background:#64748b}
 
+
 /* Apoio V1.6.12 — destaque factual da evidência mais recente */
 .apoio-latest-evidence,
 .apoio-card .latest-evidence{
