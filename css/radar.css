@@ -1212,3 +1212,29 @@ html{font-size:var(--base-font-size)}
 .apoio-square.absent{background:#94a3b8!important;border-color:#94a3b8!important}
 .apoio-square.norecord{background:transparent!important;border:1px dashed #94a3b8!important}
 [data-theme="dark"] .apoio-square.absent{background:#64748b!important;border-color:#64748b!important}
+
+/* ============================================================
+   VOTO AGORA 2º TURNO — extensão segura sobre v1.6.13.10
+   Escopo deliberadamente restrito ao card .vote-second-panel.
+   ============================================================ */
+#panel-vote .vote-second-progress{margin:.85rem 0 1rem;padding:.85rem;border:1px solid var(--line);border-radius:.75rem;background:var(--soft)}
+#panel-vote .vote-second-progress-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;font-size:.78rem;color:var(--ink)}
+#panel-vote .vote-second-progress-head strong{font-weight:850}
+#panel-vote .vote-second-progress-head span{font-weight:900;color:var(--blue)}
+#panel-vote .vote-second-progress-track{height:.72rem;margin:.55rem 0 .4rem;border-radius:999px;overflow:hidden;background:#dbe5f0}
+#panel-vote .vote-second-progress-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),#2476b9);transition:width .35s ease}
+#panel-vote .vote-second-progress small{display:block;color:var(--muted);font-size:.69rem;line-height:1.45}
+#panel-vote .vote-second-evolution,#panel-vote .vote-second-map-wrap{margin-top:1.15rem;padding-top:1rem;border-top:1px solid var(--line)}
+#panel-vote .vote-second-evolution h4,#panel-vote .vote-second-map-wrap h4{font-size:.85rem;font-weight:850;color:var(--ink);margin:0 0 .55rem}
+#panel-vote .vote-second-evolution-list{display:grid;gap:.45rem}
+#panel-vote .vote-second-evolution-row{display:grid;grid-template-columns:auto 1fr auto;gap:.55rem;align-items:center;padding:.5rem .6rem;border:1px solid var(--line);border-radius:.6rem;background:var(--soft);font-size:.68rem;line-height:1.4;color:var(--muted)}
+#panel-vote .vote-second-evolution-row time{font-weight:800;color:var(--ink);white-space:nowrap}
+#panel-vote .vote-second-evolution-row strong{color:var(--ink);font-size:.7rem}
+#panel-vote .vote-second-map-wrap .vote-map{margin-top:.55rem;min-height:220px}
+#panel-vote .vote-live-badge.is-complete{background:#e8f2ff;color:#174f88;border-color:#9fc4e8}
+.dark #panel-vote .vote-second-progress,.dark #panel-vote .vote-second-evolution-row{background:#15243b;border-color:#45576d}
+.dark #panel-vote .vote-second-progress-head,.dark #panel-vote .vote-second-progress-head strong,.dark #panel-vote .vote-second-evolution h4,.dark #panel-vote .vote-second-map-wrap h4,.dark #panel-vote .vote-second-evolution-row time,.dark #panel-vote .vote-second-evolution-row strong{color:#e2e8f0}
+.dark #panel-vote .vote-second-progress-track{background:#334155}
+.dark #panel-vote .vote-live-badge.is-complete{background:#123555;color:#cfe8ff;border-color:#3f6f9a}
+@media(max-width:560px){#panel-vote .vote-second-evolution-row{grid-template-columns:1fr;gap:.2rem}#panel-vote .vote-second-progress-head{align-items:flex-start}}
+
