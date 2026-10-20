@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.16">
+  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.12">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -310,32 +310,9 @@
 
 </div>
 
-    <p id="radarHistoryEvidence" class="radar-history-evidence" aria-live="polite">Os filtros anteriores à coleta atual dependem de registros realmente preservados; o histórico não é retroativo.</p>
-
   </section>
 
 
-
-  <details id="radarStateHistory" class="radar-state-history">
-    <summary>Histórico de snapshots por dia e horário <span>7h · 13h · 21h</span></summary>
-    <p class="radar-state-help">Fotografias reais armazenadas no D1. Os horários das capturas e as datas das fontes são exibidos separadamente. Os registros começam após a ativação.</p>
-    <div class="radar-state-filters">
-      <label for="radarStateModule">Indicador
-        <select id="radarStateModule">
-          <option value="news">Notícias</option><option value="mentions">Menções</option><option value="trends">Termos / Tendências</option>
-          <option value="videos">Vídeos</option><option value="disinfo">Desinformação</option><option value="apoio">Apoio</option>
-          <option value="polls">Pesquisas</option><option value="eurasia">Eurasia Group</option>
-        </select>
-      </label>
-      <label for="radarStatePeriod">Período
-        <select id="radarStatePeriod"><option value="24h">24 horas</option><option value="48h">48 horas</option><option value="7d" selected>7 dias</option><option value="15d">15 dias</option><option value="30d">30 dias</option><option value="election">Desde agosto</option></select>
-      </label>
-      <button id="radarStateRefresh" type="button">Atualizar histórico</button>
-    </div>
-    <p id="radarStateStatus" role="status" aria-live="polite">Abra para consultar os snapshots preservados.</p>
-    <div id="radarStateChart" aria-label="Evolução de snapshots ao longo do período" role="img"></div>
-    <div id="radarStateTable" class="radar-state-table"></div>
-  </details>
 
   <div class="radar-tabs" role="tablist" aria-label="Seções do radar">
 
@@ -709,12 +686,11 @@
 
     </div>
 
-    <div class="history-prepared-note"><strong>Período global</strong> · controlado pelo filtro Monitoramento <span>Histórico incremental em formação</span></div>
+    <div class="history-prepared-note"><strong>Período global</strong> · controlado pelo filtro Monitoramento <span>Histórico preparado · ativação no snapshot inicial</span></div>
 
     <div id="videoIndicators" class="video-indicators" aria-live="polite"></div>
 
     <div id="videoSummary" class="video-summary" aria-live="polite"></div>
-    <p id="videoHistoryStatus" class="radar-history-evidence" aria-live="polite">Histórico real começa após a primeira coleta desta versão.</p>
 
     <div id="videoGrid" class="video-grid"></div>
 
@@ -730,8 +706,8 @@
 
     <div class="disinfo-stats" id="disinfoStats" aria-live="polite"></div><p class="disinfo-cumulative-note">Indicadores do recorte selecionado no período global. São sinais editoriais por palavras-chave; não constituem veredito de falsidade.</p>
 
-    <div class="disinfo-history-context" aria-live="polite"><span>Período global</span><strong id="disinfoPeriodLabel">Últimas 24 horas</strong><small id="disinfoHistoryStatus">Histórico incremental em formação</small></div>
-    <div class="disinfo-scope"><label><span>Pessoa mencionada</span><select id="disinfoScope" aria-label="Pessoa mencionada"><option value="all">Todas as pessoas</option><option value="flavio">Flávio Bolsonaro</option><option value="lula">Lula</option><option value="both">Ambos na mesma matéria</option></select></label></div><p id="disinfoDiagnostics" class="disinfo-diagnostics" aria-live="polite"></p><div class="disinfo-controls"><input id="disinfoSearch" type="search" placeholder="Pesquisar título, fonte ou assunto" aria-label="Pesquisar publicações sobre desinformação"><select id="disinfoType" aria-label="Tipo de registro"><option value="all">Todos os registros</option><option value="checks">Checagens documentadas</option><option value="claims">Alegações e alertas</option></select><select id="disinfoSort" aria-label="Ordenar registros"><option value="recent" data-i18n="support_most_recent" selected>Mais recentes</option><option value="source">Por fonte</option></select></div>
+    <div class="disinfo-history-context" aria-live="polite"><span>Período global</span><strong id="disinfoPeriodLabel">Últimas 24 horas</strong><small id="disinfoHistoryStatus">Histórico preparado · ativação no snapshot inicial</small></div>
+    <div class="disinfo-scope"><label><span>Pessoa mencionada</span><select id="disinfoScope" aria-label="Pessoa mencionada"><option value="all">Todas as pessoas</option><option value="flavio">Flávio Bolsonaro</option><option value="lula">Lula</option><option value="both">Ambos na mesma matéria</option></select></label></div><p id="disinfoDiagnostics" class="disinfo-diagnostics" aria-live="polite"></p><div class="disinfo-controls"><input id="disinfoSearch" type="search" placeholder="Pesquisar título, fonte ou assunto" aria-label="Pesquisar publicações sobre desinformação"><select id="disinfoType" aria-label="Tipo de registro"><option value="all">Todos os registros</option><option value="checks">Notícias sobre checagens</option><option value="claims">Alegações e alertas</option></select><select id="disinfoSort" aria-label="Ordenar registros"><option value="recent" data-i18n="support_most_recent" selected>Mais recentes</option><option value="source">Por fonte</option></select></div>
 
     <div class="disinfo-grid"><article class="panel"><div class="panel-head"><div><span class="eyebrow">COBERTURA MONITORADA</span><h3>Publicações relacionadas</h3></div></div><div id="disinfoList" class="disinfo-list" aria-live="polite"></div><div id="disinfoPagination" class="apoio-pagination" aria-label="Paginação das publicações relacionadas"></div></article><aside class="panel disinfo-aside"><div class="panel-head"><div><span class="eyebrow">FONTES DE EVIDÊNCIA</span><h3>Consultar verificações</h3></div></div><p>Confira a checagem original antes de atribuir qualquer classificação a uma publicação.</p><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026" target="_blank" rel="noopener noreferrer">TSE — Eleições 2026 ↗</a><a href="https://www.tse.jus.br/comunicacao/noticias/2026/Agosto/fato-ou-boato-pagina-e-reformulada-para-as-eleicoes-2026-e-amplia-ferramentas-de-combate-a-desinformacao" target="_blank" rel="noopener noreferrer">TSE — Fato ou Boato ↗</a><a href="https://www.aosfatos.org/" target="_blank" rel="noopener noreferrer">Aos Fatos ↗</a><a href="https://www.agencialupa.org/" target="_blank" rel="noopener noreferrer">Agência Lupa ↗</a><div class="callout">Os indicadores combinam checagens documentadas pela Justiça Eleitoral com alertas agregados do SIADE e cobertura do corpus RSS. Alertas não equivalem a casos confirmados. Nenhum item é rotulado como falso sem checagem documental específica.</div></aside></div>
 
@@ -740,7 +716,7 @@
 
 
   <section id="panel-apoio" class="tab-panel" aria-labelledby="apoioHeading">
-    <div class="section-intro apoio-heading"><div><span class="eyebrow">MONITORAMENTO DE APOIO · FLAVIÔMETRO</span><h3 id="apoioHeading" data-i18n="support_title">Apoio a Flávio Bolsonaro</h3><p data-i18n="support_intro">Quem falou do candidato e quem fez pedido explícito de voto em publicações públicas.</p></div><div class="apoio-header-actions"><span class="apoio-snapshot-badge" id="apoioStatus">FONTE A VERIFICAR</span><button id="apoioRefreshHistory" type="button" class="election-action" aria-label="Reconsultar dados e histórico do Apoio">↻ Atualizar</button></div></div>
+    <div class="section-intro apoio-heading"><div><span class="eyebrow">MONITORAMENTO DE APOIO · FLAVIÔMETRO</span><h3 id="apoioHeading" data-i18n="support_title">Apoio a Flávio Bolsonaro</h3><p data-i18n="support_intro">Quem falou do candidato e quem fez pedido explícito de voto em publicações públicas.</p></div><span class="apoio-snapshot-badge" id="apoioStatus">FONTE A VERIFICAR</span></div>
     <div class="apoio-notice" id="apoioNotice" role="status">Carregando o snapshot validado de Apoio.</div>
     <div class="apoio-history-context" id="apoioHistoryContext"><span>Período global</span><strong id="apoioHistoryPeriod">Últimas 24 horas</strong><small>Dados atuais servidos por KV · importação manual validada quando disponível</small></div>
     <div class="apoio-card apoio-classification-row"><div class="apoio-field"><label data-i18n="support_classification">Classificação</label><div class="apoio-toggle" id="apoioKind"><button type="button" class="active" data-v="all" data-i18n="support_all">Todos</button><button type="button" data-v="observed">Publicação observada</button><button type="button" data-v="absent">Publicação ausente</button><button type="button" data-v="norecord">Sem registro</button></div></div></div>
@@ -752,8 +728,7 @@
       <div class="apoio-field"><label for="apoioName" data-i18n="support_name">Nome</label><input id="apoioName" type="search" placeholder="Buscar político" data-i18n-placeholder="support_search_placeholder" aria-label="Buscar político" autocomplete="off"></div>
     </div>
     <div class="apoio-kpis"><div class="apoio-card apoio-kpi"><span>Base monitorada</span><strong id="apoioKpiTotal">—</strong><small>fonte externa</small></div><div class="apoio-card apoio-kpi"><span>Falaram · 24 h</span><strong id="apoioKpiSpoke">—</strong><small>pessoas com menção</small></div><div class="apoio-card apoio-kpi"><span>Pediram voto · 24 h</span><strong id="apoioKpiVote">—</strong><small>declarações explícitas</small></div><div class="apoio-card apoio-kpi"><span>Menções · 5 dias</span><strong id="apoioKpi72">—</strong><small>falou + pediu voto</small></div><div class="apoio-card apoio-kpi"><span>Visualizações · 24 h</span><strong id="apoioKpiViews">—</strong><small>posts relacionados</small></div></div>
-    <section class="apoio-card apoio-uf-wide"><div class="apoio-head"><div><span class="eyebrow">SÉRIE HISTÓRICA DOCUMENTADA</span><h4>Evolução real de Apoio</h4></div><label class="apoio-history-window-label" for="apoioHistoryWindow">Período do gráfico <select id="apoioHistoryWindow" aria-label="Selecionar período do gráfico de Apoio"><option value="24h">24 horas</option><option value="48h">48 horas</option><option value="7d" selected>Últimos 7 dias</option><option value="15d">15 dias</option><option value="30d">30 dias</option><option value="election">Desde o início</option></select></label></div><p id="apoioHistoryEvidence" class="radar-history-evidence" aria-live="polite">Sem dados históricos carregados.</p><div id="apoioHistoryGraph" class="apoio-temporal-chart"></div></section>
-    <section class="apoio-card apoio-uf-wide"><div class="apoio-head"><div><span class="eyebrow">ATIVIDADE TERRITORIAL</span><h4 data-i18n="support_territorial">Amostra observada por UF</h4></div><div class="apoio-territory-controls"><div class="apoio-toggle" id="apoioUfMode"><button type="button" class="active" data-v="top5" data-i18n="support_top5">Top 5</button><button type="button" data-v="all" data-i18n="support_all">Todos</button></div><label class="apoio-uf-filter">UF <select id="apoioTerritoryUf"><option value="all">Todas</option></select></label></div></div><p class="apoio-chart-note">Amostra das publicações individualmente identificadas por UF (não representa o total nacional nem o histórico agregado).</p><div id="apoioUfChart" class="apoio-temporal-chart">Aguardando dados.</div></section>
+    <section class="apoio-card apoio-uf-wide"><div class="apoio-head"><div><span class="eyebrow">ATIVIDADE TERRITORIAL</span><h4 data-i18n="support_territorial">Distribuição temporal por UF</h4></div><div class="apoio-territory-controls"><div class="apoio-toggle" id="apoioUfMode"><button type="button" class="active" data-v="top5" data-i18n="support_top5">Top 5</button><button type="button" data-v="all" data-i18n="support_all">Todos</button></div><label class="apoio-uf-filter">UF <select id="apoioTerritoryUf"><option value="all">Todas</option></select></label></div></div><p class="apoio-chart-note">UFs com mais publicações que falaram de Flávio ou pediram voto nos últimos 5 dias.</p><div id="apoioUfChart" class="apoio-temporal-chart">Aguardando dados.</div></section>
     <section class="apoio-card apoio-evidence-wide"><div class="apoio-head"><div><span class="eyebrow">EVIDÊNCIAS</span><h4 data-i18n="support_latest_posts">Últimos posts</h4></div><small>links diretos para a origem</small></div><div id="apoioCriteriaPosts" class="apoio-criteria-posts">Aguardando publicações.</div></section>
     <section class="apoio-card apoio-section"><div class="apoio-head apoio-people-head"><div><span class="eyebrow">BASE MONITORADA</span><h4 class="apoio-people-title" data-i18n="support_people">Pessoas monitoradas</h4><span id="apoioCount"></span></div><label class="apoio-sort"><span data-i18n="support_sort">Ordenar por</span> <select id="apoioSort" aria-label="Ordenar pessoas monitoradas"><option value="active" data-i18n="support_active">Mais publicações observadas · 5 dias</option><option value="recent" data-i18n="support_most_recent" selected>Mais recentes</option><option value="absent" data-i18n="support_absent">Ausentes</option><option value="name">Nome</option></select></label></div><div id="apoioPeople" class="apoio-people-grid" aria-live="polite" aria-busy="false"></div><div id="apoioPagination" class="apoio-pagination" aria-label="Paginação"></div></section>
     <section class="apoio-card apoio-section"><div class="apoio-head"><h4 data-i18n="support_related_posts">Publicações relacionadas · últimos 5 dias</h4><div class="apoio-toggle" id="apoioPostTabs"><button type="button" class="active" data-v="recent" data-i18n="support_recent">Recentes</button><button type="button" data-v="engaged" data-i18n="support_engaged">Mais engajadas</button></div></div><div id="apoioPosts" class="apoio-list" aria-live="polite"></div><div id="apoioPostsPagination" class="apoio-pagination" aria-label="Paginação das publicações"></div></section>
@@ -836,6 +811,6 @@
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.6.13.16" defer></script>
+<script src="/js/radar.js?v=1.6.13.12" defer></script>
 
 </body></html>
