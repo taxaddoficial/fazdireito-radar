@@ -11372,13 +11372,13 @@ let apoioHistoryData=null,apoioHistoryAt=0,apoioHistoryPeriod='';
 const apoioGraphPeriod=()=>getEl('apoioHistoryWindow')?.value||'7d';
 async function loadApoioHistory(force=false){
  const period=apoioGraphPeriod();
- if(!force&&period===apoioHistoryPeriod&&Date.now()-apoioHistoryAt<180000){renderApoioHistoryGraph();return;}
+ if(!force&&period===apoioHistoryPeriod&&Date.now()-apoioHistoryAt<180000){apoioRenderHistorySafe();return;}
  try{
   const r=await fetch(`${RADAR_API.baseUrl}/api/apoio/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});
   if(!r.ok)throw Error('HTTP '+r.status);
   apoioHistoryData=await r.json();apoioHistoryAt=Date.now();apoioHistoryPeriod=period;
  }catch(e){apoioHistoryData=null;apoioHistoryAt=0;apoioHistoryPeriod='';}
- renderApoioHistoryGraph();
+ apoioRenderHistorySafe();
 }
 function apoioGraphStart(period){
  if(period==='election')return radarPeriodStart(period);
@@ -11388,6 +11388,17 @@ function apoioGraphStart(period){
   return new Date(n.getFullYear(),n.getMonth(),n.getDate()-span+1).getTime();
  }
  return radarPeriodStart(period);
+}
+// Proteção de falha: gráfico é acessório; nunca bloqueia o painel, filtros ou pessoas.
+function apoioRenderHistorySafe(){
+ try { renderApoioHistoryGraph(); }
+ catch(error){
+  console.warn('[Radar Apoio] Visualização histórica indisponível:',error);
+  const el=getEl('apoioHistoryGraph');
+  if(el)el.textContent='Não foi possível apresentar o gráfico neste momento. Os dados de Apoio continuam disponíveis.';
+  const note=getEl('apoioHistoryEvidence');
+  if(note)note.textContent='Falha isolada da visualização: nenhuma informação foi apagada ou modificada.';
+ }
 }
 function renderApoioHistoryGraph(){
  const el=getEl('apoioHistoryGraph');if(!el)return;
@@ -11430,7 +11441,7 @@ function renderApoioHistoryGraph(){
  el.innerHTML=svg+'</svg>';
 }
 
-function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioSortPeople(apoioFilteredPeople()),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();renderApoioHistoryGraph();apoioRenderCriteria();const from=(apoioPage-1)*APOIO_PAGE_SIZE,pageRows=rows.slice(from,from+APOIO_PAGE_SIZE);apoioSet('apoioCount',rows.length?`${apoioNum(from+1)}–${apoioNum(Math.min(from+APOIO_PAGE_SIZE,rows.length))} de ${apoioNum(rows.length)} pessoas`:'0 pessoas');people.innerHTML=pageRows.length?pageRows.map(p=>apoioPersonCard(p,f)).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';apoioPage=apoioPaginationHtml('apoioPagination',rows.length,apoioPage,APOIO_PAGE_SIZE,n=>{apoioPage=n;renderApoio();document.getElementById('apoioPeople')?.scrollIntoView({behavior:'smooth',block:'start'});});const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));const pf=(apoioPostsPage-1)*APOIO_POST_PAGE_SIZE,pr=sorted.slice(pf,pf+APOIO_POST_PAGE_SIZE);posts.innerHTML=pr.length?pr.map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';apoioPostsPage=apoioPaginationHtml('apoioPostsPagination',sorted.length,apoioPostsPage,APOIO_POST_PAGE_SIZE,n=>{apoioPostsPage=n;renderApoio();document.getElementById('apoioPosts')?.scrollIntoView({behavior:'smooth',block:'start'});});}
+function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioSortPeople(apoioFilteredPeople()),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();apoioRenderHistorySafe();apoioRenderCriteria();const from=(apoioPage-1)*APOIO_PAGE_SIZE,pageRows=rows.slice(from,from+APOIO_PAGE_SIZE);apoioSet('apoioCount',rows.length?`${apoioNum(from+1)}–${apoioNum(Math.min(from+APOIO_PAGE_SIZE,rows.length))} de ${apoioNum(rows.length)} pessoas`:'0 pessoas');people.innerHTML=pageRows.length?pageRows.map(p=>apoioPersonCard(p,f)).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';apoioPage=apoioPaginationHtml('apoioPagination',rows.length,apoioPage,APOIO_PAGE_SIZE,n=>{apoioPage=n;renderApoio();document.getElementById('apoioPeople')?.scrollIntoView({behavior:'smooth',block:'start'});});const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));const pf=(apoioPostsPage-1)*APOIO_POST_PAGE_SIZE,pr=sorted.slice(pf,pf+APOIO_POST_PAGE_SIZE);posts.innerHTML=pr.length?pr.map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';apoioPostsPage=apoioPaginationHtml('apoioPostsPagination',sorted.length,apoioPostsPage,APOIO_POST_PAGE_SIZE,n=>{apoioPostsPage=n;renderApoio();document.getElementById('apoioPosts')?.scrollIntoView({behavior:'smooth',block:'start'});});}
 async function loadApoio(force=false){if(apoioLoaded&&!force&&Date.now()-apoioLastLoadedAt<300000){renderApoio();return apoioData;}if(apoioLoading&&!force)return apoioLoading;apoioSet('apoioStatus','CONSULTANDO FONTE');apoioSet('apoioNotice','Consultando o snapshot validado da fonte externa…');apoioLoading=(async()=>{try{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);let res;try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store',headers:{accept:'application/json'}});}finally{clearTimeout(timer);}const d=await res.json();if(!res.ok||!Array.isArray(d.people))throw Error(d?.message||`HTTP ${res.status}`);apoioData=d;
     // V1.6.11 — modo manual: evidência observada, sem inferir classificação.
     if(d?.manualImport){
