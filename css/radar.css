@@ -1238,3 +1238,35 @@ html{font-size:var(--base-font-size)}
 .dark #panel-vote .vote-live-badge.is-complete{background:#123555;color:#cfe8ff;border-color:#3f6f9a}
 @media(max-width:560px){#panel-vote .vote-second-evolution-row{grid-template-columns:1fr;gap:.2rem}#panel-vote .vote-second-progress-head{align-items:flex-start}}
 
+/* V1.9.22.17.2.5 — evidências de histórico; mantém estilos existentes */
+.radar-history-evidence{color:var(--muted);font-size:.72rem;line-height:1.5;margin:.5rem 0 1rem}
+#apoioHistoryGraph svg{max-width:100%;height:auto;display:block}
+.dark .radar-history-evidence{color:#cbd5e1}
+.apoio-uf-sample{display:grid;gap:.55rem;margin:1rem 0}
+.apoio-uf-sample-row{display:grid;grid-template-columns:40px 1fr 42px;align-items:center;gap:.6rem;font-size:.75rem}
+.apoio-uf-sample-track{height:.65rem;border-radius:999px;background:#e2e8f0;overflow:hidden}
+.apoio-uf-sample-track span{display:block;height:100%;background:#154b8b;border-radius:999px}
+.apoio-uf-sample-row small{text-align:right;font-variant-numeric:tabular-nums}
+
+/* v1.6.13.14 — Snapshots históricos: apresentação progressiva, isolada */
+.radar-state-history{margin:1rem 0;padding:1rem;background:var(--panel);border:1px solid var(--line);border-radius:.85rem;color:var(--ink)}
+.radar-state-history summary{cursor:pointer;font-size:.87rem;font-weight:850;color:var(--navy)}
+.radar-state-history summary span{font-size:.65rem;font-weight:600;color:var(--muted);margin-left:.5rem}
+.radar-state-help,.radar-state-history #radarStateStatus{font-size:.73rem;color:var(--muted);margin:.7rem 0}
+.radar-state-filters{display:flex;flex-wrap:wrap;gap:.6rem;align-items:end}
+.radar-state-filters label{display:grid;gap:.15rem;font-size:.7rem;font-weight:800;min-width:150px}
+.radar-state-filters select,.radar-state-filters button{border:1px solid var(--line);border-radius:.55rem;background:#fff;padding:.5rem;font-size:.75rem;color:var(--ink)}
+.radar-state-filters button{background:var(--navy);color:white;cursor:pointer;font-weight:800}
+#radarStateChart svg{width:100%;height:auto;max-height:210px}
+.radar-state-legend{font-size:.67rem;color:var(--muted);margin-top:-.3rem}
+.radar-state-table{max-width:100%;overflow-x:auto}
+.radar-state-table table{border-collapse:collapse;width:100%;font-size:.69rem;margin-top:.6rem}
+.radar-state-table th,.radar-state-table td{text-align:left;padding:.5rem;border-bottom:1px solid var(--line);white-space:nowrap}
+.radar-state-table th{background:#eef2ff;color:var(--navy)}
+.dark .radar-state-history{background:#0f172a;border-color:#334155;color:#e2e8f0}
+.dark .radar-state-history summary{color:#f8fafc}
+.dark .radar-state-filters select{background:#111c31;color:#e2e8f0;border-color:#475569}
+.dark .radar-state-table th{background:#1e293b;color:#f8fafc}
+@media(max-width:640px){.radar-state-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.radar-state-filters label{min-width:0}.radar-state-filters button{grid-column:1/-1}}
+
+.radar-state-evidence{margin-top:.75rem;font-size:.72rem}.radar-state-evidence summary{font-weight:750}.radar-state-evidence ul{padding-left:1.3rem;list-style:disc;max-height:250px;overflow:auto}.radar-state-evidence li{margin:.2rem 0}.radar-state-evidence a{color:#1d4ed8;text-decoration:underline}
