@@ -11367,31 +11367,69 @@ function apoioPersonCard(p,f){
  return `<article class="apoio-person-card state-${five}"><header>${avatar}<div class="apoio-person-id"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc([p.party,p.role,p.uf].filter(Boolean).join(' · '))}</small></div><span class="apoio-pill ${five}" title="Classificação observacional dos últimos 5 dias">${apoioEsc(label)}</span></header><div class="apoio-person-metrics"><div><strong>${apoioNum(obs5.length)}</strong><span>publicações observadas · 5 dias</span></div><div><strong>${apoioNum(obs24.length)}</strong><span>últimas 24 h</span></div><div><strong>${apoioEsc(latestMetric)}</strong><span>última evidência</span></div></div><div class="apoio-timeline" aria-label="Cobertura observacional dos últimos cinco dias">${apoioTimeline(p)}</div><div class="apoio-legend-mini"><span><i class="apoio-square observed"></i> Publicação observada</span><span><i class="apoio-square absent"></i> Publicação ausente</span><span><i class="apoio-square norecord"></i> Sem registro</span></div><div class="apoio-socials">${apoioSocialLinks(p)||`<span>${apoioT('noProfiles')}</span>`}</div>${lp?`<div class="apoio-last-post latest-evidence"><small>${evidenceTitle} · ${apoioEsc(APOIO_NETWORKS[lp.network]||lp.network||'Rede não identificada')} · ${apoioAgo(lp.date)}</small><p>${apoioEsc(lp.text||'')}</p>${lp.url?`<a href="${apoioEsc(lp.url)}" target="_blank" rel="noopener noreferrer">${apoioT('viewPost')}</a>`:''}</div>`:''}</article>`;
 }
 function apoioPaginationHtml(id,total,page,size,onPage){const el=document.getElementById(id);if(!el)return page;const pages=Math.max(1,Math.ceil(total/size));page=Math.min(page,pages);let nums=[];for(let i=Math.max(1,page-2);i<=Math.min(pages,page+2);i++)nums.push(i);el.innerHTML=`<button ${page===1?'disabled':''} data-page="${page-1}">${apoioT('previous')}</button>${page>3?'<span>…</span>':''}${nums.map(i=>`<button class="${i===page?'active':''}" data-page="${i}">${i}</button>`).join('')}${page<pages-2?'<span>…</span>':''}<button ${page===pages?'disabled':''} data-page="${page+1}">${apoioT('next')}</button>`;el.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click',()=>onPage(Number(b.dataset.page)||1)));return page;}
+// V1.6.13.15 — O gráfico de Apoio inicia em sete dias, independentemente do filtro global.
 let apoioHistoryData=null,apoioHistoryAt=0,apoioHistoryPeriod='';
+const apoioGraphPeriod=()=>getEl('apoioHistoryWindow')?.value||'7d';
 async function loadApoioHistory(force=false){
- const period=getEl('period')?.value||'24h';if(!force&&period===apoioHistoryPeriod&&Date.now()-apoioHistoryAt<180000){renderApoioHistoryGraph();return;}
- try{const r=await fetch(`${RADAR_API.baseUrl}/api/apoio/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);apoioHistoryData=await r.json();apoioHistoryAt=Date.now();apoioHistoryPeriod=period;renderApoioHistoryGraph();}
- catch(e){apoioHistoryData=null;renderApoioHistoryGraph();}
+ const period=apoioGraphPeriod();
+ if(!force&&period===apoioHistoryPeriod&&Date.now()-apoioHistoryAt<180000){renderApoioHistoryGraph();return;}
+ try{
+  const r=await fetch(`${RADAR_API.baseUrl}/api/apoio/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});
+  if(!r.ok)throw Error('HTTP '+r.status);
+  apoioHistoryData=await r.json();apoioHistoryAt=Date.now();apoioHistoryPeriod=period;
+ }catch(e){apoioHistoryData=null;apoioHistoryAt=0;apoioHistoryPeriod='';}
+ renderApoioHistoryGraph();
+}
+function apoioGraphStart(period){
+ if(period==='election')return radarPeriodStart(period);
+ // Série diária é datada por dia civil, não por horário fictício (ex.: meio-dia).
+ if(['7d','15d','30d'].includes(period)){
+  const span=Number(period.replace('d',''));const n=new Date();
+  return new Date(n.getFullYear(),n.getMonth(),n.getDate()-span+1).getTime();
+ }
+ return radarPeriodStart(period);
 }
 function renderApoioHistoryGraph(){
- const el=document.getElementById('apoioHistoryGraph');if(!el)return;
- const d=apoioHistoryData,period=getEl('period')?.value||'24h',start=radarPeriodStart(period);
- const points=(d?.points||[]).filter(x=>Number.isFinite(Date.parse(x.importedAt||''))&&Date.parse(x.importedAt)>=start);
- // For 24h/48h only real timestamped imports are valid. The manually supplied daily series is separate.
- const daily=(d?.daily?.length?d.daily:apoioData?.manualDaily)||[];
- const parsedDaily=daily.map(x=>{const m=String(x.date||'').match(/^(\d{2})\/(\d{2})(?:\/(\d{4}))?$/);if(!m)return null;const y=Number(m[3]||2026);const t=new Date(y,Number(m[2])-1,Number(m[1]),12,0,0).getTime();return {at:t,label:x.date,value:Number(x.posts)};}).filter(x=>x&&Number.isFinite(x.value)&&x.at>=start).sort((a,b)=>a.at-b.at);
- const note=document.getElementById('apoioHistoryEvidence');
- if(note)note.textContent=`${points.length} importação(ões) documentada(s) no período · série diária da última fonte: ${daily.length?daily[0].date+' a '+daily.at(-1).date:'não disponível'}. Os dois conjuntos não são equivalentes.`;
- if(!points.length&&!parsedDaily.length){el.innerHTML='<p class="apoio-empty">Ainda não há observações suficientes neste intervalo. Cada nova importação confirmada acrescentará um ponto real; nada é interpolado.</p>';return;}
- const source=parsedDaily.length?parsedDaily:points.map(x=>({at:Date.parse(x.importedAt),label:formatDateTime(x.importedAt),value:Number(x.metrics?.posts24h||0)}));
+ const el=getEl('apoioHistoryGraph');if(!el)return;
+ const d=apoioHistoryData,period=apoioGraphPeriod(),start=apoioGraphStart(period),allowDaily=!['24h','48h'].includes(period);
+ const ledgerPoints=Array.isArray(d?.points)?d.points:[];
+ const manualPoints=Array.isArray(apoioData?.manualHistory)?apoioData.manualHistory:[];
+ // Os registros mantidos no snapshot manual continuam úteis se o ledger KV estiver pending.
+ // Deduplicação pelo ID da importação, mantendo o registro do ledger se existir.
+ const entries=new Map();
+ for(const item of [...manualPoints,...ledgerPoints]){
+  const when=Date.parse(item?.importedAt||'');if(!Number.isFinite(when)||when<start)continue;
+  const key=String(item?.sourceVersion||item?.importedAt);
+  entries.set(key,item);
+ }
+ const points=[...entries.values()].sort((a,b)=>Date.parse(a.importedAt)-Date.parse(b.importedAt));
+ const daily=(Array.isArray(d?.daily)&&d.daily.length?d.daily:(Array.isArray(apoioData?.manualDaily)?apoioData.manualDaily:[]));
+ const parsedDaily=allowDaily?daily.map(x=>{
+  const m=String(x?.date||'').match(/^(\d{2})\/(\d{2})(?:\/(\d{4}))?$/);if(!m)return null;
+  const y=Number(m[3]||2026),mo=Number(m[2]),day=Number(m[1]);
+  const local=new Date(y,mo-1,day);if(local.getFullYear()!==y||local.getMonth()!==mo-1||local.getDate()!==day)return null;
+  const value=x.posts==null?NaN:Number(x.posts);
+  return {at:local.getTime(),label:String(x.date),value};
+ }).filter(x=>x&&Number.isFinite(x.value)&&x.value>=0&&x.at>=start).sort((a,b)=>a.at-b.at):[];
+ const dailyPoints=[...new Map(parsedDaily.map(x=>[x.at,x])).values()];
+ const note=getEl('apoioHistoryEvidence');
+ if(note){
+  const recovered=points.filter(x=>!ledgerPoints.some(y=>String(y?.sourceVersion||y?.importedAt)===String(x?.sourceVersion||x?.importedAt))).length;
+  note.textContent=`${points.length} importação(ões) documentada(s) no recorte${recovered?' · '+recovered+' recuperada(s) do snapshot manual':''} · ${dailyPoints.length} dia(s) com totais de publicações. O gráfico começa em 7 dias e tem período próprio; importações e totais diários são medições diferentes.`;
+ }
+ if(!points.length&&!dailyPoints.length){el.innerHTML='<p class="apoio-empty">Ainda não há observações documentadas neste intervalo. Nenhum valor é estimado ou interpolado.</p>';return;}
+ const useDaily=dailyPoints.length>0;
+ const source=useDaily?dailyPoints:points.map(x=>({at:Date.parse(x.importedAt),label:formatDateTime(x.importedAt),value:x.metrics?.posts24h??x.engagement?.posts??null})).filter(x=>x.value!=null&&Number.isFinite(Number(x.value))&&Number(x.value)>=0).map(x=>({...x,value:Number(x.value)}));
+ if(!source.length){el.innerHTML='<p class="apoio-empty">Há importações registradas, mas seus totais de publicações não estão disponíveis para o gráfico.</p>';return;}
  const max=Math.max(1,...source.map(x=>x.value)),W=900,H=235,L=53,R=18,T=18,B=44;
- const x=i=>L+i*(W-L-R)/Math.max(1,source.length-1),y=v=>T+(H-T-B)*(1-v/max);
- let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução documentada de publicações no período">`;
- for(let k=0;k<=4;k++){const yy=T+k*(H-T-B)/4;svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="uf-grid"/><text x="${L-8}" y="${yy+4}" class="uf-axis" text-anchor="end">${Math.round(max*(4-k)/4)}</text>`;}
- svg+=`<polyline fill="none" stroke="#154b8b" stroke-width="3" points="${source.map((d,i)=>x(i)+','+y(d.value)).join(' ')}"/>`;
- source.forEach((d,i)=>{svg+=`<circle cx="${x(i)}" cy="${y(d.value)}" r="4" fill="#154b8b"><title>${apoioEsc(d.label)}: ${apoioNum(d.value)} publicações</title></circle>`;if(source.length<=14||i%Math.ceil(source.length/12)===0)svg+=`<text x="${x(i)}" y="${H-14}" class="uf-axis" text-anchor="middle">${apoioEsc(d.label)}</text>`;});
+ const X=i=>L+i*(W-L-R)/Math.max(1,source.length-1),Y=v=>T+(H-T-B)*(1-v/max);
+ let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${useDaily?'Publicações registradas por dia':'Publicações reportadas em cada importação'} no período selecionado">`;
+ for(let k=0;k<=4;k++){const y=T+k*(H-T-B)/4;svg+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" class="uf-grid"/><text x="${L-8}" y="${y+4}" class="uf-axis" text-anchor="end">${Math.round(max*(4-k)/4)}</text>`;}
+ if(source.length>1)svg+=`<polyline fill="none" stroke="#154b8b" stroke-width="3" points="${source.map((d,i)=>X(i)+','+Y(d.value)).join(' ')}"/>`;
+ source.forEach((d,i)=>{svg+=`<circle cx="${X(i)}" cy="${Y(d.value)}" r="4" fill="#154b8b"><title>${apoioEsc(d.label)}: ${apoioNum(d.value)} publicações</title></circle>`;if(source.length<=14||i%Math.ceil(source.length/12)===0)svg+=`<text x="${X(i)}" y="${H-14}" class="uf-axis" text-anchor="middle">${apoioEsc(d.label)}</text>`;});
  el.innerHTML=svg+'</svg>';
 }
+
 function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioSortPeople(apoioFilteredPeople()),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();renderApoioHistoryGraph();apoioRenderCriteria();const from=(apoioPage-1)*APOIO_PAGE_SIZE,pageRows=rows.slice(from,from+APOIO_PAGE_SIZE);apoioSet('apoioCount',rows.length?`${apoioNum(from+1)}–${apoioNum(Math.min(from+APOIO_PAGE_SIZE,rows.length))} de ${apoioNum(rows.length)} pessoas`:'0 pessoas');people.innerHTML=pageRows.length?pageRows.map(p=>apoioPersonCard(p,f)).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';apoioPage=apoioPaginationHtml('apoioPagination',rows.length,apoioPage,APOIO_PAGE_SIZE,n=>{apoioPage=n;renderApoio();document.getElementById('apoioPeople')?.scrollIntoView({behavior:'smooth',block:'start'});});const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));const pf=(apoioPostsPage-1)*APOIO_POST_PAGE_SIZE,pr=sorted.slice(pf,pf+APOIO_POST_PAGE_SIZE);posts.innerHTML=pr.length?pr.map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';apoioPostsPage=apoioPaginationHtml('apoioPostsPagination',sorted.length,apoioPostsPage,APOIO_POST_PAGE_SIZE,n=>{apoioPostsPage=n;renderApoio();document.getElementById('apoioPosts')?.scrollIntoView({behavior:'smooth',block:'start'});});}
 async function loadApoio(force=false){if(apoioLoaded&&!force&&Date.now()-apoioLastLoadedAt<300000){renderApoio();return apoioData;}if(apoioLoading&&!force)return apoioLoading;apoioSet('apoioStatus','CONSULTANDO FONTE');apoioSet('apoioNotice','Consultando o snapshot validado da fonte externa…');apoioLoading=(async()=>{try{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);let res;try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store',headers:{accept:'application/json'}});}finally{clearTimeout(timer);}const d=await res.json();if(!res.ok||!Array.isArray(d.people))throw Error(d?.message||`HTTP ${res.status}`);apoioData=d;
     // V1.6.11 — modo manual: evidência observada, sem inferir classificação.
@@ -11445,6 +11483,7 @@ async function loadApoio(force=false){if(apoioLoaded&&!force&&Date.now()-apoioLa
 apoioLoaded=true;apoioLastLoadedAt=Date.now();apoioSet('apoioStatus',d.manualImport?'SNAPSHOT MANUAL VALIDADO':(d.status==='ok'?'DADOS SINCRONIZADOS':'ÚLTIMA CÓPIA VÁLIDA'));apoioSet('apoioNotice',d.message||'Classificações reproduzidas da fonte; silêncio não é interpretado como oposição.');apoioPopulate('apoioParty',d.people.map(p=>p.party),'Todos');apoioPopulate('apoioRole',d.people.map(p=>p.role),'Todos');apoioPopulate('apoioState',d.people.map(p=>p.uf),'Todas');apoioPopulate('apoioTerritoryUf',d.people.map(p=>p.uf),'Todas');renderApoio();return d;}catch(e){console.error('[Radar Apoio] Falha ao carregar',e);apoioSet('apoioStatus','FONTE INDISPONÍVEL');apoioSet('apoioNotice',`Não foi possível consultar a fonte agora (${e?.message||'erro desconhecido'}).`);renderApoio();return null;}finally{apoioLoading=null;}})();return apoioLoading;}
 function initApoio(){const root=document.getElementById('panel-apoio');if(!root)return;if(!root.dataset.apoioBound){root.dataset.apoioBound='1';root.querySelectorAll('#apoioKind button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioKind button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioKind=b.dataset.v;apoioPage=1;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioPostTabs button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioPostTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioPostTab=b.dataset.v;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioUfMode button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioUfMode button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioUfMode=b.dataset.v;apoioRenderUfChart();}));document.getElementById('apoioTerritoryUf')?.addEventListener('change',e=>{apoioTerritoryUf=e.target.value||'all';apoioRenderUfChart();});['apoioParty','apoioRole','apoioState','apoioNetwork','apoioSort'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();}));document.getElementById('apoioName')?.addEventListener('input',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();});}loadApoio();loadApoioHistory();}
 document.getElementById('apoioRefreshHistory')?.addEventListener('click',()=>{apoioLoaded=false;loadApoio(true);loadApoioHistory(true);});
+document.getElementById('apoioHistoryWindow')?.addEventListener('change',()=>loadApoioHistory());
 function bootstrapApoioIfActive(){const root=document.getElementById('panel-apoio');if(root?.classList.contains('active')||root?.classList.contains('is-active'))initApoio();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootstrapApoioIfActive,{once:true});else bootstrapApoioIfActive();
 
