@@ -1270,3 +1270,11 @@ html{font-size:var(--base-font-size)}
 @media(max-width:640px){.radar-state-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.radar-state-filters label{min-width:0}.radar-state-filters button{grid-column:1/-1}}
 
 .radar-state-evidence{margin-top:.75rem;font-size:.72rem}.radar-state-evidence summary{font-weight:750}.radar-state-evidence ul{padding-left:1.3rem;list-style:disc;max-height:250px;overflow:auto}.radar-state-evidence li{margin:.2rem 0}.radar-state-evidence a{color:#1d4ed8;text-decoration:underline}
+/* V1.6.13.15 — Apoio: botão compacto e período independente do gráfico */
+#panel-apoio .apoio-header-actions{display:flex;align-items:center;justify-content:flex-end;flex:0 0 auto;gap:.6rem;flex-wrap:wrap}
+#panel-apoio #apoioRefreshHistory{display:inline-flex;align-items:center;justify-content:center;width:auto!important;min-width:0!important;min-height:34px;flex:0 0 auto;padding:.4rem .8rem;font-size:.73rem;font-weight:750;line-height:1.2;white-space:nowrap;border-radius:.55rem}
+#panel-apoio .apoio-history-window-label{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;color:var(--muted);font-size:.73rem;font-weight:750}
+#panel-apoio #apoioHistoryWindow{width:auto;max-width:100%;min-height:34px;padding:.35rem 1.7rem .35rem .6rem;border:1px solid var(--line);border-radius:.55rem;background:var(--panel);color:var(--ink);font-size:.76rem;font-weight:750;line-height:1.3;cursor:pointer}
+#panel-apoio #apoioHistoryWindow:focus-visible,#panel-apoio #apoioRefreshHistory:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.dark #panel-apoio #apoioHistoryWindow{background:#15243b;color:#e2e8f0;border-color:#45576d}
+@media(max-width:720px){#panel-apoio .apoio-header-actions{justify-content:flex-start;width:100%}#panel-apoio .apoio-history-window-label{justify-content:flex-start}}
