@@ -67,6 +67,7 @@ let disinfoOfficial = null;
 let disinfoOfficialLoading = null;
 let disinfoOfficialAttempted = false;
 let disinfoOfficialRetryAfter = 0;
+let disinfoOfficialFetchedAt=0;
 
 let liveStatus = null;
 let liveCoverageMovement = null;
@@ -74,10 +75,12 @@ let liveCoverageMovement = null;
 
 
 let filteredNews = [];
+let radarArchivedNews=[];let radarNewsHistoryFetched="";let radarNewsHistoryAt=0;let radarNewsHistoryBusy=false;
 
 let liveVideos = [];
 
 let videoScopeLoaded = null;
+let videoLastLoadedAt=0;let videoLastFetchedAt=null;
 
 let videoLoading = false;
 
@@ -1764,6 +1767,7 @@ async function loadRadarNews() {
     renderRealData();
 
     applyRadarFilters();
+    loadRadarNewsHistory().catch(()=>{});
 
 
 
@@ -6005,6 +6009,31 @@ function hasActiveFilters() {
 
 
 
+
+// Histórico incremental no KV; filtros globais usam notícias atuais + arquivo deduplicado.
+async function loadRadarNewsHistory(force=false){
+ const period=getEl('period')?.value||'24h';
+ // 24h também consulta o arquivo, pois o RSS corrente pode conter apenas um recorte.
+ if(radarNewsHistoryBusy)return;
+ if(!force&&radarNewsHistoryFetched===period&&Date.now()-radarNewsHistoryAt<300000)return;
+ radarNewsHistoryBusy=true;
+ try{
+  const r=await fetch(`${RADAR_API.baseUrl}/api/news/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});
+  if(!r.ok)throw Error(`HTTP ${r.status}`);
+  const d=await r.json();
+  radarArchivedNews=(d.items||[]).map(a=>({...a,publisher:a.publisher||a.source||'Fonte',mentions:a.mentions||{flavio:false,lula:false}}));
+  radarNewsHistoryFetched=period;radarNewsHistoryAt=Date.now();
+  const hint=getEl('radarHistoryEvidence');if(hint)hint.textContent=d.historyActive?`Arquivo incremental: ${d.count||0} notícias no período (desde a ativação do histórico).`:'Histórico em formação: notícias anteriores à ativação não podem ser reconstruídas automaticamente.';
+  if(liveNews)applyRadarFilters();
+ }catch(e){const hint=getEl('radarHistoryEvidence');if(hint)hint.textContent='Arquivo histórico temporariamente indisponível; mostrando notícias em cache.';}
+ finally{radarNewsHistoryBusy=false;}
+}
+function radarCombinedNews(){
+ const a=Array.isArray(liveNews)?liveNews:[],b=radarArchivedNews||[],unique=new Map();
+ for(const x of [...b,...a]){const id=String(x.url||x.title||'');if(id)unique.set(id,x);}
+ return [...unique.values()];
+}
+
 function applyRadarFilters() {
 
 
@@ -6091,7 +6120,7 @@ function applyRadarFilters() {
 
   filteredNews =
 
-    liveNews.filter(
+    radarCombinedNews().filter(
 
       article => {
 
@@ -6381,28 +6410,38 @@ function disinfoPublisher(article) {
 
 async function loadDisinfoOfficial(force=false){
  const now=Date.now();
- if(disinfoOfficial&&!force){renderDisinfo();return disinfoOfficial;}
+ if(disinfoOfficial&&!force&&now-disinfoOfficialFetchedAt<300000){renderDisinfo();return disinfoOfficial;}
  if(disinfoOfficialLoading&&!force)return disinfoOfficialLoading;
  if(!force&&disinfoOfficialAttempted&&now<disinfoOfficialRetryAfter)return disinfoOfficial;
  disinfoOfficialAttempted=true;
- disinfoOfficialLoading=(async()=>{try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo`,{cache:'no-store'});const d=await r.json().catch(()=>null);if(r.ok&&d&&(d.status==='ok'||d.status==='stale'||d.status==='degraded'||d.status==='error')){disinfoOfficial=d;disinfoOfficialRetryAfter=0;}else{disinfoOfficialRetryAfter=Date.now()+5*60*1000;}}catch(e){disinfoOfficialRetryAfter=Date.now()+5*60*1000;}finally{disinfoOfficialLoading=null;renderDisinfo();}})();
+ disinfoOfficialLoading=(async()=>{try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo`,{cache:'no-store'});const d=await r.json().catch(()=>null);if(r.ok&&d&&(d.status==='ok'||d.status==='stale'||d.status==='degraded'||d.status==='error')){if(!disinfoOfficial?.checks?.items?.length||d.checks?.items?.length)disinfoOfficial=d;disinfoOfficialFetchedAt=Date.now();disinfoOfficialRetryAfter=0;}else{disinfoOfficialRetryAfter=Date.now()+5*60*1000;}}catch(e){disinfoOfficialRetryAfter=Date.now()+5*60*1000;}finally{disinfoOfficialLoading=null;renderDisinfo();}})();
  return disinfoOfficialLoading;
 }
 let disinfoPage=1; const DISINFO_PAGE_SIZE=12;
+let disinfoHistoricRows=[];let disinfoHistoricalAt=0;let disinfoHistoricalPeriod='';
+async function loadDisinfoHistory(force=false){
+ const period=getEl('period')?.value||'24h';if(!force&&period===disinfoHistoricalPeriod&&Date.now()-disinfoHistoricalAt<180000)return;
+ try{const r=await fetch(`${RADAR_API.baseUrl}/api/disinfo/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();
+  disinfoHistoricRows=Array.isArray(d.items)?d.items:[];disinfoHistoricalPeriod=period;disinfoHistoricalAt=Date.now();
+  const note=getEl('disinfoHistoryStatus');if(note)note.textContent=d.historyActive?`Histórico incremental · ${d.count||0} registros documentados no arquivo (não são vereditos de falsidade)`:'Histórico em formação · não retroativo';
+  renderDisinfo();
+ }catch(e){const note=getEl('disinfoHistoryStatus');if(note)note.textContent='Histórico temporariamente indisponível; corpus atual preservado.';}
+}
+
 function renderDisinfo(){
  const stats=getEl('disinfoStats'),list=getEl('disinfoList');if(!stats||!list)return;
  if(!disinfoOfficial&&!disinfoOfficialLoading&&!disinfoOfficialAttempted)loadDisinfoOfficial();
- const all=Array.isArray(liveNews)?liveNews:[], official=disinfoOfficial?.checks?.items||[];
+ const all=radarCombinedNews(), official=disinfoOfficial?.checks?.items||[];
  const scope=getEl('disinfoScope')?.value||'all', globalPeriod=getEl('period')?.value||'24h', electionStart=Date.parse('2026-08-16T03:00:00.000Z'),hours=radarPeriodHours(globalPeriod),since=globalPeriod==='election'?electionStart:Date.now()-hours*3600000;
  const matchScope=a=>{const body=normalizeText([a.title,a.subtitle,a.description].join(' '));const f=/flavio bolsonaro/.test(body),l=/(^|\W)lula(\W|$)|luiz inacio lula/.test(body);return scope==='all'||(scope==='flavio'&&f)||(scope==='lula'&&l)||(scope==='both'&&f&&l);};
  const officialRows=official.filter(a=>Date.parse(a.publishedAt)>=since&&matchScope(a)).map(a=>({...a,_disinfoType:'checks',publisher:a.source||'Fato ou Boato — Justiça Eleitoral'}));
- const rssRows=all.filter(a=>{const d=validDate(a.publishedAt);return d&&d.getTime()>=since&&matchScope(a);}).map(a=>{const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));return {...a,_disinfoType:DISINFO_CHECK.test(body)?'checks':'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
- const seen=new Set(officialRows.map(x=>normalizeText(x.title)));const rssUnique=rssRows.filter(x=>!seen.has(normalizeText(x.title)));const combined=[...officialRows,...rssUnique];
+ const rssRows=[...all,...disinfoHistoricRows].filter(a=>{const d=validDate(a.publishedAt);return d&&d.getTime()>=since&&matchScope(a);}).map(a=>{const body=normalizeText([a.title,a.subtitle,a.description].filter(Boolean).join(' '));return {...a,_disinfoType:'claims',_disinfoBody:body};}).filter(a=>DISINFO_TERMS.test(a._disinfoBody));
+ const seen=new Set(officialRows.map(x=>String(x.url||'')||normalizeText(x.title)));const rssUnique=rssRows.filter(x=>{const key=String(x.url||'')||normalizeText(x.title);if(seen.has(key))return false;seen.add(key);return true;});const combined=[...officialRows,...rssUnique];
  const rawTotal=disinfoOfficial?.checks?.total,rawRecent7=disinfoOfficial?.checks?.recent7d,totalVerified=rawTotal==null?null:Number(rawTotal),recent7=rawRecent7==null?null:Number(rawRecent7),siade=Number(disinfoOfficial?.siade?.alerts||0),sources=new Set(combined.map(x=>x.publisher||disinfoPublisher(x)).filter(Boolean)).size;
  stats.innerHTML=[["Checagens verificadas",totalVerified,'checks'],["Novas em 7 dias",recent7,'checks'],["Alertas SIADE",siade,null],["Fontes de evidência",Math.max(sources,Number(disinfoOfficial?.sources?.length||0)),null]].map(([name,num,type])=>`<div class="disinfo-stat" ${type?`role="button" tabindex="0" data-disinfo-type="${type}"`:''}><span>${escapeHTML(name)}</span><strong>${num==null?'—':formatNumber(num)}</strong><small>${name==='Alertas SIADE'?'apontamentos · até 14/10':'base 2026'}</small></div>`).join('');
  const q=normalizeText(getEl('disinfoSearch')?.value||''),type=getEl('disinfoType')?.value||'all',sort=getEl('disinfoSort')?.value||'recent';let selected=combined.filter(a=>(type==='all'||a._disinfoType===type)&&(!q||normalizeText([a.title,a.publisher,a.source,a.subtitle,a.description].join(' ')).includes(q)));
  selected.sort((a,b)=>sort==='source'?String(a.publisher||disinfoPublisher(a)).localeCompare(String(b.publisher||disinfoPublisher(b)),'pt-BR'):Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0));
- const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=disinfoOfficial?(totalVerified==null?`T0 histórico aguardando carga válida · ${siade.toLocaleString('pt-BR')} apontamentos SIADE preservados. Alertas não equivalem a casos confirmados.`:`${totalVerified} checagens históricas documentadas · ${recent7} nos últimos 7 dias · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`):'Carregando base histórica verificada…';
+ const hint=getEl('disinfoDiagnostics');if(hint)hint.textContent=disinfoOfficial?(totalVerified==null?`Checagens oficiais ainda indisponíveis · ${disinfoHistoricRows.length} registros de cobertura arquivados no período · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`:`${totalVerified} checagens históricas documentadas · ${recent7} nos últimos 7 dias · ${siade.toLocaleString('pt-BR')} apontamentos SIADE. Alertas não equivalem a casos confirmados.`):'Carregando base histórica verificada…';
  const totalPages=Math.max(1,Math.ceil(selected.length/DISINFO_PAGE_SIZE));disinfoPage=Math.min(disinfoPage,totalPages);const pageStart=(disinfoPage-1)*DISINFO_PAGE_SIZE,selectedPage=selected.slice(pageStart,pageStart+DISINFO_PAGE_SIZE);
  list.innerHTML=selectedPage.length?selectedPage.map(a=>{const label=a._disinfoType==='checks'?'Checagem verificada':'Alegação ou alerta',name=a.publisher||disinfoPublisher(a),url=String(a.url||a.link||''),safe=/^https?:\/\//i.test(url)?escapeHTML(url):'',excerpt=String(a.subtitle||a.description||'').trim();return `<article class="disinfo-item"><div class="disinfo-meta"><span>${escapeHTML(name)} · ${escapeHTML(formatDateTime(a.publishedAt))}</span><span class="disinfo-badge">${escapeHTML(label)}</span></div><h4>${escapeHTML(a.title||'Sem título')}</h4>${excerpt?`<p>${escapeHTML(excerpt.slice(0,230))}</p>`:''}${safe?`<a href="${safe}" target="_blank" rel="noopener noreferrer">Ler publicação ↗</a>`:''}</article>`;}).join(''):'<p class="disinfo-empty">Nenhum registro encontrado neste recorte. Isso não significa ausência de desinformação.</p>';
  const pag=getEl('disinfoPagination');if(pag){let nums=[];for(let i=Math.max(1,disinfoPage-2);i<=Math.min(totalPages,disinfoPage+2);i++)nums.push(i);pag.innerHTML=selected.length>DISINFO_PAGE_SIZE?`<button ${disinfoPage===1?'disabled':''} data-dispage="${disinfoPage-1}">Anterior</button>${nums.map(i=>`<button class="${i===disinfoPage?'active':''}" data-dispage="${i}">${i}</button>`).join('')}<button ${disinfoPage===totalPages?'disabled':''} data-dispage="${disinfoPage+1}">Próximo</button>`:'';pag.querySelectorAll('button[data-dispage]').forEach(b=>b.addEventListener('click',()=>{disinfoPage=Number(b.dataset.dispage)||1;renderDisinfo();}));}
@@ -6425,7 +6464,7 @@ const DISINFO_PERIOD_LABELS={
 function syncDisinfoPeriodUI(){
  const p=getEl('period')?.value||'24h'; const lg=(document.documentElement.lang||'pt').slice(0,2);
  const label=getEl('disinfoPeriodLabel'); if(label)label.textContent=(DISINFO_PERIOD_LABELS[lg]||DISINFO_PERIOD_LABELS.pt)[p]||p;
- const status=getEl('disinfoHistoryStatus'); if(status)status.textContent=lg==='en'?'History prepared · activation at the initial snapshot':lg==='es'?'Histórico preparado · activación en el snapshot inicial':'Base histórica verificada · atualização nos checkpoints';
+ const status=getEl('disinfoHistoryStatus'); if(status&&!disinfoHistoricalAt)status.textContent='Histórico incremental em formação; verificação documental separada de notícias RSS.';
 }
 document.addEventListener('change',e=>{if(e.target?.id==='period'){syncDisinfoPeriodUI();renderDisinfo();}});
 document.addEventListener('click',e=>{if(e.target?.closest?.('[data-lang]'))setTimeout(syncDisinfoPeriodUI,0);});
@@ -7295,7 +7334,9 @@ async function loadYouTubeVideos(force = false) {
 
   const scope = currentVideoScope();
 
-  if (!force && videoScopeLoaded === scope && liveVideos.length) { renderYouTubeVideos(); return; }
+  const globalPeriod = getEl("period")?.value || getEl("periodFilter")?.value || "24h";
+  const cacheKey=scope+":"+globalPeriod;
+  if (!force && videoScopeLoaded === cacheKey && liveVideos.length && Date.now()-videoLastLoadedAt<180000) { renderYouTubeVideos(); return; }
 
   videoLoading = true;
 
@@ -7303,7 +7344,6 @@ async function loadYouTubeVideos(force = false) {
 
   try {
 
-    const globalPeriod = getEl("period")?.value || getEl("periodFilter")?.value || "24h";
     const response = await fetch(`${RADAR_API.baseUrl}${RADAR_API.endpoints.youtube}?scope=${encodeURIComponent(scope)}&period=${encodeURIComponent(globalPeriod)}`, { cache: "no-store" });
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -7312,9 +7352,19 @@ async function loadYouTubeVideos(force = false) {
 
     if (data.status !== "ok") throw new Error(data.message || "YouTube indisponível");
 
-    liveVideos = (Array.isArray(data.videos) ? data.videos : []).map(video => ({ ...video, _frame: classifyVideoFrame(video) }));
-
-    videoScopeLoaded = scope;
+    let allVideos=Array.isArray(data.videos)?data.videos:[];
+    let observations=0;
+    try{
+      const h=await fetch(`${RADAR_API.baseUrl}/api/videos/history?scope=${encodeURIComponent(scope)}&period=${encodeURIComponent(globalPeriod)}`,{cache:'no-store'});
+      if(h.ok){const archive=await h.json();observations=Number(archive.observations?.length||0);
+        const merged=new Map((archive.videos||[]).map(v=>[v.id,v]));for(const v of allVideos)merged.set(v.id,v);
+        allVideos=[...merged.values()].filter(v=>{const start=radarPeriodStart(globalPeriod);return Number.isFinite(Date.parse(v.publishedAt||''))&&Date.parse(v.publishedAt)>=start;});
+      }
+    }catch(e){console.warn('[Video history] usando vídeos atuais',String(e));}
+    liveVideos=allVideos.map(video=>({...video,_frame:classifyVideoFrame(video)}));
+    videoLastLoadedAt=Date.now();videoLastFetchedAt=data.fetchedAt||null;
+    const videoHistoryStatus=getEl('videoHistoryStatus');if(videoHistoryStatus)videoHistoryStatus.textContent=`Última coleta: ${formatDateTime(videoLastFetchedAt)} · ${observations} observação(ões) histórica(s) no período${data.stale?' · último snapshot válido':''}.`;
+    videoScopeLoaded = cacheKey;
 
     renderYouTubeVideos(data);
 
@@ -9736,7 +9786,8 @@ function openTab(name) {
 
 
 
-  if (name === "disinfo") { loadDisinfoOfficial(); renderDisinfo(); }
+  if (name === "disinfo") { loadDisinfoOfficial(); loadDisinfoHistory(); renderDisinfo(); }
+  if (name === "videos") loadYouTubeVideos();
 
   if (name === "apoio") initApoio();
 
@@ -11223,7 +11274,7 @@ function apoioPhotoStyle(sq){const i=APOIO_PHOTO_INDEX.get(String(sq||'').trim()
 // APOIO V1.4 — snapshot normalizado do Flaviômetro, sem D1
 const APOIO_NETWORKS={instagram:'Instagram',facebook:'Facebook',x:'X / Twitter',tiktok:'TikTok',youtube:'YouTube',threads:'Threads',kwai:'Kwai',telegram:'Telegram'};
 const APOIO_STATUS={vote:'Pediu voto',mention:'Falou',silent:'Não falou',off:'Sem postar',nored:'Sem coleta',unclassified:'Post recente'};
-let apoioData={people:[],posts:[],metrics:{}},apoioKind='all',apoioPostTab='recent',apoioLoaded=false,apoioLoading=null,apoioPage=1,apoioPostsPage=1,apoioUfMode='top5',apoioTerritoryUf='all';const APOIO_PAGE_SIZE=24,APOIO_POST_PAGE_SIZE=12;
+let apoioData={people:[],posts:[],metrics:{}},apoioKind='all',apoioPostTab='recent',apoioLoaded=false,apoioLoading=null,apoioPage=1,apoioPostsPage=1,apoioUfMode='top5',apoioTerritoryUf='all';let apoioLastLoadedAt=0;const APOIO_PAGE_SIZE=24,APOIO_POST_PAGE_SIZE=12;
 function apoioEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function apoioNum(v){return Number.isFinite(Number(v))?Number(v).toLocaleString(lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR'):'—';}
 function apoioSet(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
@@ -11241,7 +11292,19 @@ function apoioFilteredPeople(){const f=apoioFilters();return apoioBasePeople().f
 function apoioFilteredPosts(){const f=apoioFilters();return apoioData.posts.filter(p=>(apoioKind==='all'||apoioKind==='observed')&&(f.party==='all'||p.party===f.party)&&(f.role==='all'||p.role===f.role)&&(f.uf==='all'||p.uf===f.uf)&&(f.network==='all'||p.network===f.network)&&String(p.name||'').toLocaleLowerCase(lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR').includes(f.name));}
 function apoioPopulate(id,values,allLabel){const el=document.getElementById(id);if(!el)return;const old=el.value;el.replaceChildren(new Option(allLabel,'all'));[...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(x=>el.add(new Option(x,x)));el.value=[...el.options].some(x=>x.value===old)?old:'all';}
 function apoioRenderSummaries(){const f=apoioFilters(),base=apoioBasePeople(),counts={vote:0,mention:0,silent:0,off:0,nored:0};base.forEach(p=>counts[apoioPersonStatus(p,f.network)]++);const manual=apoioData?.manualImport===true&&f.party==='all'&&f.role==='all'&&f.uf==='all'&&f.network==='all'&&!f.name;apoioSet('apoioKpiTotal',apoioNum(manual?apoioData.metrics?.total:base.length));apoioSet('apoioKpiSpoke',apoioNum(manual?apoioData.metrics?.spoke:counts.vote+counts.mention));apoioSet('apoioKpiVote',apoioNum(manual?apoioData.metrics?.vote:counts.vote));apoioSet('apoioKpi72',manual?(apoioData.metrics?.mentions5d==null?'—':apoioNum(apoioData.metrics.mentions5d)):apoioNum(base.reduce((n,p)=>n+(Number(p.mentions5d??p.mentions72h)||0),0)));const ps=apoioFilteredPosts().filter(p=>Number(p.date)>=Number(apoioData.window?.from24||0));apoioSet('apoioKpiViews',apoioNum(manual?apoioData.metrics?.views24h:ps.reduce((n,p)=>n+(Number(p.views)||0),0)));apoioRenderUfChart();}
-function apoioRenderUfChart(){const el=document.getElementById('apoioUfChart');if(!el)return;const posts=apoioFilteredPosts().filter(p=>p.uf&&p.date);const to=Number(apoioData.window?.to)||Date.now(),day=86400000,days=Array.from({length:5},(_,i)=>{const d=new Date(to-(4-i)*day);return {key:new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(),label:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})};});const by={};for(const p of posts){const d=new Date(Number(p.date)),k=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();by[p.uf] ||= Object.fromEntries(days.map(x=>[x.key,0]));if(k in by[p.uf])by[p.uf][k]++;}let ufs=Object.keys(by).sort((a,b)=>Object.values(by[b]).reduce((x,y)=>x+y,0)-Object.values(by[a]).reduce((x,y)=>x+y,0));if(apoioTerritoryUf!=='all')ufs=ufs.filter(uf=>uf===apoioTerritoryUf);else if(apoioUfMode==='top5')ufs=ufs.slice(0,5);if(!ufs.length){el.innerHTML='<div class="apoio-empty">Sem ações por UF neste recorte.</div>';return;}const W=920,H=260,padL=42,padR=18,padT=18,padB=42,max=Math.max(1,...ufs.flatMap(uf=>days.map(d=>by[uf][d.key]||0))),colors=['#0f5b9d','#dc2626','#12816d','#8b5cf6','#d97706','#0891b2','#be185d','#4f46e5','#65a30d','#9333ea','#ea580c','#0284c7','#16a34a','#7c3aed','#c2410c','#0369a1','#15803d','#6d28d9','#b91c1c','#0f766e','#a16207','#1d4ed8','#047857','#9f1239','#4338ca','#854d0e','#334155'];const x=i=>padL+i*((W-padL-padR)/4),y=v=>padT+(H-padT-padB)*(1-v/max);let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ações por UF nos últimos cinco dias">`;for(let g=0;g<=4;g++){const yy=padT+g*(H-padT-padB)/4;svg+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" class="uf-grid"/><text x="${padL-8}" y="${yy+4}" text-anchor="end" class="uf-axis">${Math.round(max*(4-g)/4)}</text>`;}days.forEach((d,i)=>svg+=`<text x="${x(i)}" y="${H-14}" text-anchor="middle" class="uf-axis">${d.label}</text>`);ufs.forEach((uf,j)=>{const pts=days.map((d,i)=>`${x(i)},${y(by[uf][d.key]||0)}`).join(' ');svg+=`<polyline points="${pts}" fill="none" stroke="${colors[j%colors.length]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;days.forEach((d,i)=>svg+=`<circle cx="${x(i)}" cy="${y(by[uf][d.key]||0)}" r="3.5" fill="${colors[j%colors.length]}"><title>${uf} · ${d.label}: ${by[uf][d.key]||0}</title></circle>`);});svg+='</svg>';const legend=ufs.map((uf,j)=>`<span><i style="background:${colors[j%colors.length]}"></i>${apoioEsc(uf)} <b>${apoioNum(Object.values(by[uf]).reduce((a,b)=>a+b,0))}</b></span>`).join('');el.innerHTML=`${svg}<div class="apoio-uf-legend">${legend}</div>`;}
+function apoioRenderUfChart(){const el=document.getElementById('apoioUfChart');if(!el)return;
+ if(apoioData?.manualImport){
+  const posts=apoioFilteredPosts().filter(p=>/^[A-Z]{2}$/.test(String(p.uf||'')));
+  const counts=new Map();for(const p of posts)counts.set(p.uf,(counts.get(p.uf)||0)+1);
+  let selected=[...counts].sort((a,b)=>b[1]-a[1]);
+  if(apoioTerritoryUf!=='all')selected=selected.filter(([uf])=>uf===apoioTerritoryUf);
+  else if(apoioUfMode==='top5')selected=selected.slice(0,5);
+  if(!selected.length){el.innerHTML='<p class="apoio-empty">Nenhuma publicação identificada por UF nesta amostra.</p>';return;}
+  const max=Math.max(1,...selected.map(x=>x[1]));
+  el.innerHTML=`<div class="apoio-uf-sample">${selected.map(([uf,count])=>`<div class="apoio-uf-sample-row"><strong>${apoioEsc(uf)}</strong><div class="apoio-uf-sample-track"><span style="width:${Math.max(1,100*count/max)}%"></span></div><small>${apoioNum(count)}</small></div>`).join('')}</div><p class="radar-history-evidence">${apoioNum(posts.length)} posts detalhados na amostra; o agregado nacional da fonte não possui desagregação temporal confiável por UF.</p>`;
+  return;
+ }
+const posts=apoioFilteredPosts().filter(p=>p.uf&&p.date);const to=Number(apoioData.window?.to)||Date.now(),day=86400000,days=Array.from({length:5},(_,i)=>{const d=new Date(to-(4-i)*day);return {key:new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(),label:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})};});const by={};for(const p of posts){const d=new Date(Number(p.date)),k=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();by[p.uf] ||= Object.fromEntries(days.map(x=>[x.key,0]));if(k in by[p.uf])by[p.uf][k]++;}let ufs=Object.keys(by).sort((a,b)=>Object.values(by[b]).reduce((x,y)=>x+y,0)-Object.values(by[a]).reduce((x,y)=>x+y,0));if(apoioTerritoryUf!=='all')ufs=ufs.filter(uf=>uf===apoioTerritoryUf);else if(apoioUfMode==='top5')ufs=ufs.slice(0,5);if(!ufs.length){el.innerHTML='<div class="apoio-empty">Sem ações por UF neste recorte.</div>';return;}const W=920,H=260,padL=42,padR=18,padT=18,padB=42,max=Math.max(1,...ufs.flatMap(uf=>days.map(d=>by[uf][d.key]||0))),colors=['#0f5b9d','#dc2626','#12816d','#8b5cf6','#d97706','#0891b2','#be185d','#4f46e5','#65a30d','#9333ea','#ea580c','#0284c7','#16a34a','#7c3aed','#c2410c','#0369a1','#15803d','#6d28d9','#b91c1c','#0f766e','#a16207','#1d4ed8','#047857','#9f1239','#4338ca','#854d0e','#334155'];const x=i=>padL+i*((W-padL-padR)/4),y=v=>padT+(H-padT-padB)*(1-v/max);let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ações por UF nos últimos cinco dias">`;for(let g=0;g<=4;g++){const yy=padT+g*(H-padT-padB)/4;svg+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" class="uf-grid"/><text x="${padL-8}" y="${yy+4}" text-anchor="end" class="uf-axis">${Math.round(max*(4-g)/4)}</text>`;}days.forEach((d,i)=>svg+=`<text x="${x(i)}" y="${H-14}" text-anchor="middle" class="uf-axis">${d.label}</text>`);ufs.forEach((uf,j)=>{const pts=days.map((d,i)=>`${x(i)},${y(by[uf][d.key]||0)}`).join(' ');svg+=`<polyline points="${pts}" fill="none" stroke="${colors[j%colors.length]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;days.forEach((d,i)=>svg+=`<circle cx="${x(i)}" cy="${y(by[uf][d.key]||0)}" r="3.5" fill="${colors[j%colors.length]}"><title>${uf} · ${d.label}: ${by[uf][d.key]||0}</title></circle>`);});svg+='</svg>';const legend=ufs.map((uf,j)=>`<span><i style="background:${colors[j%colors.length]}"></i>${apoioEsc(uf)} <b>${apoioNum(Object.values(by[uf]).reduce((a,b)=>a+b,0))}</b></span>`).join('');el.innerHTML=`${svg}<div class="apoio-uf-legend">${legend}</div>`;}
 function apoioRenderCriteria(){const el=document.getElementById('apoioCriteriaPosts');if(!el)return;const rows=[...apoioFilteredPosts()].sort((a,b)=>Number(b.date)-Number(a.date)).slice(0,4);el.innerHTML=rows.length?rows.map(p=>`<article class="apoio-mini-post"><div><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind])}</span><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network)} · ${apoioAgo(p.date)}</small></div><p>${apoioEsc(p.text||'Publicação documentada pela fonte.')}</p>${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</article>`).join(''):'<div class="apoio-empty">Sem evidências neste recorte.</div>';}
 function apoioSortPeople(rows){
  const f=apoioFilters();
@@ -11304,8 +11367,33 @@ function apoioPersonCard(p,f){
  return `<article class="apoio-person-card state-${five}"><header>${avatar}<div class="apoio-person-id"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc([p.party,p.role,p.uf].filter(Boolean).join(' · '))}</small></div><span class="apoio-pill ${five}" title="Classificação observacional dos últimos 5 dias">${apoioEsc(label)}</span></header><div class="apoio-person-metrics"><div><strong>${apoioNum(obs5.length)}</strong><span>publicações observadas · 5 dias</span></div><div><strong>${apoioNum(obs24.length)}</strong><span>últimas 24 h</span></div><div><strong>${apoioEsc(latestMetric)}</strong><span>última evidência</span></div></div><div class="apoio-timeline" aria-label="Cobertura observacional dos últimos cinco dias">${apoioTimeline(p)}</div><div class="apoio-legend-mini"><span><i class="apoio-square observed"></i> Publicação observada</span><span><i class="apoio-square absent"></i> Publicação ausente</span><span><i class="apoio-square norecord"></i> Sem registro</span></div><div class="apoio-socials">${apoioSocialLinks(p)||`<span>${apoioT('noProfiles')}</span>`}</div>${lp?`<div class="apoio-last-post latest-evidence"><small>${evidenceTitle} · ${apoioEsc(APOIO_NETWORKS[lp.network]||lp.network||'Rede não identificada')} · ${apoioAgo(lp.date)}</small><p>${apoioEsc(lp.text||'')}</p>${lp.url?`<a href="${apoioEsc(lp.url)}" target="_blank" rel="noopener noreferrer">${apoioT('viewPost')}</a>`:''}</div>`:''}</article>`;
 }
 function apoioPaginationHtml(id,total,page,size,onPage){const el=document.getElementById(id);if(!el)return page;const pages=Math.max(1,Math.ceil(total/size));page=Math.min(page,pages);let nums=[];for(let i=Math.max(1,page-2);i<=Math.min(pages,page+2);i++)nums.push(i);el.innerHTML=`<button ${page===1?'disabled':''} data-page="${page-1}">${apoioT('previous')}</button>${page>3?'<span>…</span>':''}${nums.map(i=>`<button class="${i===page?'active':''}" data-page="${i}">${i}</button>`).join('')}${page<pages-2?'<span>…</span>':''}<button ${page===pages?'disabled':''} data-page="${page+1}">${apoioT('next')}</button>`;el.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click',()=>onPage(Number(b.dataset.page)||1)));return page;}
-function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioSortPeople(apoioFilteredPeople()),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();apoioRenderCriteria();const from=(apoioPage-1)*APOIO_PAGE_SIZE,pageRows=rows.slice(from,from+APOIO_PAGE_SIZE);apoioSet('apoioCount',rows.length?`${apoioNum(from+1)}–${apoioNum(Math.min(from+APOIO_PAGE_SIZE,rows.length))} de ${apoioNum(rows.length)} pessoas`:'0 pessoas');people.innerHTML=pageRows.length?pageRows.map(p=>apoioPersonCard(p,f)).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';apoioPage=apoioPaginationHtml('apoioPagination',rows.length,apoioPage,APOIO_PAGE_SIZE,n=>{apoioPage=n;renderApoio();document.getElementById('apoioPeople')?.scrollIntoView({behavior:'smooth',block:'start'});});const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));const pf=(apoioPostsPage-1)*APOIO_POST_PAGE_SIZE,pr=sorted.slice(pf,pf+APOIO_POST_PAGE_SIZE);posts.innerHTML=pr.length?pr.map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';apoioPostsPage=apoioPaginationHtml('apoioPostsPagination',sorted.length,apoioPostsPage,APOIO_POST_PAGE_SIZE,n=>{apoioPostsPage=n;renderApoio();document.getElementById('apoioPosts')?.scrollIntoView({behavior:'smooth',block:'start'});});}
-async function loadApoio(force=false){if(apoioLoaded&&!force){renderApoio();return apoioData;}if(apoioLoading&&!force)return apoioLoading;apoioSet('apoioStatus','CONSULTANDO FONTE');apoioSet('apoioNotice','Consultando o snapshot validado da fonte externa…');apoioLoading=(async()=>{try{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);let res;try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store',headers:{accept:'application/json'}});}finally{clearTimeout(timer);}const d=await res.json();if(!res.ok||!Array.isArray(d.people))throw Error(d?.message||`HTTP ${res.status}`);apoioData=d;
+let apoioHistoryData=null,apoioHistoryAt=0,apoioHistoryPeriod='';
+async function loadApoioHistory(force=false){
+ const period=getEl('period')?.value||'24h';if(!force&&period===apoioHistoryPeriod&&Date.now()-apoioHistoryAt<180000){renderApoioHistoryGraph();return;}
+ try{const r=await fetch(`${RADAR_API.baseUrl}/api/apoio/history?period=${encodeURIComponent(period)}`,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);apoioHistoryData=await r.json();apoioHistoryAt=Date.now();apoioHistoryPeriod=period;renderApoioHistoryGraph();}
+ catch(e){apoioHistoryData=null;renderApoioHistoryGraph();}
+}
+function renderApoioHistoryGraph(){
+ const el=document.getElementById('apoioHistoryGraph');if(!el)return;
+ const d=apoioHistoryData,period=getEl('period')?.value||'24h',start=radarPeriodStart(period);
+ const points=(d?.points||[]).filter(x=>Number.isFinite(Date.parse(x.importedAt||''))&&Date.parse(x.importedAt)>=start);
+ // For 24h/48h only real timestamped imports are valid. The manually supplied daily series is separate.
+ const daily=(d?.daily?.length?d.daily:apoioData?.manualDaily)||[];
+ const parsedDaily=daily.map(x=>{const m=String(x.date||'').match(/^(\d{2})\/(\d{2})(?:\/(\d{4}))?$/);if(!m)return null;const y=Number(m[3]||2026);const t=new Date(y,Number(m[2])-1,Number(m[1]),12,0,0).getTime();return {at:t,label:x.date,value:Number(x.posts)};}).filter(x=>x&&Number.isFinite(x.value)&&x.at>=start).sort((a,b)=>a.at-b.at);
+ const note=document.getElementById('apoioHistoryEvidence');
+ if(note)note.textContent=`${points.length} importação(ões) documentada(s) no período · série diária da última fonte: ${daily.length?daily[0].date+' a '+daily.at(-1).date:'não disponível'}. Os dois conjuntos não são equivalentes.`;
+ if(!points.length&&!parsedDaily.length){el.innerHTML='<p class="apoio-empty">Ainda não há observações suficientes neste intervalo. Cada nova importação confirmada acrescentará um ponto real; nada é interpolado.</p>';return;}
+ const source=parsedDaily.length?parsedDaily:points.map(x=>({at:Date.parse(x.importedAt),label:formatDateTime(x.importedAt),value:Number(x.metrics?.posts24h||0)}));
+ const max=Math.max(1,...source.map(x=>x.value)),W=900,H=235,L=53,R=18,T=18,B=44;
+ const x=i=>L+i*(W-L-R)/Math.max(1,source.length-1),y=v=>T+(H-T-B)*(1-v/max);
+ let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução documentada de publicações no período">`;
+ for(let k=0;k<=4;k++){const yy=T+k*(H-T-B)/4;svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="uf-grid"/><text x="${L-8}" y="${yy+4}" class="uf-axis" text-anchor="end">${Math.round(max*(4-k)/4)}</text>`;}
+ svg+=`<polyline fill="none" stroke="#154b8b" stroke-width="3" points="${source.map((d,i)=>x(i)+','+y(d.value)).join(' ')}"/>`;
+ source.forEach((d,i)=>{svg+=`<circle cx="${x(i)}" cy="${y(d.value)}" r="4" fill="#154b8b"><title>${apoioEsc(d.label)}: ${apoioNum(d.value)} publicações</title></circle>`;if(source.length<=14||i%Math.ceil(source.length/12)===0)svg+=`<text x="${x(i)}" y="${H-14}" class="uf-axis" text-anchor="middle">${apoioEsc(d.label)}</text>`;});
+ el.innerHTML=svg+'</svg>';
+}
+function renderApoio(){const people=document.getElementById('apoioPeople'),posts=document.getElementById('apoioPosts');if(!people||!posts)return;const f=apoioFilters(),rows=apoioSortPeople(apoioFilteredPeople()),filteredPosts=apoioFilteredPosts();apoioRenderSummaries();renderApoioHistoryGraph();apoioRenderCriteria();const from=(apoioPage-1)*APOIO_PAGE_SIZE,pageRows=rows.slice(from,from+APOIO_PAGE_SIZE);apoioSet('apoioCount',rows.length?`${apoioNum(from+1)}–${apoioNum(Math.min(from+APOIO_PAGE_SIZE,rows.length))} de ${apoioNum(rows.length)} pessoas`:'0 pessoas');people.innerHTML=pageRows.length?pageRows.map(p=>apoioPersonCard(p,f)).join(''):'<div class="apoio-empty">Sem registros para os filtros selecionados.</div>';apoioPage=apoioPaginationHtml('apoioPagination',rows.length,apoioPage,APOIO_PAGE_SIZE,n=>{apoioPage=n;renderApoio();document.getElementById('apoioPeople')?.scrollIntoView({behavior:'smooth',block:'start'});});const sorted=[...filteredPosts].sort((a,b)=>apoioPostTab==='engaged'?(Number(b.engagement||0)-Number(a.engagement||0)):(Number(b.date||0)-Number(a.date||0)));const pf=(apoioPostsPage-1)*APOIO_POST_PAGE_SIZE,pr=sorted.slice(pf,pf+APOIO_POST_PAGE_SIZE);posts.innerHTML=pr.length?pr.map(p=>`<article class="apoio-post"><div class="apoio-post-title"><strong>${apoioEsc(p.name)}</strong><small>${apoioEsc(APOIO_NETWORKS[p.network]||p.network||'Rede não identificada')}</small></div><p>${apoioEsc(p.text||'Publicação documentada na fonte.')}</p><footer><span class="apoio-pill ${p.kind}">${apoioEsc(APOIO_STATUS[p.kind]||p.kind)}</span><span>${p.date?new Date(p.date).toLocaleString('pt-BR'):''}</span>${p.views!=null?`<span>${apoioNum(p.views)} visualizações</span>`:''}${p.engagement?`<span>${apoioNum(p.engagement)} interações</span>`:''}${p.url?`<a href="${apoioEsc(p.url)}" target="_blank" rel="noopener noreferrer">Ver publicação original ↗</a>`:''}</footer></article>`).join(''):'<div class="apoio-empty">Nenhuma publicação classificada pela fonte para este recorte.</div>';apoioPostsPage=apoioPaginationHtml('apoioPostsPagination',sorted.length,apoioPostsPage,APOIO_POST_PAGE_SIZE,n=>{apoioPostsPage=n;renderApoio();document.getElementById('apoioPosts')?.scrollIntoView({behavior:'smooth',block:'start'});});}
+async function loadApoio(force=false){if(apoioLoaded&&!force&&Date.now()-apoioLastLoadedAt<300000){renderApoio();return apoioData;}if(apoioLoading&&!force)return apoioLoading;apoioSet('apoioStatus','CONSULTANDO FONTE');apoioSet('apoioNotice','Consultando o snapshot validado da fonte externa…');apoioLoading=(async()=>{try{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);let res;try{res=await fetch(`${RADAR_API.baseUrl}/api/apoio`,{signal:ctl.signal,cache:'no-store',headers:{accept:'application/json'}});}finally{clearTimeout(timer);}const d=await res.json();if(!res.ok||!Array.isArray(d.people))throw Error(d?.message||`HTTP ${res.status}`);apoioData=d;
     // V1.6.11 — modo manual: evidência observada, sem inferir classificação.
     if(d?.manualImport){
       const importedPosts=Array.isArray(d.posts)?d.posts:[];
@@ -11354,8 +11442,9 @@ async function loadApoio(force=false){if(apoioLoaded&&!force){renderApoio();retu
 
       d.observationMode=true;
     }
-apoioLoaded=true;apoioSet('apoioStatus',d.manualImport?'SNAPSHOT MANUAL VALIDADO':(d.status==='ok'?'DADOS SINCRONIZADOS':'ÚLTIMA CÓPIA VÁLIDA'));apoioSet('apoioNotice',d.message||'Classificações reproduzidas da fonte; silêncio não é interpretado como oposição.');apoioPopulate('apoioParty',d.people.map(p=>p.party),'Todos');apoioPopulate('apoioRole',d.people.map(p=>p.role),'Todos');apoioPopulate('apoioState',d.people.map(p=>p.uf),'Todas');apoioPopulate('apoioTerritoryUf',d.people.map(p=>p.uf),'Todas');renderApoio();return d;}catch(e){console.error('[Radar Apoio] Falha ao carregar',e);apoioSet('apoioStatus','FONTE INDISPONÍVEL');apoioSet('apoioNotice',`Não foi possível consultar a fonte agora (${e?.message||'erro desconhecido'}).`);renderApoio();return null;}finally{apoioLoading=null;}})();return apoioLoading;}
-function initApoio(){const root=document.getElementById('panel-apoio');if(!root)return;if(!root.dataset.apoioBound){root.dataset.apoioBound='1';root.querySelectorAll('#apoioKind button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioKind button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioKind=b.dataset.v;apoioPage=1;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioPostTabs button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioPostTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioPostTab=b.dataset.v;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioUfMode button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioUfMode button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioUfMode=b.dataset.v;apoioRenderUfChart();}));document.getElementById('apoioTerritoryUf')?.addEventListener('change',e=>{apoioTerritoryUf=e.target.value||'all';apoioRenderUfChart();});['apoioParty','apoioRole','apoioState','apoioNetwork','apoioSort'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();}));document.getElementById('apoioName')?.addEventListener('input',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();});}loadApoio();}
+apoioLoaded=true;apoioLastLoadedAt=Date.now();apoioSet('apoioStatus',d.manualImport?'SNAPSHOT MANUAL VALIDADO':(d.status==='ok'?'DADOS SINCRONIZADOS':'ÚLTIMA CÓPIA VÁLIDA'));apoioSet('apoioNotice',d.message||'Classificações reproduzidas da fonte; silêncio não é interpretado como oposição.');apoioPopulate('apoioParty',d.people.map(p=>p.party),'Todos');apoioPopulate('apoioRole',d.people.map(p=>p.role),'Todos');apoioPopulate('apoioState',d.people.map(p=>p.uf),'Todas');apoioPopulate('apoioTerritoryUf',d.people.map(p=>p.uf),'Todas');renderApoio();return d;}catch(e){console.error('[Radar Apoio] Falha ao carregar',e);apoioSet('apoioStatus','FONTE INDISPONÍVEL');apoioSet('apoioNotice',`Não foi possível consultar a fonte agora (${e?.message||'erro desconhecido'}).`);renderApoio();return null;}finally{apoioLoading=null;}})();return apoioLoading;}
+function initApoio(){const root=document.getElementById('panel-apoio');if(!root)return;if(!root.dataset.apoioBound){root.dataset.apoioBound='1';root.querySelectorAll('#apoioKind button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioKind button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioKind=b.dataset.v;apoioPage=1;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioPostTabs button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioPostTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioPostTab=b.dataset.v;apoioPostsPage=1;renderApoio();}));root.querySelectorAll('#apoioUfMode button').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('#apoioUfMode button').forEach(x=>x.classList.remove('active'));b.classList.add('active');apoioUfMode=b.dataset.v;apoioRenderUfChart();}));document.getElementById('apoioTerritoryUf')?.addEventListener('change',e=>{apoioTerritoryUf=e.target.value||'all';apoioRenderUfChart();});['apoioParty','apoioRole','apoioState','apoioNetwork','apoioSort'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();}));document.getElementById('apoioName')?.addEventListener('input',()=>{apoioPage=1;apoioPostsPage=1;renderApoio();});}loadApoio();loadApoioHistory();}
+document.getElementById('apoioRefreshHistory')?.addEventListener('click',()=>{apoioLoaded=false;loadApoio(true);loadApoioHistory(true);});
 function bootstrapApoioIfActive(){const root=document.getElementById('panel-apoio');if(root?.classList.contains('active')||root?.classList.contains('is-active'))initApoio();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootstrapApoioIfActive,{once:true});else bootstrapApoioIfActive();
 
@@ -11516,4 +11605,55 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  }
  document.addEventListener('DOMContentLoaded',()=>{voteGlobalPeriodV169();document.querySelectorAll('select').forEach(x=>x.addEventListener('change',voteGlobalPeriodV169));document.getElementById('applyFilters')?.addEventListener('click',voteGlobalPeriodV169);});
  window.voteGlobalPeriodV169=voteGlobalPeriodV169;
+})();
+// V1.9.22.17.2.5 — sincronia do período global com histórico realmente persistido.
+document.addEventListener('change',e=>{if(e.target?.id==='period'){
+ radarArchivedNews=[];radarNewsHistoryFetched='';
+ loadRadarNewsHistory().catch(()=>{});
+ videoScopeLoaded=null;loadYouTubeVideos(true).catch(()=>{});
+ loadDisinfoHistory(true).catch(()=>{});
+ loadApoioHistory(true).catch(()=>{});
+}});
+document.getElementById('applyFilters')?.addEventListener('click',()=>loadRadarNewsHistory().catch(()=>{}));
+
+
+// ============================================================
+// v1.6.13.14 — HISTÓRICO VISÍVEL DOS CHECKPOINTS D1 (somente leitura)
+// Não altera o funcionamento dos gráficos, da navegação ou dos filtros atuais.
+// ============================================================
+(function radarStateSnapshotUi(){
+ const byId=id=>document.getElementById(id),moduleLabel={news:'Notícias',mentions:'Menções',trends:'Termos / Tendências',videos:'Vídeos',disinfo:'Desinformação',apoio:'Apoio',polls:'Pesquisas',eurasia:'Eurasia Group'};
+ const metrics={news:[['Matérias','total'],['Veículos','publishers']],mentions:[['Flávio','flavio'],['Lula','lula'],['Ambos','both']],trends:[['Artigos','articles']],videos:[['Vídeos observados','count']],disinfo:[['Checagens documentadas','verifiedChecks'],['Últimos 7 dias','recent7d']],apoio:[['Publicações/24h','metrics.posts24h'],['Pessoas com publicações','metrics.spoke']],polls:[['Pesquisas','pollCount'],['Resultados','resultRows']],eurasia:[['Flávio (%)','flavio'],['Lula (%)','lula']]};
+ const value=(o,path)=>path.split('.').reduce((a,k)=>a?.[k],o);
+ let lastReq=0;
+ const fmt=x=>x?new Date(x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+ const safe=s=>escapeHTML(String(s??''));
+ const getColor=i=>i===0?'#154b8b':'#e39a0b';
+ function paint(d){
+  const chart=byId('radarStateChart'),table=byId('radarStateTable'),stat=byId('radarStateStatus');if(!chart||!table||!stat)return;
+  const points=Array.isArray(d?.points)?d.points:[],mod=d?.module||'news';chart.replaceChildren();table.replaceChildren();
+  const fresh=points.filter(p=>p.freshness==='fresh').length,old=points.filter(p=>p.freshness==='last_good').length;
+  stat.textContent=points.length?`${points.length} fotografia(s) armazenada(s) · ${fresh} com fonte recente · ${old} mantendo último dado válido. Capturas nas janelas 7h / 13h / 21h.`:'Ainda não há snapshots D1 neste período. O histórico começa no primeiro checkpoint após o deploy e não é retroativo.';
+  if(!points.length)return;
+  const lines=metrics[mod]||[],W=790,H=160,pad=26;
+  let all=points.flatMap(p=>lines.map(([,k])=>Number(value(p.data,k))).filter(Number.isFinite));if(!all.length)all=[0,1];
+  const min=Math.min(0,...all),max=Math.max(min+1,...all),x=i=>pad+i*(W-2*pad)/Math.max(1,points.length-1),y=v=>H-pad-(v-min)*(H-2*pad)/(max-min);
+  const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('aria-label',`Evolução de ${moduleLabel[mod]} em ${points.length} capturas`);svg.setAttribute('role','img');
+  for(let i=0;i<3;i++){const l=document.createElementNS(NS,'line');l.setAttribute('x1',pad);l.setAttribute('x2',W-pad);l.setAttribute('y1',String(pad+i*(H-2*pad)/2));l.setAttribute('y2',String(pad+i*(H-2*pad)/2));l.setAttribute('stroke','#e2e8f0');svg.appendChild(l)}
+  lines.forEach(([label,path],idx)=>{const valid=points.map((p,i)=>({i,v:Number(value(p.data,path))})).filter(x=>value(points[x.i].data,path)!=null&&Number.isFinite(x.v));if(!valid.length)return;const pathEl=document.createElementNS(NS,'path');pathEl.setAttribute('d',valid.map((p,i)=>`${i?'L':'M'}${x(p.i).toFixed(2)} ${y(p.v).toFixed(2)}`).join(' '));pathEl.setAttribute('fill','none');pathEl.setAttribute('stroke',getColor(idx));pathEl.setAttribute('stroke-width','3');pathEl.setAttribute('stroke-linecap','round');svg.appendChild(pathEl);for(const p of valid){const dot=document.createElementNS(NS,'circle');dot.setAttribute('cx',x(p.i));dot.setAttribute('cy',y(p.v));dot.setAttribute('r','3.5');dot.setAttribute('fill',getColor(idx));const tip=document.createElementNS(NS,'title');tip.textContent=`${label}: ${p.v.toLocaleString('pt-BR')} · ${fmt(points[p.i].capturedAt)}`;dot.appendChild(tip);svg.appendChild(dot)}});
+  chart.appendChild(svg);
+  const legend=document.createElement('p');legend.className='radar-state-legend';legend.textContent=lines.map(([name])=>name).join(' · ');chart.appendChild(legend);
+  const rows=points.slice().reverse().slice(0,120);table.innerHTML=`<table><thead><tr><th>Captura</th><th>Fonte atualizada</th><th>Situação</th>${lines.map(([name])=>`<th>${safe(name)}</th>`).join('')}</tr></thead><tbody>${rows.map(p=>`<tr><td>${safe(fmt(p.capturedAt))}</td><td>${safe(fmt(p.sourceAt))}</td><td>${p.freshness==='fresh'?'Recente':p.freshness==='last_good'?'Último válido':'Indisponível'}</td>${lines.map(([,k])=>{const v=value(p.data,k);return `<td>${v==null?'—':safe(Number.isFinite(Number(v))?Number(v).toLocaleString('pt-BR'):v)}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+  const last=points.at(-1)?.data||{};
+  const evidence=mod==='news'?last.evidence:mod==='videos'?last.videos:mod==='disinfo'?last.lastChecks:mod==='trends'?last.terms:[];
+  if(Array.isArray(evidence)&&evidence.length){
+   const list=document.createElement('details');list.className='radar-state-evidence';
+   list.innerHTML=`<summary>Ver ${evidence.length} referência(s) textuais do último snapshot</summary><ul>${evidence.map(item=>{const name=safe(item.title||item.term||item.id||'Referência');const url=String(item.url||'');const valid=/^https:\/\/[^\s<>"']+$/i.test(url);return `<li>${valid?`<a href="${safe(url)}" target="_blank" rel="noopener noreferrer">${name}</a>`:name}${item.count!=null?` · ${safe(item.count)}`:''}</li>`}).join('')}</ul>`;table.appendChild(list);
+  }
+ }
+ async function load(){const root=byId('radarStateHistory');if(!root?.open)return;const stat=byId('radarStateStatus');if(stat)stat.textContent='Consultando snapshots armazenados…';const id=++lastReq;
+  try{const mod=byId('radarStateModule')?.value||'news',period=byId('radarStatePeriod')?.value||'7d';const r=await fetch(`${RADAR_API.baseUrl}/api/snapshots?module=${encodeURIComponent(mod)}&period=${encodeURIComponent(period)}`,{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);const d=await r.json();if(id===lastReq)paint(d)}catch(e){if(id===lastReq&&stat)stat.textContent='Não foi possível consultar o D1 agora. Os dados atuais do Radar permanecem disponíveis.'}
+ }
+ function init(){const root=byId('radarStateHistory');if(!root)return;root.addEventListener('toggle',()=>{if(root.open)load()});byId('radarStateModule')?.addEventListener('change',load);byId('radarStatePeriod')?.addEventListener('change',load);byId('radarStateRefresh')?.addEventListener('click',load);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
