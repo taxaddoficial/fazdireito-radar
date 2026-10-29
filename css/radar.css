@@ -1278,3 +1278,39 @@ html{font-size:var(--base-font-size)}
 #panel-apoio #apoioHistoryWindow:focus-visible,#panel-apoio #apoioRefreshHistory:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .dark #panel-apoio #apoioHistoryWindow{background:#15243b;color:#e2e8f0;border-color:#45576d}
 @media(max-width:720px){#panel-apoio .apoio-header-actions{justify-content:flex-start;width:100%}#panel-apoio .apoio-history-window-label{justify-content:flex-start}}
+
+/* ============================================================
+   LULA 4 — arquivo jornalístico independente
+   ============================================================ */
+.lula4-intro{margin:0 0 1.15rem;align-items:flex-start}
+.lula4-cadence{background:#eaf1fb;color:#174b71;border-radius:999px;padding:.45rem .75rem;font-size:.73rem;font-weight:850;white-space:nowrap}
+.lula4-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin-bottom:1rem}
+.lula4-metric{background:var(--panel);border:1px solid var(--line);border-radius:.8rem;padding:1rem;min-width:0}
+.lula4-metric span{display:block;font-size:.72rem;color:var(--muted);font-weight:750}
+.lula4-metric strong{display:block;margin-top:.35rem;font-size:1.25rem;color:var(--navy);line-height:1.35;overflow-wrap:anywhere}
+.lula4-panel{padding:1.1rem}
+.lula4-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 2fr auto;align-items:end;gap:.65rem}
+.lula4-filters label{display:block;min-width:0;font-size:.73rem;font-weight:800;color:var(--muted)}
+.lula4-filters select,.lula4-filters input{display:block;width:100%;margin-top:.25rem;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.65rem;min-height:43px;padding:.6rem;font-size:.8rem;min-width:0}
+.lula4-filters button{min-height:43px}
+.lula4-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:1rem 0 .5rem;border-bottom:1px solid var(--line);padding-bottom:.8rem}
+.lula4-toolbar p{margin:0;font-size:.75rem;color:var(--muted)}
+.lula4-list{display:grid;gap:.7rem}
+.lula4-item{padding:.95rem 1rem;background:#fafcff;border:1px solid var(--line);border-radius:.75rem}
+.lula4-item-meta{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;font-size:.65rem;color:var(--muted)}
+.lula4-group,.lula4-topic{border-radius:99px;padding:.2rem .55rem;font-weight:850;background:#eaf1fb;color:#16476d}
+.lula4-topic{background:#fef3c7;color:#854d0e}
+.lula4-item h4{font-weight:800;color:var(--navy);font-size:.9rem;line-height:1.5;margin:.45rem 0}
+.lula4-item h4 a{text-decoration:none}.lula4-item h4 a:hover{text-decoration:underline}
+.lula4-item-foot{display:flex;flex-wrap:wrap;gap:.35rem;color:var(--muted);font-size:.7rem}
+.lula4-empty{padding:2rem 1rem;color:var(--muted);text-align:center;font-size:.84rem}
+.lula4-pagination{display:flex;align-items:center;gap:1rem;justify-content:center;margin-top:1rem;font-size:.76rem;color:var(--muted)}
+.lula4-pagination button:disabled{opacity:.45;cursor:not-allowed}
+.lula4-method{font-size:.73rem;line-height:1.65;margin-top:1rem;color:var(--muted)}
+.dark .lula4-metric,.dark .lula4-panel{background:#0f172a;border-color:#334155}
+.dark .lula4-item{background:#111c31;border-color:#334155}
+.dark .lula4-item h4,.dark .lula4-item h4 a,.dark .lula4-metric strong{color:#f8fafc}
+.dark .lula4-filters select,.dark .lula4-filters input{background:#111c31;color:#e2e8f0;border-color:#475569}
+.dark .lula4-cadence{background:#213a55;color:#e2e8f0}
+@media(max-width:1000px){.lula4-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.lula4-query{grid-column:span 2}}
+@media(max-width:620px){.lula4-filters{grid-template-columns:1fr 1fr}.lula4-query{grid-column:1/-1}.lula4-filters button{grid-column:1/-1}.lula4-metrics{grid-template-columns:1fr 1fr}.lula4-metrics .lula4-metric:last-child{grid-column:1/-1}.lula4-toolbar{flex-direction:column;align-items:flex-start}.lula4-intro{flex-direction:column;align-items:flex-start}}
