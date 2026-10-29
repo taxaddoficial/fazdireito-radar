@@ -1,3 +1,4 @@
+// RADAR_LULA4_BUILD: 2026-10-29-ADMIN-STAGING-V2
 // ============================================================
 
 // FAZ DIREITO — RADAR ELEITORAL 2026
