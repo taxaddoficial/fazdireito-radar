@@ -1,3 +1,4 @@
+/* RADAR_LULA4_BUILD: 2026-10-29-ADMIN-STAGING-V2 */
 :root{--base-font-size:100%;--navy:#0b2341;--blue:#154b8b;--yellow:#fdb813;--green:#168447;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--panel:#fff;--soft:#f8fafc}
 
 
@@ -1314,3 +1315,7 @@ html{font-size:var(--base-font-size)}
 .dark .lula4-cadence{background:#213a55;color:#e2e8f0}
 @media(max-width:1000px){.lula4-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.lula4-query{grid-column:span 2}}
 @media(max-width:620px){.lula4-filters{grid-template-columns:1fr 1fr}.lula4-query{grid-column:1/-1}.lula4-filters button{grid-column:1/-1}.lula4-metrics{grid-template-columns:1fr 1fr}.lula4-metrics .lula4-metric:last-child{grid-column:1/-1}.lula4-toolbar{flex-direction:column;align-items:flex-start}.lula4-intro{flex-direction:column;align-items:flex-start}}
+
+/* Lula 4: link de manutenção e indicação da cadência */
+.lula4-admin-link{font-size:.72rem;font-weight:800;color:#17538a;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.dark .lula4-admin-link{color:#b7d4ff}
