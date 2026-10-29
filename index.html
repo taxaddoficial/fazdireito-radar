@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.17-lula4">
+  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.19-l4admin2">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -33,6 +33,17 @@
 </head>
 
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+<script>
+/* Diagnóstico defensivo: exibido somente quando o JS principal falhar ao analisar. */
+window.addEventListener('error',function(e){
+  if(e.filename && /\/js\/radar\.js(?:\?|$)/.test(e.filename)){
+    var area=document.getElementById('radarDeploymentAlert');
+    if(area){area.hidden=false;area.textContent='Falha ao carregar o JavaScript do Radar. Confira /js/radar.js e abra /diagnostico.html para verificar a publicação.';}
+  }
+});
+</script>
+<div id="radarDeploymentAlert" hidden role="alert" style="position:fixed;bottom:12px;right:12px;left:12px;z-index:9999;background:#7f1d1d;color:white;border-radius:10px;padding:14px 18px;font:600 14px system-ui;box-shadow:0 10px 35px #0004"></div>
+
 
 <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
 
@@ -827,7 +838,7 @@
         <h3>Lula 4 — Monitoramento de notícias</h3>
         <p>Títulos e links de publicações identificadas por assunto e agente citado. Coleta automática diária; histórico arquivado no D1.</p>
       </div>
-      <span class="lula4-cadence">1 coleta por dia</span>
+      <span class="lula4-cadence">2 coletas temporárias · snapshot às 9h</span>
     </div>
     <div class="lula4-metrics" aria-label="Indicadores da coleta">
       <div class="lula4-metric"><span>Itens exibidos</span><strong id="lula4Shown">—</strong></div>
@@ -842,11 +853,11 @@
         <label class="lula4-query">Pesquisar títulos<input type="search" id="lula4Query" placeholder="Tema, órgão, nome ou palavra-chave" maxlength="90"></label>
         <button type="submit" class="btn-primary">Filtrar</button>
       </form>
-      <div class="lula4-toolbar"><p id="lula4Count" role="status" aria-live="polite">Histórico disponível após a primeira coleta.</p><button class="btn-secondary" id="lula4Reload" type="button">Atualizar visualização</button></div>
+      <div class="lula4-toolbar"><p id="lula4Count" role="status" aria-live="polite">Histórico disponível após o primeiro snapshot das 9h.</p><a class="lula4-admin-link" href="https://fazdireito-radar-api.taxadd-oficial.workers.dev/api/lula4/admin" target="_blank" rel="noopener noreferrer">Manutenção (token) ↗</a><button class="btn-secondary" id="lula4Reload" type="button">Atualizar visualização</button></div>
       <div id="lula4List" class="lula4-list" aria-live="polite"><p class="lula4-empty">Aguardando carregamento do arquivo de notícias.</p></div>
       <div class="lula4-pagination"><button type="button" id="lula4Prev" class="btn-secondary" disabled>Anterior</button><span id="lula4PageLabel">Página 1</span><button type="button" id="lula4Next" class="btn-secondary" disabled>Próxima</button></div>
     </div>
-    <p class="lula4-method">Seleção automatizada baseada no título e na descrição RSS, com referência nominal ou institucional. "Grupo" indica a pessoa, partido ou órgão citado, não atribuição de responsabilidade por fatos de terceiros. A existência de investigação ou denúncia não estabelece culpa. As classificações são passíveis de revisão; a fonte original é sempre acessível pelo link.</p>
+    <p class="lula4-method">Coletas temporárias automáticas às 0h e 8h30; snapshot público às 9h (Brasília). Inclusões manuais são publicadas no próximo snapshot. Seleção automatizada baseada no título e na descrição RSS, com referência nominal ou institucional. "Grupo" indica a pessoa, partido ou órgão citado, não atribuição de responsabilidade por fatos de terceiros. A existência de investigação ou denúncia não estabelece culpa. As classificações são passíveis de revisão; a fonte original é sempre acessível pelo link.</p>
   </section>
 
   <section id="panel-sources" class="tab-panel">
@@ -867,6 +878,6 @@
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.6.13.17-lula4" defer></script>
+<script src="/js/radar.js?v=1.6.13.19-l4admin2" defer></script>
 
 </body></html>
