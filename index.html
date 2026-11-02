@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="/css/tailwind-home.css">
 
-  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.19-l4admin2">
+  <link rel="stylesheet" href="/css/radar.css?v=1.6.13.21-l4paginacao">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -841,8 +841,8 @@ window.addEventListener('error',function(e){
       <span class="lula4-cadence">2 coletas temporárias · snapshot às 9h</span>
     </div>
     <div class="lula4-metrics" aria-label="Indicadores da coleta">
-      <div class="lula4-metric"><span>Itens exibidos</span><strong id="lula4Shown">—</strong></div>
-      <div class="lula4-metric"><span>Coleta mais recente</span><strong id="lula4Collected">—</strong></div>
+      <div class="lula4-metric"><span>Notícias disponíveis</span><strong id="lula4Shown">—</strong></div>
+      <div class="lula4-metric"><span>Último snapshot</span><strong id="lula4Collected">—</strong></div>
       <div class="lula4-metric"><span>Estado do arquivo</span><strong id="lula4State">Aguardando</strong></div>
     </div>
     <div class="panel lula4-panel">
@@ -855,7 +855,7 @@ window.addEventListener('error',function(e){
       </form>
       <div class="lula4-toolbar"><p id="lula4Count" role="status" aria-live="polite">Histórico disponível após o primeiro snapshot das 9h.</p><a class="lula4-admin-link" href="https://fazdireito-radar-api.taxadd-oficial.workers.dev/api/lula4/admin" target="_blank" rel="noopener noreferrer">Manutenção (token) ↗</a><button class="btn-secondary" id="lula4Reload" type="button">Atualizar visualização</button></div>
       <div id="lula4List" class="lula4-list" aria-live="polite"><p class="lula4-empty">Aguardando carregamento do arquivo de notícias.</p></div>
-      <div class="lula4-pagination"><button type="button" id="lula4Prev" class="btn-secondary" disabled>Anterior</button><span id="lula4PageLabel">Página 1</span><button type="button" id="lula4Next" class="btn-secondary" disabled>Próxima</button></div>
+      <div class="lula4-pagination"><button type="button" id="lula4Prev" class="btn-secondary" disabled>Anterior</button><span id="lula4PageLabel" aria-live="polite">Página 1</span><button type="button" id="lula4Next" class="btn-secondary" disabled>Próxima</button></div>
     </div>
     <p class="lula4-method">Coletas temporárias automáticas às 0h e 8h30; snapshot público às 9h (Brasília). Inclusões manuais são publicadas no próximo snapshot. Seleção automatizada baseada no título e na descrição RSS, com referência nominal ou institucional. "Grupo" indica a pessoa, partido ou órgão citado, não atribuição de responsabilidade por fatos de terceiros. A existência de investigação ou denúncia não estabelece culpa. As classificações são passíveis de revisão; a fonte original é sempre acessível pelo link.</p>
   </section>
@@ -878,6 +878,6 @@ window.addEventListener('error',function(e){
 
 <footer class="radar-footer"><div class="radar-footer-inner"><strong>A Direita faz Direito | O Brasil Vai Vencer</strong><span data-i18n="footer_desc">Radar Eleitoral 2026 — monitoramento de fontes públicas.</span><nav aria-label="Links do rodapé"><a href="https://fazdireito.neocities.org/">Mapa de Votos</a><a href="https://fazdireito.neocities.org/assuntos.html">Eixos Temáticos</a><a href="https://fazdireito.neocities.org/materiais.html">Kit Mídia</a><a href="https://fazdireito.neocities.org/guia.html">Guia de Diálogo</a></nav></div></footer>
 
-<script src="/js/radar.js?v=1.6.13.19-l4admin2" defer></script>
+<script src="/js/radar.js?v=1.6.13.21-l4paginacao" defer></script>
 
 </body></html>
