@@ -1,4 +1,4 @@
-// RADAR_LULA4_BUILD: 2026-10-29-ADMIN-STAGING-V2
+// RADAR_LULA4_BUILD: 2026-11-02-PAGINACAO-EFICIENTE
 // ============================================================
 
 // FAZ DIREITO — RADAR ELEITORAL 2026
@@ -11713,42 +11713,112 @@ document.getElementById('applyFilters')?.addEventListener('click',()=>loadRadarN
 })();
 
 // ============================================================
-// LULA 4 — Histórico em D1, consulta por grupos e assuntos
-// Arquivo independente da antiga aba Menções.
+// LULA 4 — Histórico D1 / paginação clara (2026-11-02)
+// Preserva 25 notícias visíveis por página; um bloco de 50 cobre duas páginas.
+// Não calcula um total fictício e evita consultas extras ao D1.
 // ============================================================
-const lula4UI={page:1,loading:false,hasMore:false,lastQuery:"",sequence:0,loaded:false};
+const LULA4_PAGE_SIZE=25;
+const LULA4_API_BLOCK=50; // limite já aceito pelo Worker v3.1.6
+const lula4UI={page:1,loading:false,hasMore:false,lastQuery:"",sequence:0,loaded:false,
+ blockCache:new Map(),knownTotal:null,cacheAt:0};
 function lula4SafeURL(url){try{const u=new URL(url);return (u.protocol==="https:"||u.protocol==="http:")?u.href:null;}catch{return null;}}
 function lula4Date(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(+d)?"—":d.toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});}
+function lula4BaseParams(){
+ const q=new URLSearchParams();
+ const group=getEl("lula4Group")?.value||"",topic=getEl("lula4Topic")?.value||"";
+ const search=(getEl("lula4Query")?.value||"").trim(),period=getEl("lula4Period")?.value||"all";
+ if(group)q.set("group",group);if(topic)q.set("topic",topic);if(search)q.set("q",search);
+ if(period!=="all"&&Number.isFinite(Number(period))){
+  const from=new Date(Date.now()-Number(period)*86400000);
+  q.set("from",from.toISOString().slice(0,10));
+ }
+ return q;
+}
+function lula4ClearCache(){lula4UI.blockCache.clear();lula4UI.knownTotal=null;lula4UI.cacheAt=Date.now();}
+async function lula4GetBlock(params,block){
+ if(lula4UI.blockCache.has(block))return lula4UI.blockCache.get(block);
+ const q=new URLSearchParams(params);
+ q.set("page",String(block));q.set("limit",String(LULA4_API_BLOCK));
+ const promise=radarApiFetch("/api/lula4?"+q.toString()).then(data=>{
+  if(!data||!Array.isArray(data.items)||!['ok','pending'].includes(data.status))throw Error('Resposta da API Lula 4 inválida');
+  return data;
+ });
+ lula4UI.blockCache.set(block,promise);
+ try{return await promise;}catch(error){lula4UI.blockCache.delete(block);throw error;}
+}
+function lula4PaintSummary(rows,data,block,offset){
+ const total=lula4UI.knownTotal;
+ const page=lula4UI.page;
+ const start=rows.length?(page-1)*LULA4_PAGE_SIZE+1:0;
+ const end=rows.length?start+rows.length-1:0;
+ const hasMore=total!==null?end<total:(data.items.length>offset+LULA4_PAGE_SIZE||!!data.hasMore);
+ lula4UI.hasMore=hasMore;
+ const metric=getEl('lula4Shown'),count=getEl('lula4Count'),label=getEl('lula4PageLabel');
+ if(metric){
+  metric.textContent=total!==null?String(total):(data.hasMore?`${block*LULA4_API_BLOCK}+`:String((block-1)*LULA4_API_BLOCK+data.items.length));
+  metric.title=total===null?'Contagem parcial. Há mais notícias na página seguinte da API.':'Total de notícias públicas compatíveis com os filtros.';
+ }
+ if(label)label.textContent=total!==null?`Página ${page} de ${Math.max(1,Math.ceil(total/LULA4_PAGE_SIZE))}`:`Página ${page} · há mais`;
+ const prev=getEl('lula4Prev'),next=getEl('lula4Next');
+ if(prev)prev.disabled=page<=1;
+ if(next)next.disabled=!hasMore;
+ if(count){
+  if(!rows.length)count.textContent='Nenhuma notícia encontrada para os filtros selecionados.';
+  else if(total!==null)count.textContent=`Exibindo ${start}–${end} de ${total} notícias · ${data.source||'D1'}`;
+  else count.textContent=`Exibindo ${start}–${end} notícias · total parcial, há mais resultados · ${data.source||'D1'}`;
+ }
+}
 async function lula4Load(){
- const list=getEl("lula4List");if(!list)return;
- const current=++lula4UI.sequence;
- lula4UI.loading=true;getEl("lula4State").textContent="Consultando";
+ const list=getEl('lula4List');if(!list)return;
+ const seq=++lula4UI.sequence;
+ lula4UI.loading=true;
+ const state=getEl('lula4State');if(state)state.textContent='Consultando';
  list.innerHTML='<p class="lula4-empty">Consultando o histórico...</p>';
  try{
-  const q=new URLSearchParams({page:String(lula4UI.page),limit:"25"});
-  const group=getEl("lula4Group").value,topic=getEl("lula4Topic").value,search=getEl("lula4Query").value.trim(),period=getEl("lula4Period").value;
-  if(group)q.set("group",group);if(topic)q.set("topic",topic);if(search)q.set("q",search);
-  if(period!=="all"){const from=new Date(Date.now()-Number(period)*86400000);q.set("from",from.toISOString().slice(0,10));}
-  const data=await radarApiFetch("/api/lula4?"+q.toString());if(current!==lula4UI.sequence)return;
-  const rows=Array.isArray(data.items)?data.items:[];
-  lula4UI.hasMore=!!data.hasMore;
-  getEl("lula4Shown").textContent=String(rows.length);
-  getEl("lula4Collected").textContent=lula4Date(data.lastRun?.completedAt||data.lastRun?.startedAt);
-  getEl("lula4State").textContent=data.status==="ok"?"Disponível":data.status==="pending"?"Aguardando coleta":"Indisponível";
-  getEl("lula4PageLabel").textContent="Página "+lula4UI.page;
-  getEl("lula4Prev").disabled=lula4UI.page<=1;
-  getEl("lula4Next").disabled=!lula4UI.hasMore;
-  getEl("lula4Count").textContent=rows.length?`${rows.length} notícias nesta página · ${data.source||"D1"}`:"Nenhum registro encontrado neste período e filtros.";
-  if(!rows.length){list.innerHTML='<p class="lula4-empty">Ainda não há publicações para os filtros selecionados. A coleta não acrescenta exemplos manualmente.</p>';return;}
+  const base=lula4BaseParams(),query=base.toString();
+  if(query!==lula4UI.lastQuery){lula4UI.lastQuery=query;lula4ClearCache();lula4UI.page=1;}
+  else if(Date.now()-lula4UI.cacheAt>180000){lula4ClearCache();}
+  const page=lula4UI.page;
+  const block=Math.floor((page-1)/2)+1;
+  const offset=((page-1)%2)*LULA4_PAGE_SIZE;
+  const data=await lula4GetBlock(base,block);
+  if(seq!==lula4UI.sequence)return;
+  const rows=data.items.slice(offset,offset+LULA4_PAGE_SIZE);
+  if(!data.hasMore){
+   lula4UI.knownTotal=(block-1)*LULA4_API_BLOCK+data.items.length;
+  }
+  const collected=getEl('lula4Collected');
+  if(collected)collected.textContent=lula4Date(data.lastRun?.completedAt||data.lastRun?.startedAt);
+  if(state)state.textContent=data.status==='ok'?'Disponível':data.status==='pending'?'Aguardando coleta':'Indisponível';
+  // Retorna à última página válida se um snapshot ou filtro tiver reduzido o acervo.
+  if(!rows.length&&page>1){
+   const last=Math.max(1,Math.ceil((lula4UI.knownTotal??(block-1)*LULA4_API_BLOCK)/LULA4_PAGE_SIZE));
+   if(last!==page){lula4UI.page=last;return lula4Load();}
+  }
+  lula4PaintSummary(rows,data,block,offset);
+  if(!rows.length){
+   list.innerHTML='<p class="lula4-empty">Ainda não há publicações para os filtros selecionados. A coleta não acrescenta exemplos manualmente.</p>';
+   return;
+  }
   list.innerHTML=rows.map(row=>{
-   const safe=lula4SafeURL(row.url);if(!safe)return "";
-   const title=escapeHTML(row.title||"Notícia"),publisher=escapeHTML(row.source||new URL(safe).hostname),group=escapeHTML(row.group_name||""),topic=escapeHTML(row.topic||""),subject=escapeHTML(row.subject||"");
-   return `<article class="lula4-item"><div class="lula4-item-meta"><span class="lula4-group">${group}</span><span class="lula4-topic">${topic}</span><time>${escapeHTML(lula4Date(row.published_at||row.first_seen_at))}</time></div><h4><a href="${escapeHTML(safe)}" target="_blank" rel="noopener noreferrer">${title} ↗</a></h4><div class="lula4-item-foot"><span>${publisher}</span>${subject?`<span>· ${subject}</span>`:""}</div></article>`;
-  }).join("");
- }catch(err){if(current!==lula4UI.sequence)return;getEl("lula4State").textContent="Indisponível";getEl("lula4Count").textContent="Não foi possível consultar o arquivo.";list.innerHTML=`<p class="lula4-empty">A API ainda não está configurada ou o histórico está temporariamente indisponível. ${escapeHTML(err.message||"")}</p>`;}
- finally{if(current===lula4UI.sequence){lula4UI.loading=false;lula4UI.loaded=true;}}
+   const safe=lula4SafeURL(row.url);if(!safe)return '';
+   const title=escapeHTML(row.title||'Notícia'),publisher=escapeHTML(row.source||new URL(safe).hostname);
+   const group=escapeHTML(row.group_name||''),topic=escapeHTML(row.topic||''),subject=escapeHTML(row.subject||'');
+   return `<article class="lula4-item"><div class="lula4-item-meta"><span class="lula4-group">${group}</span><span class="lula4-topic">${topic}</span><time>${escapeHTML(lula4Date(row.published_at||row.first_seen_at))}</time></div><h4><a href="${escapeHTML(safe)}" target="_blank" rel="noopener noreferrer">${title} ↗</a></h4><div class="lula4-item-foot"><span>${publisher}</span>${subject?`<span>· ${subject}</span>`:''}</div></article>`;
+  }).join('');
+ }catch(err){
+  if(seq!==lula4UI.sequence)return;
+  if(state)state.textContent='Indisponível';
+  const count=getEl('lula4Count');if(count)count.textContent='Não foi possível consultar o arquivo.';
+  list.innerHTML=`<p class="lula4-empty">O histórico está temporariamente indisponível. ${escapeHTML(err.message||'')}</p>`;
+ }finally{if(seq===lula4UI.sequence){lula4UI.loading=false;lula4UI.loaded=true;}}
 }
-function initLula4(){const form=getEl("lula4Filters");if(!form)return;form.addEventListener("submit",ev=>{ev.preventDefault();lula4UI.page=1;lula4Load()});getEl("lula4Reload")?.addEventListener("click",()=>lula4Load());getEl("lula4Prev")?.addEventListener("click",()=>{if(lula4UI.page>1){lula4UI.page--;lula4Load()}});getEl("lula4Next")?.addEventListener("click",()=>{if(lula4UI.hasMore){lula4UI.page++;lula4Load()}});
- const hash=location.hash.replace(/^#/,"");if(hash==="lula4"||hash==="lula-4")openTab("lula4");
+function initLula4(){
+ const form=getEl('lula4Filters');if(!form)return;
+ form.addEventListener('submit',ev=>{ev.preventDefault();lula4UI.page=1;lula4ClearCache();lula4Load();});
+ getEl('lula4Reload')?.addEventListener('click',()=>{lula4ClearCache();lula4Load();});
+ getEl('lula4Prev')?.addEventListener('click',()=>{if(lula4UI.page>1){lula4UI.page--;lula4Load();}});
+ getEl('lula4Next')?.addEventListener('click',()=>{if(lula4UI.hasMore){lula4UI.page++;lula4Load();}});
+ const hash=location.hash.replace(/^#/,'');if(hash==='lula4'||hash==='lula-4')openTab('lula4');
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initLula4,{once:true});else initLula4();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initLula4,{once:true});else initLula4();
